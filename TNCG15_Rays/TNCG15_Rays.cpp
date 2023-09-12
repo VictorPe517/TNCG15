@@ -5,7 +5,7 @@
 
 int main()
 {
-    std::cout << "Big balls\n";
+    std::cout << "Welcome to Global\n";
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
