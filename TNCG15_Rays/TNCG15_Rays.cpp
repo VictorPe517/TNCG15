@@ -20,14 +20,11 @@ public:
         //We have our camera position from the above corners, !!!  X = 0  !!!
         //We need to set the position of each pixel in the camera to make sense
 
-        allPixels.resize(x_res);
-        for (int i = 0; i < x_res; i++) {
-            allPixels[i].resize(y_res);
-        }
+        
 
         for (int i = 0; i < 800; i++) {
             for (int j = 0; j < 800; j++) {
-                allPixels[i][j].position = glm::dvec3(0,-1+i*delta,-1+j*delta);
+                allPixels.push_back(Pixel(glm::dvec3(0,-1+i*delta,-1+j*delta)));
             }
         }
 
@@ -37,7 +34,7 @@ public:
     static const int y_res = 800;   //Const:    We pinky promise to the compiler that we won't change the resolution of the camera during runtime.
 
     glm::dvec3 c1, c2, c3, c4;
-    std::vector<std::vector<Pixel>> allPixels;
+    std::vector<Pixel> allPixels;
 };
 
 class Polygon {
