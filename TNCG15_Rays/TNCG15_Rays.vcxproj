@@ -140,7 +140,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ColorDBL.cpp" />
+    <ClCompile Include="Pixel.cpp" />
+    <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="Ray.cpp" />
+    <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="TNCG15_Rays.cpp" />
+    <ClCompile Include="Triangle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="ColorDBL.h" />
+    <ClInclude Include="Pixel.h" />
+    <ClInclude Include="Polygon.h" />
+    <ClInclude Include="Ray.h" />
+    <ClInclude Include="Rectangle.h" />
+    <ClInclude Include="Triangle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
