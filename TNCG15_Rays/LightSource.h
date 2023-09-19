@@ -33,7 +33,17 @@ public:
 		return direction / glm::length(direction);
 	}
 
-	glm::dvec3 getIntersection(Ray theRay) {
+	glm::dvec3 getRandomPoint() {
+		double rand1 = rand() / static_cast<double>((RAND_MAX + 1));
+		double rand2 = rand() / static_cast<double>((RAND_MAX + 1));
+		
+		glm::dvec3 e1 = v2 - v1;
+		glm::dvec3 e2 = v3 - v1;
+
+		return(v1 + rand1 * e1 + rand2 * e2);
+	}
+
+	glm::vec3 isIntersection(Ray theRay) {
 		glm::dvec3 vertex = v2;
 
 		glm::dvec3 c1 = v3 - vertex;
@@ -51,14 +61,20 @@ public:
 		}
 	};
 
-	glm::dvec3 getRandomPoint() {
-		double rand1 = rand() / (RAND_MAX + 1);
-		double rand2 = rand() / (RAND_MAX + 1);
+	glm::dvec3 getIntersection(Ray theRay) {
+		glm::dvec3 vertex = v2;
 
-		glm::dvec3 e1 = v2 - v1;
-		glm::dvec3 e2 = v3 - v1;
+		glm::dvec3 c1 = v3 - vertex;
+		glm::dvec3 c2 = v1 - vertex;
 
-		return(v1 + rand1 * e1 + rand2 * e2);
+		double t = glm::dot((this->v2 - theRay.startPosition), this->normal()) / (glm::dot(theRay.direction, this->normal()));
+
+		glm::dvec3 possibleIntersection = theRay.startPosition + t * theRay.direction;
+
+		double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
+		double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
+
+		return(possibleIntersection);
 	};
 
 	ColorDBL Color = ColorDBL(1.0, 1.0, 1.0);
