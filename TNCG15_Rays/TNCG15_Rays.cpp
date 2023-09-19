@@ -16,7 +16,7 @@
 std::vector<Polygon> Polygon::thePolygons;
 std::vector<Rectangle> Rectangle::theRectangles;
 std::vector<Triangle> Triangle::theTriangles;
-double Ray::maxE = -1;
+double Ray::maxE = 0.0;
 
 
 //-------------------------------------------------------------------------------------------------------//
@@ -83,11 +83,11 @@ int main()
                 if (glm::dot(Rectangle::theRectangles[l].normal(), aRay.direction) < 0 && Rectangle::theRectangles[l].getIntersection(aRay) != glm::dvec3(0,0,0)) {
                     //std::cout << "Intersection found!\n";
                     //theCamera.thePixels[i * Camera::x_res + j].pixelColor = Rectangle::theRectangles[l].Color; //Give color of rectangle or triangle to pixel
-                    for (size_t iter = 0; iter < 40; iter++) {
+                    for (size_t iter = 0; iter < 90; iter++) {
                         glm::dvec3 thePoint = areaLight.getRandomPoint();
                         Ray newRay(thePoint, Rectangle::theRectangles[l].getIntersection(aRay) - thePoint, white, areaLight.radiance);
 
-                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Rectangle::theRectangles[l].normal(), areaLight.normal(), newRay.radiance) / 40.0f; //Give color of rectangle or triangle to pixel
+                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Rectangle::theRectangles[l].normal(), areaLight.normal(), newRay.radiance); //Give color of rectangle or triangle to pixel
                     }
 
                     
@@ -99,11 +99,11 @@ int main()
                 if (glm::dot(Triangle::theTriangles[l].normal(), aRay.direction) < 0 && Triangle::theTriangles[l].getIntersection(aRay) != glm::dvec3(0, 0, 0)) {
                     //std::cout << "Intersection found!\n";
                     //theCamera.thePixels[i * Camera::x_res + j].pixelColor = Rectangle::theRectangles[l].Color; //Give color of rectangle or triangle to pixel
-                    for (size_t iter = 0; iter < 40; iter++) {
+                    for (size_t iter = 0; iter < 90; iter++) {
                         glm::dvec3 thePoint = areaLight.getRandomPoint();
                         Ray newRay(thePoint, Triangle::theTriangles[l].getIntersection(aRay) - thePoint, white, areaLight.radiance);
 
-                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Triangle::theTriangles[l].normal(), areaLight.normal(), newRay.radiance) / 40.0f; //Give color of rectangle or triangle to pixel
+                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Triangle::theTriangles[l].normal(), areaLight.normal(), newRay.radiance); //Give color of rectangle or triangle to pixel
                     }
 
 
@@ -128,10 +128,11 @@ int main()
 
     for (int i = 0; i < sqrt(theCamera.thePixels.size()); i++) {
         for (int j = 0; j < sqrt(theCamera.thePixels.size()); j++) {
-            int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r / Ray::maxE * 230);
-            int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g / Ray::maxE * 230);
-            int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b / Ray::maxE * 230);
+            int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r / Ray::maxE * 254.0);
+            int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g / Ray::maxE * 254.0);
+            int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b / Ray::maxE * 254.0);
 
+            //std::cout << (r + b + g) / 3.0 << "\n";
 
             img << r << " " << g << " " << b << std::endl;
         }

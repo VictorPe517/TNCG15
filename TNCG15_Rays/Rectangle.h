@@ -30,7 +30,7 @@ public:
         double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
         double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
 
-        if (a <= 0.0 || b <= 1.0) {
+        if (a >= 0.0 && a <= 1.0 && b >= 0.0 && b <= 1.0) {
             return(possibleIntersection);
         }
         else {

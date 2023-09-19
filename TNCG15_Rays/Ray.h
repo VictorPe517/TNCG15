@@ -31,7 +31,7 @@ public:
         glm::dvec3 y = startPosition;
         glm::dvec3 x = direction + startPosition;
 
-        glm::dvec3 d = x-y;
+        glm::dvec3 d = y-x;
         double distance = glm::length(d);
 
 
@@ -40,7 +40,7 @@ public:
 
         double G = cos_omega_x * cos_omega_y / (distance * distance);
 
-        double E = 16/std::numbers::pi * G;
+        double E = 16.0/std::numbers::pi * G;
 
         //std::cout << "E value is: " << E << "\n";
 

@@ -8,6 +8,7 @@
 #include <numbers>
 #include "Ray.h"
 #include <iostream>
+#include <stdlib.h>
 
 class LightSource
 {
@@ -34,8 +35,10 @@ public:
 	}
 
 	glm::dvec3 getRandomPoint() {
-		double rand1 = rand() / static_cast<double>((RAND_MAX + 1));
-		double rand2 = rand() / static_cast<double>((RAND_MAX + 1));
+		double rand1 = (rand()) / ((RAND_MAX + 1.0));
+
+
+		double rand2 = (rand()) / ((RAND_MAX + 1.0));
 		
 		glm::dvec3 e1 = v2 - v1;
 		glm::dvec3 e2 = v3 - v1;
@@ -74,7 +77,13 @@ public:
 		double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
 		double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
 
-		return(possibleIntersection);
+
+		if (a >= 0.0 && a <= 1.0 && b >= 0.0 && b <= 1.0) {
+			return(possibleIntersection);
+		}
+		else {
+			return glm::dvec3(0, 0, 0); //If vector is empty then no intersection
+		}
 	};
 
 	ColorDBL Color = ColorDBL(1.0, 1.0, 1.0);
