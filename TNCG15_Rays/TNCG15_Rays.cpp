@@ -74,13 +74,14 @@ int main()
     for (size_t i = 0; i < Camera::x_res; i++) {
 
         for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye);
+            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, white);
 
             for (size_t l = 0; l < Triangle::theTriangles.size(); l++) {
                 if (glm::dot(Triangle::theTriangles[l].normal(), aRay.direction) < 0 && Triangle::theTriangles[l].isIntersection(aRay)) {
                     //std::cout << "Intersection found!\n";
 
-                    Ray newRay(Triangle::theTriangles[l].getIntersection(aRay);
+                    //this needs to be fixed, just added values so we don't get errors
+                    Ray newRay(Triangle::theTriangles[l].getIntersection(aRay), glm::dvec3(0,0,0), white);
                     
                     theCamera.thePixels[i * Camera::x_res + j].pixelColor = Triangle::theTriangles[l].Color; //Give color of rectangle or triangle to pixel
                 }
