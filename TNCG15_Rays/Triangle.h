@@ -31,7 +31,7 @@ public:
         double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
         double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
 
-        return(a <= 0.0, b <= 1.0);
+        return(a <= 0.0 || b <= 1.0);
     };
 
     std::vector<Triangle> get_vec() {

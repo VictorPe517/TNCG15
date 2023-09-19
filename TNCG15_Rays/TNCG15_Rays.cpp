@@ -11,7 +11,9 @@
 #include "Camera.h"
 #include "Rectangle.h"
 #include "Triangle.h"
+#include "LightSource.h"
 
+std::vector<Polygon> Polygon::thePolygons;
 std::vector<Rectangle> Rectangle::theRectangles;
 std::vector<Triangle> Triangle::theTriangles;
 
@@ -31,6 +33,7 @@ int main()
     ColorDBL green = ColorDBL(0.0, 1.0, 0.0);
     ColorDBL cyan = ColorDBL(0.0,1.0,1.0);
     ColorDBL blue = ColorDBL(0.0, 0.0, 1.0);
+    ColorDBL white = ColorDBL(1.0, 1.0, 1.0);
 
 
 
@@ -57,6 +60,9 @@ int main()
         Rectangle wallSE(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), green);
 
         Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1));
+
+
+        LightSource areaLight(glm::dvec3(0, 3, 5), glm::dvec3(5, 3, 5), glm::dvec3(5, -3, 5), glm::dvec3(0, -3, 5), 100, white);
         //-----------------------//
 
 
@@ -83,6 +89,12 @@ int main()
                     theCamera.thePixels[i * Camera::x_res + j].pixelColor = Rectangle::theRectangles[l].Color; //Give color of rectangle or triangle to pixel
                 }
             }
+
+            if (glm::dot(areaLight.normal(), aRay.direction) < 0 && areaLight.calculateIntersection(aRay)) {
+                //std::cout << "Intersection found!\n";
+                theCamera.thePixels[i * Camera::x_res + j].pixelColor = areaLight.Color; //Give color of rectangle or triangle to pixel
+            }
+
             pixelIndex++;
         }
     }

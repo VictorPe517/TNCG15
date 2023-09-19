@@ -8,5 +8,9 @@ public:
     glm::dvec3 direction = glm::dvec3(0, 0, 0);
     Ray* prevRay = nullptr;
     Ray* nextRay = nullptr;
+    double radiance = 0;
+    double importance = 0;
+    double reflectivity = 1;
+
 };
 

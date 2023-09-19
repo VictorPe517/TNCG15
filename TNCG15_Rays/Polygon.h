@@ -4,6 +4,6 @@
 class Polygon {
 public:
     Polygon() = default;
-    std::vector<Polygon> thePolygons;
+    static std::vector<Polygon> thePolygons;
 };
 
