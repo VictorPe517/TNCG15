@@ -21,7 +21,7 @@ public:
 	double Watt = 100.0;
 	double area = 1.0;
 	double radiosity = 10000;
-	double radiance = radiosity / std::numbers::pi;
+	double radiance = radiosity;
 
 	double calculateArea() {
 		area = glm::length(v2 - v1) * glm::length(v3 - v1);
@@ -48,9 +48,6 @@ public:
 
 		if (a <= 0.0 || b <= 1.0) {
 			return(possibleIntersection);
-		}
-		else {
-			return glm::dvec3(0, 0, 0); //If vector is empty then no intersection
 		}
 	};
 
