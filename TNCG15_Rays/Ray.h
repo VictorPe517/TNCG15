@@ -4,20 +4,40 @@
 
 class Ray {
 public:
-    Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor) : startPosition{ start }, direction{ dir }, RayColor { _RayColor } {}
+    Ray() = default;
 
-   
+    Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance) : startPosition{ start }, direction{ dir }, RayColor { _RayColor }, radiance{_radiance} {}
     
     
     glm::dvec3 startPosition = glm::dvec3(0, 0, 0);
     glm::dvec3 direction = glm::dvec3(0, 0, 0);
     Ray* prevRay = nullptr;
     Ray* nextRay = nullptr;
-    Polygon* Surface = nullptr;
-    ColorDBL RayColor;
-    double radiance = 0;
-    double importance = 0;
-    double reflectivity = 1;
+    //Polygon* Surface = nullptr;
+    ColorDBL RayColor = ColorDBL(0.0,0.0,0.0);
+    double radiance = 0.0;
+    double importance = 0.0;
+    double reflectivity = 1.0;
+
+    ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double Lradiance) {
+        double irradiance = 0.0;
+
+        glm::dvec3 y = startPosition;
+        glm::dvec3 x = direction + startPosition;
+
+        glm::dvec3 d = y - x;
+        double distance = (double)glm::distance(d, glm::dvec3(0.0, 0.0, 0.0));
+
+
+        double cos_omega_x = glm::dot(x_normal, d) / (distance * distance);
+        double cos_omega_y = glm::dot(-1.0 * y_normal, d) / (distance * distance);
+
+        double G = cos_omega_x * cos_omega_y / (distance * distance);
+
+        double E = 32.0 * G;
+
+        return ColorDBL(E, E, E);
+    };
 
 };
 

@@ -16,23 +16,6 @@ public:
         return direction / glm::length(direction);
     }
 
-    bool isIntersection(Ray theRay) {
-        glm::dvec3 dir = theRay.direction;
-        glm::dvec3 start = theRay.startPosition;
-        glm::dvec3 vertex = this->v2;
-        glm::dvec3 c1 = v3 - v2;
-        glm::dvec3 c2 = v1 - v2;
-
-
-        double t = glm::dot((vertex - start), this->normal()) / (glm::dot(dir, this->normal()));
-
-        glm::dvec3 possibleIntersection = start + t * dir; //xi = s + t*d
-
-        double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
-        double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
-
-        return(a <= 0.0 || b <= 1.0);
-    };
 
     glm::dvec3 getIntersection(Ray theRay) {
         glm::dvec3 vertex = v2;
@@ -46,8 +29,13 @@ public:
 
         double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
         double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
-
-        return(possibleIntersection);
+        
+        if (a <= 0.0 || b <= 1.0) {
+            return(possibleIntersection);
+        }
+        else {
+            return glm::dvec3(0,0,0); //If vector is empty then no intersection
+        }
     };
 
     std::vector<Triangle> get_vec() {
