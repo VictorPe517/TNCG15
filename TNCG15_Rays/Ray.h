@@ -11,6 +11,5 @@ public:
     double radiance = 0;
     double importance = 0;
     double reflectivity = 1;
-
 };
 
