@@ -75,7 +75,7 @@ int main()
     for (size_t i = 0; i < Camera::x_res; i++) {
 
         for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, white, 0);
+            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, yellow, 0);
 
 
 
@@ -85,7 +85,7 @@ int main()
                     //theCamera.thePixels[i * Camera::x_res + j].pixelColor = Rectangle::theRectangles[l].Color; //Give color of rectangle or triangle to pixel
                     for (size_t iter = 0; iter < 90; iter++) {
                         glm::dvec3 thePoint = areaLight.getRandomPoint();
-                        Ray newRay(thePoint, Rectangle::theRectangles[l].getIntersection(aRay) - thePoint, white, areaLight.radiance);
+                        Ray newRay(thePoint, Rectangle::theRectangles[l].getIntersection(aRay) - thePoint, yellow, areaLight.radiance);
 
                         theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Rectangle::theRectangles[l].normal(), areaLight.normal(), newRay.radiance); //Give color of rectangle or triangle to pixel
                     }
@@ -101,7 +101,7 @@ int main()
                     //theCamera.thePixels[i * Camera::x_res + j].pixelColor = Rectangle::theRectangles[l].Color; //Give color of rectangle or triangle to pixel
                     for (size_t iter = 0; iter < 90; iter++) {
                         glm::dvec3 thePoint = areaLight.getRandomPoint();
-                        Ray newRay(thePoint, Triangle::theTriangles[l].getIntersection(aRay) - thePoint, white, areaLight.radiance);
+                        Ray newRay(thePoint, Triangle::theTriangles[l].getIntersection(aRay) - thePoint, yellow, areaLight.radiance);
 
                         theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Triangle::theTriangles[l].normal(), areaLight.normal(), newRay.radiance); //Give color of rectangle or triangle to pixel
                     }
@@ -121,7 +121,7 @@ int main()
     std::cout << "Writing the image to disk... \n";
     
     //--------------------WRITING THE IMAGE TO PICTURE.PPM---------------//
-    std::ofstream img("picture.ppm");
+    std::ofstream img("GlobalenPicture.ppm");
     img << "P3" << std::endl;
     img << Camera::x_res << " " << Camera::y_res << std::endl;
     img << "255" << std::endl;

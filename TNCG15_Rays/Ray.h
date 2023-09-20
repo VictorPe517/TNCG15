@@ -5,13 +5,11 @@
 #include <cmath>
 #include <numbers>
 
-#define _USE_MATH_DEFINES
-
 class Ray {
 public:
     Ray() = default;
 
-    Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance) : startPosition{ start }, direction{ dir }, RayColor { _RayColor }, radiance{_radiance} {}
+    Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance) : startPosition{ start }, direction{ glm::normalize(dir) }, RayColor { _RayColor }, radiance{_radiance} {}
     
     static double maxE;
     
@@ -31,16 +29,16 @@ public:
         glm::dvec3 y = startPosition;
         glm::dvec3 x = direction + startPosition;
 
-        glm::dvec3 d = y-x;
+        glm::dvec3 d = (y-x);
         double distance = glm::length(d);
 
 
-        double cos_omega_x = glm::dot(x_normal, d) / (distance * distance);
-        double cos_omega_y = glm::dot(-1.0*y_normal, d) / (distance * distance);
+        double cos_omega_x = glm::dot((x_normal), glm::normalize(d)) / (distance * distance);
+        double cos_omega_y = glm::dot(-1.0*(y_normal), glm::normalize(d)) / (distance * distance);
 
         double G = cos_omega_x * cos_omega_y / (distance * distance);
 
-        double E = 16.0/std::numbers::pi * G;
+        double E = Lradiance/std::numbers::pi * G;
 
         //std::cout << "E value is: " << E << "\n";
 
