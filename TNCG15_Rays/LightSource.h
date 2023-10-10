@@ -9,6 +9,7 @@
 #include "Ray.h"
 #include <iostream>
 #include <stdlib.h>
+#include "glm/gtx/string_cast.hpp"
 
 class LightSource
 {
@@ -25,19 +26,20 @@ public:
 	double radiance = radiosity;
 
 	double calculateArea() {
-		area = glm::length(v2 - v1) * glm::length(v3 - v1);
+		area = glm::distance(v2 , v1) * glm::distance(v3 , v1);
 		return area;
 	}
 
 	glm::dvec3 normal() {
 		glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
-		return direction / glm::length(direction);
+
+		//std::cout << "	Light normal is: " << glm::to_string(direction) << "\n\n";
+
+		return direction / glm::distance(direction, glm::dvec3(0,0,0));
 	}
 
 	glm::dvec3 getRandomPoint() {
 		double rand1 = (rand()) / ((RAND_MAX + 1.0));
-
-
 		double rand2 = (rand()) / ((RAND_MAX + 1.0));
 		
 		glm::dvec3 e1 = v2 - v1;
@@ -46,7 +48,7 @@ public:
 		return(v1 + rand1 * e1 + rand2 * e2);
 	}
 
-	glm::vec3 isIntersection(Ray theRay) {
+	bool isIntersection(Ray theRay) {
 		glm::dvec3 vertex = v2;
 
 		glm::dvec3 c1 = v3 - vertex;
@@ -59,9 +61,8 @@ public:
 		double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
 		double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
 
-		if (a <= 0.0 || b <= 1.0) {
-			return(possibleIntersection);
-		}
+		return(a >= 0.0 && a <= 1.0 && b >= 0.0 && b <= 1.0);
+		
 	};
 
 	glm::dvec3 getIntersection(Ray theRay) {
@@ -82,7 +83,7 @@ public:
 			return(possibleIntersection);
 		}
 		else {
-			return glm::dvec3(0, 0, 0); //If vector is empty then no intersection
+			return glm::dvec3(-9999,-9999,-9999); //If vector is empty then no intersection
 		}
 	};
 

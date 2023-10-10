@@ -11,7 +11,7 @@ class Ray {
 public:
     Ray() = default;
 
-    Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance) : startPosition{ start }, direction{ dir }, RayColor { _RayColor }, radiance{_radiance} {}
+    Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance) : startPosition{ start }, direction{ glm::normalize(dir) }, RayColor { _RayColor }, radiance{_radiance} {    }
     
     static double maxE;
     
@@ -25,14 +25,14 @@ public:
     double importance = 0.0;
     double reflectivity = 1.0;
 
-    ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double Lradiance) {
+    ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double Lradiance, double area) {
         double irradiance = 0.0;
 
         glm::dvec3 y = startPosition;
-        glm::dvec3 x = direction + startPosition;
+        glm::dvec3 x = direction+ startPosition;
 
-        glm::dvec3 d = y-x;
-        double distance = glm::length(d);
+        glm::dvec3 d = glm::normalize(y-x);
+        double distance = glm::distance(y, x);
 
 
         double cos_omega_x = glm::dot(x_normal, d) / (distance * distance);
@@ -40,15 +40,21 @@ public:
 
         double G = cos_omega_x * cos_omega_y / (distance * distance);
 
-        double E = 16.0/std::numbers::pi * G;
+        double E = area*3200 * G;
 
-        //std::cout << "E value is: " << E << "\n";
+        //std::cout << "Irradiance value is: " << E << "\n\n";
 
         if (E > maxE) {
             maxE = E;
         }
 
-        return ColorDBL(E, E, E);
+        if (E < 0) {
+            return ColorDBL(0, 0, 0);
+        }
+        else {
+            return ColorDBL(E, E, E);
+        }
+        
     };
 
 };
