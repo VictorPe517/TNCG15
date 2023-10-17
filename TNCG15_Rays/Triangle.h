@@ -19,34 +19,41 @@ public:
     }
 
     virtual glm::dvec3 getIntersection(Ray theRay) override {
-        glm::dvec3 vertex = v3;
+        glm::dvec3 e1 = v2 - v1;
+        glm::dvec3 e2 = v3 - v1;
+        glm::dvec3 h = glm::cross(theRay.direction, e2); 
+        double a = glm::dot(e1, h); // a = determinanten. 
 
-        glm::dvec3 c1 = v1-vertex;
-        glm::dvec3 c2 = v2-vertex;
-
-        //std::cout << glm::to_string(this->normal()) << std::endl;
-
-        double t = glm::dot((vertex - theRay.startPosition), glm::normalize(glm::cross(c2,c1))) / (glm::dot((theRay.direction),glm::normalize(glm::cross(c2, c1))));
-        
-        glm::dvec3 possibleIntersection = theRay.startPosition + t * theRay.direction;
-
-        double a = glm::dot((possibleIntersection - vertex), c1) / (glm::dot(c1, c1));
-        double b = glm::dot((possibleIntersection - vertex), c2) / (glm::dot(c2, c2));
-
-        //std::cout << glm::to_string(this->normal()) << std::endl;
-        //std::cout << "     " << glm::to_string(v1) << ", " << glm::to_string(v2) << ", " << glm::to_string(v3) << std::endl;
-
-        if (a > 0.0 && b > 0.0 && (a + b) < 1.0) {
-            //std::cout << "      a = " << a << ", b = " << b << std::endl;
-            //std::cout << "         " << glm::to_string(possibleIntersection) << std::endl;
-
-            return(possibleIntersection);
+        // Ray parallel till triangle
+        if (a > -1e-6 && a < 1e-6) {
+            return glm::dvec3(-9999, -9999, -9999); 
         }
-        else {
-            //std::cout << "    Non-intersecting triangle met \n\n";
-            return glm::dvec3(-9999, -9999, -9999); //If vector is 999,999,999 then no intersection
+
+        double f = 1.0 / a;
+        glm::dvec3 s = theRay.startPosition - v1;
+        double u = f * glm::dot(s, h);
+
+        //Ray intersection utanför triangle 
+        if (u < 0.0 || u > 1.0) {
+            return glm::dvec3(-9999, -9999, -9999); 
         }
-    };
+
+        glm::dvec3 q = glm::cross(s, e1);
+        double v = f * glm::dot(theRay.direction, q);
+
+        // Utanför triangle 
+        if (v < 0.0 || u + v > 1.0) {
+            return glm::dvec3(-9999, -9999, -9999); 
+        }
+
+        double t = f * glm::dot(e2, q);
+
+        if (t > 1e-6) {
+            return theRay.startPosition + t * theRay.direction; // True ray intersection.
+        }
+
+        return glm::dvec3(-9999, -9999, -9999); // No intersection.
+    }
 
     std::vector<Triangle> get_vec() {
         return theTriangles;
