@@ -25,22 +25,24 @@ public:
     double importance = 0.0;
     double reflectivity = 1.0;
 
-    ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double Lradiance, double area) {
+    ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double Lradiance, double area, glm::dvec3 intersectionPoint, glm::dvec3 areaLightPoint) {
         double irradiance = 0.0;
 
-        glm::dvec3 y = startPosition;
-        glm::dvec3 x = direction+ startPosition;
+        glm::dvec3 y = areaLightPoint; //Random punkt på lampan
+        glm::dvec3 x = intersectionPoint;  //Intersection from eye->object
+        //glm::dvec3 x = intersectionPoint;
 
-        glm::dvec3 d = glm::normalize(y-x);
-        double distance = glm::distance(y, x);
+        glm::dvec3 d = x-y;
+        double distance = glm::distance(x, y);
+
+        double cos_omega_x = glm::dot(x_normal, d) / (distance);
+        double cos_omega_y = -1.0 * glm::dot(y_normal, d) / (distance);
+
+        double G = cos_omega_x * cos_omega_y / (distance*distance);
+
+        double E = 3200 * G * area;
 
 
-        double cos_omega_x = glm::dot(x_normal, d) / (distance * distance);
-        double cos_omega_y = glm::dot(-1.0*y_normal, d) / (distance * distance);
-
-        double G = cos_omega_x * cos_omega_y / (distance * distance);
-
-        double E = area*3200 * G;
 
         //std::cout << "Irradiance value is: " << E << "\n\n";
 

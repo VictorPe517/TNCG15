@@ -44,6 +44,10 @@ public:
         }
     };
 
+    virtual ColorDBL getColor() override {
+        return Color;
+    }
+
     glm::dvec3 v1, v2, v3, v4;
     ColorDBL Color = ColorDBL(0, 0, 0);
     static std::vector<Rectangle> theRectangles;

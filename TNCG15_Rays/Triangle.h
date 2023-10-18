@@ -25,7 +25,7 @@ public:
         double a = glm::dot(e1, h); // a = determinanten. 
 
         // Ray parallel till triangle
-        if (a > -1e-6 && a < 1e-6) {
+        if (a > doubThreshold && a < doubThreshold) {
             return glm::dvec3(-9999, -9999, -9999); 
         }
 
@@ -48,7 +48,7 @@ public:
 
         double t = f * glm::dot(e2, q);
 
-        if (t > 1e-6) {
+        if (t > doubThreshold) {
             return theRay.startPosition + t * theRay.direction; // True ray intersection.
         }
 
@@ -59,8 +59,15 @@ public:
         return theTriangles;
     }
 
+    virtual ColorDBL getColor() override {
+        return Color;
+    }
+
     glm::dvec3 v1, v2, v3;
     ColorDBL Color = ColorDBL(0.0, 0.0, 0.0);
     static std::vector<Triangle> theTriangles;
+
+private:
+    double doubThreshold = 1e-6;
 };
 

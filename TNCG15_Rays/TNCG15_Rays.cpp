@@ -25,6 +25,14 @@ double Ray::maxE = 0.0;
 //-------------------------------------------------------------------------------------------------------//
 int main()
 {
+    //-------SETTINGS-------//
+    double exposureMultiplier = 3.0;
+    double iterations = 200;
+
+
+    //----------------------//
+
+
     std::vector<std::thread> threads; //Sets up multi-threading capabilities
 
     std::cout << "Compilation successful. Welcome back commander. \n";
@@ -48,9 +56,9 @@ int main()
     
     //------GEOMETRY------//
         //------CIELING------//
-        Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), white);
-        Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), white);
-        Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), white);
+        Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), blue);
+        Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), blue);
+        Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), blue);
         
         //-------FLOOR-------//
         Rectangle floorRect(glm::dvec3(10, 6, -5), glm::dvec3(0, 6, -5), glm::dvec3(0, -6, -5), glm::dvec3(10, -6, -5), white);
@@ -61,12 +69,12 @@ int main()
         
         
         //-------WALLS-------//
-        Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), white);
-        Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), white);
-        Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), white);
-        Rectangle wallS(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), white);
-        Rectangle wallSW(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), white);
-        Rectangle wallSE(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), white);
+        Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), green);
+        Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), magenta);
+        Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), green);
+        Rectangle wallS(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), magenta);
+        Rectangle wallSW(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), green);
+        Rectangle wallSE(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), magenta);
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
@@ -86,9 +94,6 @@ int main()
     int maxval = -4000;
     int minval = 999999;
 
-    double iterations = 1;
-
-
     for (size_t i = 0; i < Camera::x_res; i++) {
         for (size_t j = 0; j < Camera::y_res; j++) {
             Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, white, 0);
@@ -99,19 +104,48 @@ int main()
                         glm::dvec3 thePoint = areaLight.getRandomPoint();
                         Ray newRay(thePoint, (*Polygon::thePolygons[l]).getIntersection(aRay) - thePoint, white, areaLight.radiance);
 
-                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance((*Polygon::thePolygons[l]).normal(), areaLight.normal(), newRay.radiance, areaLight.calculateArea()) / iterations; //Give color of rectangle or triangle to pixel
+                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance((*Polygon::thePolygons[l]).normal(), areaLight.normal(), newRay.radiance, areaLight.calculateArea(), (*Polygon::thePolygons[l]).getIntersection(aRay), thePoint) / iterations; //Give color of rectangle or triangle to pixel
                     }
+                    theCamera.thePixels[i * Camera::x_res + j].pixelColor *= (* Polygon::thePolygons[l]).getColor();
                     break;
                 }
             }
 
             //-------Write image to file-------//
-            int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * 0.07 * 255.0 / 3200.0);
-            int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * 0.07 * 255.0 / 3200.0);
-            int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b * 0.07 * 255.0 / 3200.0);
+            int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * exposureMultiplier * 255.0 / 3200.0);
+            int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * exposureMultiplier * 255.0 / 3200.0);
+            int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b * exposureMultiplier * 255.0 / 3200.0);
 
-            if (r > maxval) maxval = r;
-            if (r < minval) minval = r;
+            if (r > 255) {
+                int temp = (r - 255) / 2;
+                g += temp;
+                b += temp;
+
+                r = 255;
+            }
+
+            if (g > 255) {
+                int temp2 = (g - 255) / 2;
+                r += temp2;
+                b += temp2;
+
+                g = 255;
+            }
+
+            if (b > 255) {
+                int temp3 = (b - 255) / 2;
+                r += temp3;
+                g += temp3;
+
+                b = 255;
+            }
+
+            if (r > 255) r = 255;
+            if (g > 255) g = 255;
+            if (b > 255) b = 255;
+
+            if ((r+g+b)/3 > maxval) maxval = (r + g + b) / 3;
+            if ((r + g + b) / 3 < minval) minval = (r + g + b) / 3;
 
             //std::cout << theCamera.thePixels[i * Camera::x_res + j].pixelColor.ToString() << "Which corresponds to ints r: " << r << ", g: " << g << ", b: " << b
             //    << "\n Raw pixelCol r: " << theCamera.thePixels[i * Camera::x_res + j].pixelColor.r << ", g: " << theCamera.thePixels[i * Camera::x_res + j].pixelColor.g << ", b:" << theCamera.thePixels[i * Camera::x_res + j].pixelColor.b << "\n    With a mean of: " << (r + g + b) / 3.0 << "\n\n";
