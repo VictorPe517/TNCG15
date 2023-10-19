@@ -13,12 +13,15 @@
 #include "Rectangle.h"
 #include "Triangle.h"
 #include "LightSource.h"
+#include "Sphere.h"
 #include <cassert>
 #include <thread>
+#include <ppl.h>
 
 std::vector<Polygon*> Polygon::thePolygons;
 std::vector<Rectangle> Rectangle::theRectangles;
 std::vector<Triangle> Triangle::theTriangles;
+std::vector<Sphere*> Sphere::theSpheres;
 double Ray::maxE = 0.0;
 
 
@@ -26,8 +29,8 @@ double Ray::maxE = 0.0;
 int main()
 {
     //-------SETTINGS-------//
-    double exposureMultiplier = 3.0;
-    double iterations = 200;
+    double exposureMultiplier = 6.0;
+    double iterations = 100;
 
 
     //----------------------//
@@ -53,6 +56,8 @@ int main()
 
     LightSource areaLight(glm::dvec3(5, 6, 4.8), glm::dvec3(8, 6, 4.8), glm::dvec3(5, 4, 4.8), glm::dvec3(8, 4, 4.8), 100, white);
     Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1));
+
+    
     
     //------GEOMETRY------//
         //------CIELING------//
@@ -67,7 +72,6 @@ int main()
 
         Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), white);  //Behind camera
         
-        
         //-------WALLS-------//
         Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), green);
         Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), magenta);
@@ -79,6 +83,8 @@ int main()
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
         //-----------------------//
+        Sphere sphere1(glm::dvec3(, 3, 0), 2, white);
+        
         
 
     std::cout << "Rendering & Writing image...\n\n";
@@ -94,9 +100,14 @@ int main()
     int maxval = -4000;
     int minval = 999999;
 
-    for (size_t i = 0; i < Camera::x_res; i++) {
+    for(size_t i = 0; i < Camera::x_res; i++) {
         for (size_t j = 0; j < Camera::y_res; j++) {
             Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, white, 0);
+
+            if (glm::dot(sphere1.normal(aRay), aRay.direction) < 0.0) {
+                //std::cout << " dot: " << glm::dot(sphere1.normal(aRay), aRay.direction) << "\n";
+                //std::cout << "    intersection point: " << glm::to_string((sphere1.getIntersection(aRay))) << "\n";
+            }
 
             for (size_t l = 0; l < Polygon::thePolygons.size(); l++) {
                 if (glm::dot((*Polygon::thePolygons[l]).normal(), aRay.direction) < 0.0 && (*Polygon::thePolygons[l]).getIntersection(aRay) != glm::dvec3(-9999, -9999, -9999)) {
@@ -110,14 +121,24 @@ int main()
                     break;
                 }
             }
+            
+            if (glm::dot(sphere1.normal(aRay), aRay.direction) < 0.0 && (sphere1.getIntersection(aRay)) != glm::dvec3(-9999, -9999, -9999)) {
+                theCamera.thePixels[i * Camera::x_res + j].pixelColor = ColorDBL(0, 0, 0);
+                for (size_t iter = 0; iter < iterations; iter++) {
+                    glm::dvec3 thePoint = areaLight.getRandomPoint();
+                    Ray newRay(thePoint, (sphere1.getIntersection(aRay) - thePoint), white, areaLight.radiance);
 
+                    theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(sphere1.normal(aRay), areaLight.normal(), newRay.radiance, areaLight.calculateArea(), sphere1.getIntersection(aRay), thePoint)/iterations; //Give color of rectangle or triangle to pixel
+                    //theCamera.thePixels[i * Camera::x_res + j].pixelColor = ColorDBL(1, 1, 1);
+                }
+            }
             //-------Write image to file-------//
             int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * exposureMultiplier * 255.0 / 3200.0);
             int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * exposureMultiplier * 255.0 / 3200.0);
             int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b * exposureMultiplier * 255.0 / 3200.0);
 
             if (r > 255) {
-                int temp = (r - 255) / 2;
+                int temp = (r - 255) / 5; //Give the other two channels some of the intensity of the highest colors
                 g += temp;
                 b += temp;
 
@@ -125,7 +146,7 @@ int main()
             }
 
             if (g > 255) {
-                int temp2 = (g - 255) / 2;
+                int temp2 = (g - 255) / 5;
                 r += temp2;
                 b += temp2;
 
@@ -133,7 +154,7 @@ int main()
             }
 
             if (b > 255) {
-                int temp3 = (b - 255) / 2;
+                int temp3 = (b - 255) / 5;
                 r += temp3;
                 g += temp3;
 

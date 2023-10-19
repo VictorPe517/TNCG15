@@ -5,7 +5,9 @@
 #include <cmath>
 #include <numbers>
 
+
 #define _USE_MATH_DEFINES
+
 
 class Ray {
 public:
@@ -26,6 +28,8 @@ public:
     double reflectivity = 1.0;
 
     ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double Lradiance, double area, glm::dvec3 intersectionPoint, glm::dvec3 areaLightPoint) {
+        double visibility = 1;
+
         double irradiance = 0.0;
 
         glm::dvec3 y = areaLightPoint; //Random punkt på lampan
@@ -40,9 +44,13 @@ public:
 
         double G = cos_omega_x * cos_omega_y / (distance*distance);
 
+        Ray shadowRay = Ray(areaLightPoint, intersectionPoint - areaLightPoint, RayColor, 1.0);
+
         double E = 3200 * G * area;
 
-
+        //if (theSphere.getIntersection(shadowRay) != glm::dvec3(-9999, -9999, -9999)) {
+        //     E = 0.0;
+        //}
 
         //std::cout << "Irradiance value is: " << E << "\n\n";
 
