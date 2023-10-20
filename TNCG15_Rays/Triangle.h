@@ -4,15 +4,19 @@
 #include "ColorDBL.h"
 #include "Ray.h"
 #include "glm/gtx/string_cast.hpp"
+#include "Material.h"
+#include "Object.h"
 
 class Triangle : public Polygon {
 public:
-    Triangle(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, ColorDBL _Color) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 }, Color{ _Color } {
+    Triangle(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, ColorDBL _Color) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 } {
+        theMaterial.MatColor = _Color;
+        theObjects.push_back(this);
         theTriangles.push_back(*this);
         thePolygons.push_back(this);
     }
 
-    virtual glm::dvec3 normal() override {
+    virtual glm::dvec3 normal(Ray& theRay) override {
         glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
         //std::cout << "	Triangle normal is: " << glm::to_string(direction) << ", with length: " << glm::length(direction) << ", with midpoint at position: " << glm::to_string((v1+v2+v3)/3.0) << "\n\n";
         return direction / glm::length(direction);
@@ -60,12 +64,17 @@ public:
     }
 
     virtual ColorDBL getColor() override {
-        return Color;
+        return theMaterial.MatColor;
+    }
+
+    virtual Material getMaterial() override {
+        return theMaterial;
     }
 
     glm::dvec3 v1, v2, v3;
     ColorDBL Color = ColorDBL(0.0, 0.0, 0.0);
     static std::vector<Triangle> theTriangles;
+    Material theMaterial = Material(1, 0, 1, false, ColorDBL(1, 1, 1));
 
 private:
     double doubThreshold = 1e-6;

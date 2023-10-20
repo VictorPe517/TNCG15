@@ -16,6 +16,14 @@ public:
         return *this;
     }
 
+    ColorDBL operator-(ColorDBL rhs) {
+        r -= rhs.r;
+        g -= rhs.g;
+        b -= rhs.b;
+
+        return *this;
+    }
+
     ColorDBL operator/(double rhs) {
         r /= rhs;
         g /= rhs;

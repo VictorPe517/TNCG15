@@ -17,25 +17,42 @@
 #include <cassert>
 #include <thread>
 #include <ppl.h>
+#include "Object.h"
 
+class LightSource;
+
+void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j);
+
+std::vector<Object*> Object::theObjects;
 std::vector<Polygon*> Polygon::thePolygons;
 std::vector<Rectangle> Rectangle::theRectangles;
 std::vector<Triangle> Triangle::theTriangles;
 std::vector<Sphere*> Sphere::theSpheres;
+
+struct HitPoint{
+public:
+    glm::dvec3 point;
+    Object* theObject;
+};
+
 double Ray::maxE = 0.0;
 
+//-------SETTINGS-------//
+double exposureMultiplier = 6.0;
+double iterations = 2;
+
+//----------------------//
+int pixelIndex = 0;
+
+std::ofstream img("picture.ppm");
+
+
+int maxval = -4000;
+int minval = 999999;
 
 //-------------------------------------------------------------------------------------------------------//
 int main()
 {
-    //-------SETTINGS-------//
-    double exposureMultiplier = 6.0;
-    double iterations = 100;
-
-
-    //----------------------//
-
-
     std::vector<std::thread> threads; //Sets up multi-threading capabilities
 
     std::cout << "Compilation successful. Welcome back commander. \n";
@@ -50,6 +67,7 @@ int main()
     ColorDBL cyan = ColorDBL(0.0,1.0,1.0);
     ColorDBL blue = ColorDBL(0.0, 0.0, 1.0);
     ColorDBL white = ColorDBL(1.0, 1.0, 1.0);
+    ColorDBL black = ColorDBL(1.0, 1.0, 1.0);
 
 
     std::cout << "Setting up primitives...\n\n";
@@ -58,126 +76,114 @@ int main()
     Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1));
 
     
-    
     //------GEOMETRY------//
+    Sphere sphere1(glm::dvec3(10, 0, -3), 2, white);
         //------CIELING------//
-        Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), blue);
-        Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), blue);
-        Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), blue);
+        Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), magenta);
+        Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), yellow);
+        Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), red);
         
         //-------FLOOR-------//
-        Rectangle floorRect(glm::dvec3(10, 6, -5), glm::dvec3(0, 6, -5), glm::dvec3(0, -6, -5), glm::dvec3(10, -6, -5), white);
+        Rectangle floorRect(glm::dvec3(10, 6, -5), glm::dvec3(0, 6, -5), glm::dvec3(0, -6, -5), glm::dvec3(10, -6, -5), green);
 
         //Rectangle testRect(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, -6, -5), glm::dvec3(13,6,5), white);
 
-        Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), white);  //Behind camera
+        Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), blue);  //Behind camera
         
         //-------WALLS-------//
-        Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), green);
-        Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), magenta);
-        Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), green);
-        Rectangle wallS(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), magenta);
-        Rectangle wallSW(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), green);
-        Rectangle wallSE(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), magenta);
+        //Rectangle wallBlock(glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(10, -6, 5), white);
+        //wallBlock.theMaterial.isMirror = true;
+        Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), cyan);
+        Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), white);
+        Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), black);
+        Rectangle wallS(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), orange);
+        Rectangle wallSW(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), green - ColorDBL(0.4, 0.4, 0.4));
+        Rectangle wallSE(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), red - ColorDBL(0.4, 0.4, 0.4));
+        wallSE.theMaterial.isMirror = true;
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
         //-----------------------//
-        Sphere sphere1(glm::dvec3(, 3, 0), 2, white);
+        //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
+        sphere1.theMaterial.isMirror = true;
         
         
 
     std::cout << "Rendering & Writing image...\n\n";
 
     //--------------------RENDERING LOOP--------------------//
-    int pixelIndex = 0;
-
-    std::ofstream img("picture.ppm");
     img << "P3" << std::endl;
     img << Camera::x_res << " " << Camera::y_res << std::endl;
     img << "255" << std::endl;
 
-    int maxval = -4000;
-    int minval = 999999;
+    //for(size_t i = 0; i < Camera::x_res; i++) {
+    //    for (size_t j = 0; j < Camera::y_res; j++) {
+    //            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position - theEye, white, 0);
 
-    for(size_t i = 0; i < Camera::x_res; i++) {
+    //            for (size_t l = 0; l < Polygon::thePolygons.size(); l++) {
+    //                glm::dvec3 possibleIntersection = (*Polygon::thePolygons[l]).getIntersection(aRay);
+    //                if (glm::dot((*Polygon::thePolygons[l]).normal(), aRay.direction) < 0.0 && possibleIntersection != glm::dvec3(-9999, -9999, -9999)) {
+    //                    if (Polygon::thePolygons[l]->getMaterial().isMirror) {
+    //                        Ray mirrorRay(possibleIntersection, aRay.getReflectedDirection(possibleIntersection, (*Polygon::thePolygons[l]).normal()),white,0);
+
+    //                        glm::dvec3 secondHit = (*Polygon::thePolygons[l]).getIntersection(mirrorRay);
+
+    //                        for (size_t iter = 0; iter < iterations; iter++) {
+    //                            glm::dvec3 thePoint = areaLight.getRandomPoint();
+    //                            Ray newRay(thePoint, secondHit - thePoint, white, areaLight.radiance);
+
+    //                            theCamera.thePixels[i * Camera::x_res + j].pixelColor += mirrorRay.calcIrradiance((*Polygon::thePolygons[l]).normal(), areaLight.normal(), mirrorRay.radiance, areaLight.calculateArea(), secondHit, thePoint) / iterations; //Give color of rectangle or triangle to pixel
+    //                        }
+    //                        //theCamera.thePixels[i * Camera::x_res + j].pixelColor *= (*Polygon::thePolygons[l]).getColor();
+    //                        break;
+    //                        
+    //                    }
+    //                    else {
+    //                        for (size_t iter = 0; iter < iterations; iter++) {
+    //                            glm::dvec3 thePoint = areaLight.getRandomPoint();
+    //                            Ray newRay(thePoint, possibleIntersection - thePoint, white, areaLight.radiance);
+
+    //                            theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance((*Polygon::thePolygons[l]).normal(), areaLight.normal(), newRay.radiance, areaLight.calculateArea(), possibleIntersection, thePoint) / iterations; //Give color of rectangle or triangle to pixel
+    //                        }
+    //                        theCamera.thePixels[i * Camera::x_res + j].pixelColor *= (*Polygon::thePolygons[l]).getColor();
+    //                        break;
+    //                    }
+    //                }
+    //            }
+
+    //            if (glm::dot(sphere1.normal(aRay), aRay.direction) < 0.0 && (sphere1.getIntersection(aRay)) != glm::dvec3(-9999, -9999, -9999)) {
+    //                theCamera.thePixels[i * Camera::x_res + j].pixelColor = ColorDBL(0, 0, 0);
+    //                for (size_t iter = 0; iter < iterations; iter++) {
+    //                    glm::dvec3 thePoint = areaLight.getRandomPoint();
+    //                    Ray newRay(thePoint, (sphere1.getIntersection(aRay) - thePoint), white, areaLight.radiance);
+
+    //                    theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(sphere1.normal(aRay), areaLight.normal(), newRay.radiance, areaLight.calculateArea(), sphere1.getIntersection(aRay), thePoint) / iterations; //Give color of rectangle or triangle to pixel
+    //                    //theCamera.thePixels[i * Camera::x_res + j].pixelColor = ColorDBL(1, 1, 1);
+    //                }
+    //            }
+
+    //            writeCurrentPixelToFile(theCamera, i, j);
+
+    //    }
+    //    if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res)*100.0 << "% \n";
+    //}
+
+    for (size_t i = 0; i < Camera::x_res; i++) {
         for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, white, 0);
+            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position - theEye, black, 0, 1);
 
-            if (glm::dot(sphere1.normal(aRay), aRay.direction) < 0.0) {
-                //std::cout << " dot: " << glm::dot(sphere1.normal(aRay), aRay.direction) << "\n";
-                //std::cout << "    intersection point: " << glm::to_string((sphere1.getIntersection(aRay))) << "\n";
-            }
+            glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects));
 
-            for (size_t l = 0; l < Polygon::thePolygons.size(); l++) {
-                if (glm::dot((*Polygon::thePolygons[l]).normal(), aRay.direction) < 0.0 && (*Polygon::thePolygons[l]).getIntersection(aRay) != glm::dvec3(-9999, -9999, -9999)) {
-                    for (size_t iter = 0; iter < iterations; iter++) {
-                        glm::dvec3 thePoint = areaLight.getRandomPoint();
-                        Ray newRay(thePoint, (*Polygon::thePolygons[l]).getIntersection(aRay) - thePoint, white, areaLight.radiance);
+            aRay.calculateLighting(hitPos, Object::theObjects, &areaLight, 100);
 
-                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance((*Polygon::thePolygons[l]).normal(), areaLight.normal(), newRay.radiance, areaLight.calculateArea(), (*Polygon::thePolygons[l]).getIntersection(aRay), thePoint) / iterations; //Give color of rectangle or triangle to pixel
-                    }
-                    theCamera.thePixels[i * Camera::x_res + j].pixelColor *= (* Polygon::thePolygons[l]).getColor();
-                    break;
-                }
-            }
-            
-            if (glm::dot(sphere1.normal(aRay), aRay.direction) < 0.0 && (sphere1.getIntersection(aRay)) != glm::dvec3(-9999, -9999, -9999)) {
-                theCamera.thePixels[i * Camera::x_res + j].pixelColor = ColorDBL(0, 0, 0);
-                for (size_t iter = 0; iter < iterations; iter++) {
-                    glm::dvec3 thePoint = areaLight.getRandomPoint();
-                    Ray newRay(thePoint, (sphere1.getIntersection(aRay) - thePoint), white, areaLight.radiance);
+            theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
 
-                    theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(sphere1.normal(aRay), areaLight.normal(), newRay.radiance, areaLight.calculateArea(), sphere1.getIntersection(aRay), thePoint)/iterations; //Give color of rectangle or triangle to pixel
-                    //theCamera.thePixels[i * Camera::x_res + j].pixelColor = ColorDBL(1, 1, 1);
-                }
-            }
-            //-------Write image to file-------//
-            int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * exposureMultiplier * 255.0 / 3200.0);
-            int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * exposureMultiplier * 255.0 / 3200.0);
-            int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b * exposureMultiplier * 255.0 / 3200.0);
+            //std::cout << theCamera.thePixels[i * Camera::x_res + j].pixelColor.ToString();
 
-            if (r > 255) {
-                int temp = (r - 255) / 5; //Give the other two channels some of the intensity of the highest colors
-                g += temp;
-                b += temp;
+            writeCurrentPixelToFile(theCamera, i, j);
 
-                r = 255;
-            }
-
-            if (g > 255) {
-                int temp2 = (g - 255) / 5;
-                r += temp2;
-                b += temp2;
-
-                g = 255;
-            }
-
-            if (b > 255) {
-                int temp3 = (b - 255) / 5;
-                r += temp3;
-                g += temp3;
-
-                b = 255;
-            }
-
-            if (r > 255) r = 255;
-            if (g > 255) g = 255;
-            if (b > 255) b = 255;
-
-            if ((r+g+b)/3 > maxval) maxval = (r + g + b) / 3;
-            if ((r + g + b) / 3 < minval) minval = (r + g + b) / 3;
-
-            //std::cout << theCamera.thePixels[i * Camera::x_res + j].pixelColor.ToString() << "Which corresponds to ints r: " << r << ", g: " << g << ", b: " << b
-            //    << "\n Raw pixelCol r: " << theCamera.thePixels[i * Camera::x_res + j].pixelColor.r << ", g: " << theCamera.thePixels[i * Camera::x_res + j].pixelColor.g << ", b:" << theCamera.thePixels[i * Camera::x_res + j].pixelColor.b << "\n    With a mean of: " << (r + g + b) / 3.0 << "\n\n";
-
-
-
-            img << r << " " << g << " " << b << std::endl;
-
-            pixelIndex++;
         }
-        if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res)*100.0 << "% \n";
+        if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
     }
 
     std::cout << "Render Successful.\n\n";
@@ -192,7 +198,57 @@ int main()
 }
 
 
-Pixel::Pixel()
+Pixel::Pixel() //<-- Why is this here???
 {
+}
+
+void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
+    //-------Write image to file-------//
+    int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * 255);
+    int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * 255);
+    int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b * 255);
+
+    //Give the other two channels some of the intensity of the highest colors
+    if (r > 255) {
+        int temp = (r - 255) / 5; 
+        g += temp;
+        b += temp;
+
+        r = 255;
+    }
+
+    if (g > 255) {
+        int temp2 = (g - 255) / 5;
+        r += temp2;
+        b += temp2;
+
+        g = 255;
+    }
+
+    if (b > 255) {
+        int temp3 = (b - 255) / 5;
+        r += temp3;
+        g += temp3;
+
+        b = 255;
+    }
+
+    if (r > 255) r = 255;
+    if (g > 255) g = 255;
+    if (b > 255) b = 255;
+
+    if (r < 0) r = 0;
+    if (g < 0) g = 0;
+    if (b < 0) b = 0;
+
+    if ((r + g + b) / 3 > maxval) maxval = (r + g + b) / 3;
+    if ((r + g + b) / 3 < minval) minval = (r + g + b) / 3;
+
+    //std::cout << theCamera.thePixels[i * Camera::x_res + j].pixelColor.ToString() << "Which corresponds to ints r: " << r << ", g: " << g << ", b: " << b
+    //    << "\n Raw pixelCol r: " << theCamera.thePixels[i * Camera::x_res + j].pixelColor.r << ", g: " << theCamera.thePixels[i * Camera::x_res + j].pixelColor.g << ", b:" << theCamera.thePixels[i * Camera::x_res + j].pixelColor.b << "\n    With a mean of: " << (r + g + b) / 3.0 << "\n\n";
+
+    img << r << " " << g << " " << b << std::endl;
+
+    pixelIndex++;
 }
 

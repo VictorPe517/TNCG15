@@ -143,6 +143,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ColorDBL.cpp" />
     <ClCompile Include="LightSource.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Pixel.cpp" />
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Ray.cpp" />
@@ -155,6 +157,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ColorDBL.h" />
     <ClInclude Include="LightSource.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="Ray.h" />
