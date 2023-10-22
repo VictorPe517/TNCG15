@@ -107,7 +107,7 @@ int main()
         //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
-        Sphere sphere1(glm::dvec3(9, -4, 0), 1, white);
+        Sphere sphere1(glm::dvec3(9, 0, 0), 2, white);
         sphere1.theMaterial.isMirror = true;
         
         

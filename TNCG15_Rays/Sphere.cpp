@@ -33,6 +33,9 @@ glm::dvec3 Sphere::getIntersection(Ray& theRay){
 		double t1 = (-c2 + glm::sqrt(arg)) / (2.0 * c1);
 		double t2 = (-c2 - glm::sqrt(arg)) / (2.0 * c1);
 
+		if (t1 < 0) return theRay.direction + theRay.direction * t2;
+		if (t2 < 0) return theRay.direction + theRay.direction * t1;
+
 		if (t1 < t2) {
 			//std::cout << "    Tmin = " << t1 << " \n";
 			return theRay.startPosition + theRay.direction * t1;
