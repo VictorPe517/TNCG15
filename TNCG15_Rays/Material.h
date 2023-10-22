@@ -4,6 +4,8 @@
 class Material
 {
 public:
+	Material() = default;
+
 	Material(double _refl, double _rough, double _transm, bool _mirror, ColorDBL _color) 
 		: reflectance{_refl}, roughness{_rough}, transmission{_transm}, isMirror{_mirror}, MatColor{_color}{}
 

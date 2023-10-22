@@ -15,49 +15,17 @@ public:
         theRectangles.push_back(*this);
     }
 
-    virtual glm::dvec3 normal(Ray& theRay) override {
-        glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
-        
-        return direction / glm::length(direction);
-    }
+    virtual glm::dvec3 normal(Ray& theRay) override;
 
-    virtual glm::dvec3 getIntersection(Ray theRay) override {
-        glm::dvec3 vertex = v2;
+    virtual glm::dvec3 getIntersection(Ray& theRay) override;
 
-        glm::dvec3 c1 = v3 - vertex;
-        glm::dvec3 c2 = v1 - vertex;
+    virtual ColorDBL getColor() override;
 
-        double t = glm::dot((vertex - theRay.startPosition), this->normal(theRay)) / (glm::dot(theRay.direction, this->normal(theRay)));
-
-        if (t > 25.0) {
-            return glm::dvec3(-9999, -9999, -9999);
-        }
-
-        glm::dvec3 possibleIntersection = theRay.startPosition + t * theRay.direction;
-
-        double a = glm::dot((possibleIntersection - vertex), c1) / (dot(c1, c1));
-        double b = glm::dot((possibleIntersection - vertex), c2) / (dot(c2, c2));
-
-        if (a >= 0.0 && a <= 1.0 && b >= 0.0 && b <= 1.0) {
-            return(possibleIntersection);
-        }
-        else {
-            //std::cout << "    Non-intersecting rectangle met \n\n";
-            return glm::dvec3(-9999,-9999,-9999); //If vector is empty then no intersection
-        }
-    };
-
-    virtual ColorDBL getColor() override {
-        return theMaterial.MatColor;
-    }
-
-    virtual Material getMaterial() override {
-        return theMaterial;
-    }
+    virtual Material getMaterial() override;
 
     glm::dvec3 v1, v2, v3, v4;
     //ColorDBL Color = ColorDBL(0, 0, 0);
-    Material theMaterial = Material(1,0,0,true,ColorDBL(0,0,0));
+    Material theMaterial = Material(1,0,0,false,ColorDBL(0,0,0));
     static std::vector<Rectangle> theRectangles;
 };
 

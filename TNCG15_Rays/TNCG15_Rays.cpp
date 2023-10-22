@@ -38,8 +38,8 @@ public:
 double Ray::maxE = 0.0;
 
 //-------SETTINGS-------//
-double exposureMultiplier = 6.0;
-double iterations = 2;
+double exposureMultiplier = 10;
+double iterations = 50;
 
 //----------------------//
 int pixelIndex = 0;
@@ -57,7 +57,7 @@ int main()
 
     std::cout << "Compilation successful. Welcome back commander. \n";
 
-    glm::dvec3 theEye(-1.0, 0.0, 0.0);
+    glm::dvec3 theEye(-1, 0, 0.0);
 
     ColorDBL magenta = ColorDBL(1.0, 0.0, 1.0);
     ColorDBL red = ColorDBL(1.0,0.0,0.0);
@@ -72,12 +72,12 @@ int main()
 
     std::cout << "Setting up primitives...\n\n";
 
-    LightSource areaLight(glm::dvec3(5, 6, 4.8), glm::dvec3(8, 6, 4.8), glm::dvec3(5, 4, 4.8), glm::dvec3(8, 4, 4.8), 100, white);
+    
     Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1));
 
     
     //------GEOMETRY------//
-    Sphere sphere1(glm::dvec3(10, 0, -3), 2, white);
+    
         //------CIELING------//
         Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), magenta);
         Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), yellow);
@@ -93,18 +93,21 @@ int main()
         //-------WALLS-------//
         //Rectangle wallBlock(glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(10, -6, 5), white);
         //wallBlock.theMaterial.isMirror = true;
-        Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), cyan);
+        Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow);
         Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), white);
         Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), black);
-        Rectangle wallS(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), orange);
-        Rectangle wallSW(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), green - ColorDBL(0.4, 0.4, 0.4));
-        Rectangle wallSE(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), red - ColorDBL(0.4, 0.4, 0.4));
-        wallSE.theMaterial.isMirror = true;
+        Rectangle wallR(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), red);
+        Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), orange);
+        Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), white);
+        //wallL_F.theMaterial.isMirror = true;
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
+        LightSource areaLight(glm::dvec3(4.0, 2.0, 4.5), glm::dvec3(5.0, 2.0, 4.5), glm::dvec3(4.0, -2.0, 4.5), glm::dvec3(5.0, -2.0, 4.5), 100, white);
+        //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
+        Sphere sphere1(glm::dvec3(9, -4, 0), 1, white);
         sphere1.theMaterial.isMirror = true;
         
         
@@ -167,21 +170,18 @@ int main()
     //    }
     //    if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res)*100.0 << "% \n";
     //}
+    size_t maxSample = 4;
+    double todaysSampleSize;
 
     for (size_t i = 0; i < Camera::x_res; i++) {
         for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position - theEye, black, 0, 1);
+            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position - theEye, white, 0, 5);
 
-            glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects));
-
-            aRay.calculateLighting(hitPos, Object::theObjects, &areaLight, 100);
-
+            glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
+            
             theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
-
-            //std::cout << theCamera.thePixels[i * Camera::x_res + j].pixelColor.ToString();
-
+                
             writeCurrentPixelToFile(theCamera, i, j);
-
         }
         if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
     }
@@ -198,19 +198,17 @@ int main()
 }
 
 
-Pixel::Pixel() //<-- Why is this here???
-{
-}
+
 
 void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
     //-------Write image to file-------//
-    int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * 255);
-    int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * 255);
-    int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b * 255);
+    int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * 255 * exposureMultiplier);
+    int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * 255 * exposureMultiplier);
+    int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b * 255 * exposureMultiplier);
 
     //Give the other two channels some of the intensity of the highest colors
     if (r > 255) {
-        int temp = (r - 255) / 5; 
+        int temp = (r - 255.0) / 50.0; 
         g += temp;
         b += temp;
 
@@ -218,7 +216,7 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
     }
 
     if (g > 255) {
-        int temp2 = (g - 255) / 5;
+        int temp2 = (g - 255) / 50;
         r += temp2;
         b += temp2;
 
@@ -226,7 +224,7 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
     }
 
     if (b > 255) {
-        int temp3 = (b - 255) / 5;
+        int temp3 = (b - 255) / 50;
         r += temp3;
         g += temp3;
 

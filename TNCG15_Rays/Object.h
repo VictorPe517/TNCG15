@@ -14,7 +14,7 @@ public:
 
     virtual ColorDBL getColor() = 0;
 
-    virtual glm::dvec3 getIntersection(Ray theRay) = 0;
+    virtual glm::dvec3 getIntersection(Ray& theRay) = 0;
 
     virtual Material getMaterial() = 0;
 
