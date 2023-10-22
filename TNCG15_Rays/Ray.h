@@ -43,6 +43,8 @@ public:
 
     Object* hitObject;
 
+    bool debug = true;
+
     int hitIndex = 0;
 
     void calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt);

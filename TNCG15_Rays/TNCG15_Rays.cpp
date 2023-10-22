@@ -44,7 +44,7 @@ double iterations = 50;
 //----------------------//
 int pixelIndex = 0;
 
-std::ofstream img("picture.ppm");
+void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j, std::ofstream& img);
 
 
 int maxval = -4000;
@@ -69,6 +69,8 @@ int main()
     ColorDBL white = ColorDBL(1.0, 1.0, 1.0);
     ColorDBL black = ColorDBL(1.0, 1.0, 1.0);
 
+    std::string fileName = "frame";
+
 
     std::cout << "Setting up primitives...\n\n";
 
@@ -80,44 +82,100 @@ int main()
     
         //------CIELING------//
         Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), magenta);
+        std::cout << "Object 0: cielingRect\n";
+
         Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), yellow);
+        std::cout << "Object 1: cielingTri1\n";
+
         Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), red);
+        std::cout << "Object 2: cielingTri2\n";
         
         //-------FLOOR-------//
         Rectangle floorRect(glm::dvec3(10, 6, -5), glm::dvec3(0, 6, -5), glm::dvec3(0, -6, -5), glm::dvec3(10, -6, -5), green);
+        std::cout << "Object 3: floorRect\n";
 
         //Rectangle testRect(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, -6, -5), glm::dvec3(13,6,5), white);
 
         Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), blue);  //Behind camera
+        std::cout << "Object 4: floorTri1\n";
         
         //-------WALLS-------//
         //Rectangle wallBlock(glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(10, -6, 5), white);
         //wallBlock.theMaterial.isMirror = true;
         Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow);
+        std::cout << "Object 5: wallN\n";
+
         Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), white);
+        std::cout << "Object 6: wallNW\n";
+
         Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), black);
+        std::cout << "Object 7: wallNE\n";
+
         Rectangle wallR(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), red);
+        std::cout << "Object 8: wallR\n";
+
         Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), orange);
+        std::cout << "Object 9: wallR_F\n";
+
         Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), white);
+        std::cout << "Object 10: wallL_F\n";
         //wallL_F.theMaterial.isMirror = true;
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
+        std::cout << "Object 11: floorTri2\n";
 
         LightSource areaLight(glm::dvec3(4.0, 2.0, 4.5), glm::dvec3(5.0, 2.0, 4.5), glm::dvec3(4.0, -2.0, 4.5), glm::dvec3(5.0, -2.0, 4.5), 100, white);
+        std::cout << "Object 12: areaLight\n";
         //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
-        Sphere sphere1(glm::dvec3(9, -4, 0), 1, white);
+        Sphere sphere1(glm::dvec3(9, 0, 0), 2, white);
+        std::cout << "Object 13: Sphere\n";
         sphere1.theMaterial.isMirror = true;
-        
-        
+            
 
     std::cout << "Rendering & Writing image...\n\n";
+    int totalFrameAmt = 1;
 
-    //--------------------RENDERING LOOP--------------------//
-    img << "P3" << std::endl;
-    img << Camera::x_res << " " << Camera::y_res << std::endl;
-    img << "255" << std::endl;
+    for (size_t frame = 0; frame < totalFrameAmt; frame++) {
+        std::string file = "picture" + std::to_string((int)frame)+".ppm";
+
+        std::ofstream img(file.c_str());
+
+        pixelIndex = 0;
+        //sphere1.setSize(sphere1.radius - 6.5/totalFrameAmt);
+        sphere1.setPosition(sphere1.position + glm::dvec3(0, (8.0*frame) / totalFrameAmt, 0));
+        //--------------------RENDERING LOOP--------------------//
+        img << "P3" << std::endl;
+        img << Camera::x_res << " " << Camera::y_res << std::endl;
+        img << "255" << std::endl;
+
+        for (size_t i = 0; i < Camera::x_res; i++) {
+            for (size_t j = 0; j < Camera::y_res; j++) {
+                Ray aRay(theEye, theCamera.thePixels[pixelIndex].position - theEye, white, 0, 1);
+
+                glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
+
+                theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
+
+                //std::cout << "Pixel " << i * Camera::x_res + j << " has color: " << aRay.RayColor.ToString()<<"\n";
+
+                writeCurrentPixelToFile(theCamera, i, j, img);
+            }
+            if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
+        }
+
+        std::cout << "Render Successful.\n\n";
+
+        std::cout << "The image contains " << theCamera.thePixels.size() << " pixels.\n";
+        std::cout << "The Ray::maxE was: " << Ray::maxE << "\n";
+        std::cout << "Minval: " << minval << ", Maxval: " << maxval << "\n\n";
+
+        std::string theFileName = "explorer picture" + std::to_string((int)frame) + ".ppm";
+
+        system(theFileName.c_str());
+    }
+
 
     //for(size_t i = 0; i < Camera::x_res; i++) {
     //    for (size_t j = 0; j < Camera::y_res; j++) {
@@ -170,37 +228,12 @@ int main()
     //    }
     //    if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res)*100.0 << "% \n";
     //}
-    size_t maxSample = 4;
-    double todaysSampleSize;
 
-    for (size_t i = 0; i < Camera::x_res; i++) {
-        for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position - theEye, white, 0, 5);
-
-            glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
-            
-            theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
-                
-            writeCurrentPixelToFile(theCamera, i, j);
-        }
-        if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
-    }
-
-    std::cout << "Render Successful.\n\n";
-
-    std::cout << "The image contains " << theCamera.thePixels.size() << " pixels.\n";
-    std::cout << "The Ray::maxE was: " << Ray::maxE << "\n";
-    std::cout << "Minval: " << minval << ", Maxval: " << maxval << "\n\n";
-
-    system("explorer picture.ppm");
-    
     return 0;
 }
 
 
-
-
-void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
+void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j, std::ofstream& img) {
     //-------Write image to file-------//
     int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * 255 * exposureMultiplier);
     int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g * 255 * exposureMultiplier);

@@ -17,12 +17,13 @@ glm::dvec3 Sphere::getIntersection(Ray& theRay){
 	arg = c2 * c2 - 4.0 * c1 * c3;
 
 	if (arg < 0) {
+		//std::cout << "ARG LESS THAN 0\n";
 		return glm::dvec3(-9999, -9999, -9999);
 	}
 
 	if (arg == 0) {
 		//one solution
-		std::cout << " Hit the edge \n";
+		//std::cout << " Hit the edge \n";
 		return theRay.startPosition + theRay.direction * (-c2 + glm::sqrt(arg)) / (2.0 * c1);
 	}
 
@@ -33,16 +34,22 @@ glm::dvec3 Sphere::getIntersection(Ray& theRay){
 		double t1 = (-c2 + glm::sqrt(arg)) / (2.0 * c1);
 		double t2 = (-c2 - glm::sqrt(arg)) / (2.0 * c1);
 
+		if (t1 < 0) return theRay.startPosition + theRay.direction * t2;
+
+		if (t2 < 0) return theRay.startPosition + theRay.direction * t1;
+
 		if (t1 < t2) {
-			//std::cout << "    Tmin = " << t1 << " \n";
+			//std::cout << "    Tmin t1 = " << t1 << " \n";
 			return theRay.startPosition + theRay.direction * t1;
 		}
 		else {
+			//std::cout << "    Tmin t2= " << t2 << " \n";
 			return theRay.startPosition + theRay.direction * t2;
 		}
 
 	}
 	else {
+		//std::cout << "ARG ISNT MORE THAN 0\n";
 		return glm::dvec3(-9999, -9999, -9999);
 	}
 }
@@ -52,7 +59,7 @@ glm::dvec3 Sphere::normal(Ray& theRay) {
 
 	glm::dvec3 intersection = getIntersection(theRay);
 	//if(intersection != glm::dvec3(-9999, -9999, -9999)) std::cout << glm::length(intersection - position) << "\n";
-	
+	//if (intersection == glm::dvec3(-9999, -9999, -9999)) std::cout << "Something went wrong in the normal calculation! \n";
 
 	return (glm::normalize(intersection - position));
 
@@ -64,4 +71,14 @@ ColorDBL Sphere::getColor(){
 
 Material Sphere::getMaterial(){
 	return theMaterial;
+}
+
+void Sphere::setSize(double newSize)
+{
+	radius = newSize;
+}
+
+void Sphere::setPosition(glm::dvec3 pos)
+{
+	position = pos;
 }

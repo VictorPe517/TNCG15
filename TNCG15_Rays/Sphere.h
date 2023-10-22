@@ -25,6 +25,10 @@ public:
 
 	virtual Material getMaterial() override;
 
+	void setSize(double newSize);
+
+	void setPosition(glm::dvec3 pos);
+
 	glm::dvec3 position = glm::dvec3(0, 0, 0);
 	double radius = 0;
 	//ColorDBL Color = ColorDBL(0,0,0);
