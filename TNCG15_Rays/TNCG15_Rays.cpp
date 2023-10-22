@@ -39,7 +39,7 @@ double Ray::maxE = 0.0;
 
 //-------SETTINGS-------//
 double exposureMultiplier = 10;
-double iterations = 50;
+double iterations = 10;
 
 //----------------------//
 int pixelIndex = 0;
@@ -131,20 +131,23 @@ int main()
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
         Sphere sphere1(glm::dvec3(9, 0, 0), 2, white);
         std::cout << "Object 13: Sphere\n";
-        sphere1.theMaterial.isMirror = true;
+        //sphere1.theMaterial.isMirror = true;
             
 
     std::cout << "Rendering & Writing image...\n\n";
-    int totalFrameAmt = 1;
+    int totalFrameAmt = 2;
 
     for (size_t frame = 0; frame < totalFrameAmt; frame++) {
+        std::cout << "-----RENDERING FRAME " << frame << "-----\n";
+
         std::string file = "picture" + std::to_string((int)frame)+".ppm";
 
         std::ofstream img(file.c_str());
 
         pixelIndex = 0;
         //sphere1.setSize(sphere1.radius - 6.5/totalFrameAmt);
-        sphere1.setPosition(sphere1.position + glm::dvec3(0, (8.0*frame) / totalFrameAmt, 0));
+        //sphere1.setPosition(sphere1.position + glm::dvec3(0, (8.0*frame) / totalFrameAmt, 0));
+        areaLight = LightSource(glm::dvec3(4.0, 2.0 - 2.0 * frame / totalFrameAmt, 4.5), glm::dvec3(5.0, 2.0 - 2.0 * frame / totalFrameAmt, 4.5), glm::dvec3(4.0 , -2.0 + 2.0 * frame / totalFrameAmt, 4.5), glm::dvec3(5.0 , -2.0 + 2.0 * frame / totalFrameAmt, 4.5), 100, white);
         //--------------------RENDERING LOOP--------------------//
         img << "P3" << std::endl;
         img << Camera::x_res << " " << Camera::y_res << std::endl;
@@ -173,7 +176,7 @@ int main()
 
         std::string theFileName = "explorer picture" + std::to_string((int)frame) + ".ppm";
 
-        system(theFileName.c_str());
+        //system(theFileName.c_str());
     }
 
 

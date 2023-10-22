@@ -95,6 +95,8 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
     ColorDBL finalPixelColor(0, 0, 0);
 
     if (dynamic_cast<LightSource*>((Object::theObjects[hitIndex])) != nullptr) { //If we hit a lamp just return the lamp color
+        std::cout << "Hit lamp: " << glm::to_string(hitPoint) << "\n";
+            
         RayColor = ColorDBL(1, 1, 1);
         return;
     }
