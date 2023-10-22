@@ -99,7 +99,7 @@ int main()
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
-        LightSource areaLight(glm::dvec3(4.0, 1.0, 4.5), glm::dvec3(9.0, 1.0, 4.5), glm::dvec3(4.0, -1.0, 4.5), glm::dvec3(9.0, -1.0, 4.5), 100, white);
+        LightSource areaLight(glm::dvec3(4.0, 2.0, 4.5), glm::dvec3(6.0, 2.0, 4.5), glm::dvec3(4.0, -2.0, 4.5), glm::dvec3(6.0, -2.0, 4.5), 100, white);
         //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
@@ -120,14 +120,14 @@ int main()
     {
     //for (size_t i = 0; i < Camera::x_res; i++) {
         for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[i * Camera::x_res + j].position - theEye, white, 0, 3);
+            Ray aRay(theEye, theCamera.thePixels[i * Camera::x_res + j].position - theEye, white, 0, 5);
 
             glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
 
             theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
 
         }
-        if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
+        //if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
     //}
     });
 

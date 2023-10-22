@@ -25,10 +25,10 @@ glm::dvec3 LightSource::getRandomPoint() {
 
 //Returns the point of intersection between a ray and the particular light source in world-space
 glm::dvec3 LightSource::getIntersection(Ray& theRay) {
-	glm::dvec3 vertex = v2;
+	glm::dvec3 vertex = v1;
 
-	glm::dvec3 c1 = v3 - vertex;
-	glm::dvec3 c2 = v1 - vertex;
+	glm::dvec3 c1 = v2 - vertex; //v3
+	glm::dvec3 c2 = v3 - vertex; //v1
 
 	double t = glm::dot((this->v2 - (theRay).startPosition), this->normal(theRay)) / (glm::dot((theRay).direction, this->normal(theRay)));
 
