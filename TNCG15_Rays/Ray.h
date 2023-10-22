@@ -19,7 +19,7 @@ public:
 
     Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance, int _bounces) : startPosition{ start }, direction{ glm::normalize(dir) }, RayColor{ _RayColor }, radiance{ _radiance }, bounces_left{_bounces} {    }
     
-    ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double area, glm::dvec3 intersectionPoint, glm::dvec3 areaLightPoint);
+    ColorDBL calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double area, glm::dvec3 intersectionPoint, glm::dvec3 areaLightPoint, std::vector<Object*>& theObjects, LightSource theLight);
 
     static double maxE;
     
@@ -51,7 +51,7 @@ public:
 
     glm::dvec3 getReflectedDirection(glm::dvec3 surfaceNormal);
 
-    double calculateShadowRay(glm::dvec3 hitPoint, glm::dvec3 thePoint, std::vector<Object*> theObjects, LightSource& theLight);
+    double calculateShadowRay(glm::dvec3& hitPoint, glm::dvec3& thePoint, std::vector<Object*>& theObjects, LightSource& theLight);
 
 };
 

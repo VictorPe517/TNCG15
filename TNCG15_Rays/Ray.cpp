@@ -1,9 +1,8 @@
 #include "Ray.h"
 
-ColorDBL Ray::calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double area, glm::dvec3 intersectionPoint, glm::dvec3 areaLightPoint) {
+ColorDBL Ray::calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double area, glm::dvec3 intersectionPoint, glm::dvec3 areaLightPoint, std::vector<Object*>& theObjects,LightSource theLight) {
     glm::dvec3 y = areaLightPoint; //Random punkt på lampan
     glm::dvec3 x = intersectionPoint;  //Intersection from eye->object
-    //glm::dvec3 x = intersectionPoint;
 
     glm::dvec3 d = x - y;
     double distance = glm::distance(x, y);
@@ -13,9 +12,9 @@ ColorDBL Ray::calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double ar
 
     double G = cos_omega_x * cos_omega_y / (distance * distance);
 
-    //Ray shadowRay = Ray(areaLightPoint, intersectionPoint - areaLightPoint, RayColor, 1.0);
+    double shadowVar = calculateShadowRay(intersectionPoint, areaLightPoint, theObjects, theLight);
 
-    double E = 3200 * G * area;
+    double E = 3200 * G * shadowVar * area;
 
     //std::cout << "Irradiance value is: " << E << "\n\n";
 
@@ -36,44 +35,29 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
     double minLength = 9999999.0;
 
     RayColor = ColorDBL(0, 0, 0);
-    if (prevRay != nullptr && prevRay->hitObject == hitObject) std::cout << "      Seems like we hit the same object the previous ray hit... Naughty!\n";
+
     for (size_t l = 0; l < theObjects.size(); l++) {
         if (glm::dot((*theObjects[l]).normal(*this), direction) < 0.0) {
-
             glm::dvec3 possibleIntersection = (theObjects[l])->getIntersection(*this);
-            //
+
             if (possibleIntersection != glm::dvec3(-9999, -9999, -9999) && minLength >= glm::length(this->startPosition - possibleIntersection)) { //We hit the closest object
                 this->hitObject = theObjects[l];
                 minLength = glm::length(this->startPosition - possibleIntersection);
                 intersection = possibleIntersection;
                 hitIndex = l;
 
-                //if (!do_not_reflect && theObjects[l]->getMaterial().isMirror && bounces_left == 0) {
-                //    //calculateLighting(intersection, Object::theObjects, theLight, 20);
-                //    RayColor = (theObjects[l]->getColor());                     //Här blir spegelbollen bara vit när den ska ta färger från omgivningen...
-                //    //std::cout << "    Hit a mirror with 0 bounces left! Set color and terminated ray...\n";
-                //    
-                //}
-
                 if (!do_not_reflect && theObjects[l]->getMaterial().isMirror && bounces_left > 0) {
                     //Bounce ray
-                    
 
-                    //this->nextRay = new Ray(intersection, (*this).getReflectedDirection((theObjects[l])->normal(*this)), RayColor, 1.0, bounces_left - 1);
                     this->nextRay = new Ray(intersection, glm::reflect(direction, (theObjects[l])->normal(*this)), RayColor, 1.0, bounces_left - 1);
                     intersection = (* nextRay).getPointOfIntersection(theObjects, theLight);
-
-                    //std::cout << "  Hit Mirror and reflected at point " << glm::to_string(intersection) <<", with normal "<< glm::to_string((theObjects[l])->normal(*this)) <<".  " << bounces_left << " bounces left\n";
-                    
-                    
-                    //calculateLighting(intersection, Object::theObjects, theLight, 20);
 
                     RayColor = (*nextRay).RayColor;
                     
                 }
                 else {
                     RayColor = (theObjects[l]->getColor());
-                    calculateLighting(intersection, Object::theObjects, theLight, 150);
+                    calculateLighting(intersection, Object::theObjects, theLight, 900);
                 }
                 //std::cout << "  Hit! r:" << RayColor.r << ", g: " << RayColor.g << ", b: " << RayColor.b << "\n";
             }
@@ -103,9 +87,12 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 
         Ray newRay(thePoint, hitPoint - thePoint, ColorDBL(1, 0, 1), (theLight).radiance, 0);
        
+        //double shadowVar = calculateShadowRay(hitPoint, thePoint, theObjects, theLight);
 
-        finalPixelColor += RayColor * 1 * newRay.calcIrradiance(((*Object::theObjects[hitIndex]).normal(newRay)),
-                                                  (theLight).normal(newRay), theLight.area, hitPoint, thePoint)/ (iterationAmt*3200);
+        finalPixelColor += (RayColor *  newRay.calcIrradiance(((*Object::theObjects[hitIndex]).normal(newRay)),
+                (theLight).normal(newRay), theLight.area, hitPoint, thePoint, theObjects, theLight)) / (iterationAmt * 3200);
+
+        
         //RayColor *= newRay.calcIrradiance(((*Object::theObjects[hitIndex]).normal(newRay)), 
         //                                  (theLight).normal(newRay), 6.0, hitPoint, thePoint)*0.005 / iterationAmt; //Give color of rectangle or triangle to pixel
     }
@@ -113,18 +100,39 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
     RayColor = finalPixelColor;
 }
 
-double Ray::calculateShadowRay(glm::dvec3 hitPoint, glm::dvec3 randomLightSourcePoint, std::vector<Object*> theObjects, LightSource& theLight) {
+double Ray::calculateShadowRay(glm::dvec3& hitPoint, glm::dvec3& randomLightSourcePoint, std::vector<Object*>& theObjects, LightSource& theLight) {
     shadowCalculated = true;
-    Ray shadowRay(hitPoint, randomLightSourcePoint - hitPoint, ColorDBL(0, 0, 0), 50, 0);
+    Ray shadowRay(hitPoint, randomLightSourcePoint - hitPoint, ColorDBL(1, 1, 1), 50, 0);
     shadowRay.do_not_reflect = true;
 
-    glm::dvec3 prospectiveShadowImpact = shadowRay.getPointOfIntersection(theObjects, theLight);
+    double testLength = glm::distance(hitPoint, randomLightSourcePoint);
 
-    if(prospectiveShadowImpact == randomLightSourcePoint) {
+    glm::dvec3 prospectiveShadowImpact;
+    glm::dvec3 intersection;
+    double shadowLength = 999999.0;
+    int index = -1;
+
+    for (size_t l = 0; l < theObjects.size(); l++) {
+        prospectiveShadowImpact = (theObjects[l])->getIntersection(shadowRay);
+
+        if (shadowRay.hitObject != theObjects[l] && glm::length(prospectiveShadowImpact-randomLightSourcePoint) < testLength) {
+            shadowLength = glm::length(prospectiveShadowImpact);
+            intersection = (theObjects[l])->getIntersection(shadowRay);
+            index = l;
+        }
+    }
+
+    //std::cout << "ShadowImpact: " << glm::to_string(prospectiveShadowImpact) << "\n randomLightSource: " << glm::to_string(randomLightSourcePoint) << "\n\n";
+
+    if(index == 12) {
+        //std::cout << "hit the light!\n";
         return 1.0;
     }
-    else {
-        return 1.0;
-    }
-    shadowCalculated = false;
+    
+     //std::cout << "didnt hit\n";
+     /*std::cout << "There's an object in the way!: " << index << "\n";
+     std::cout << "Ray start position = " << glm::to_string(shadowRay.startPosition) << ", in direction: " << glm::to_string(shadowRay.direction) << "\n\n";
+     std::cout << "Ray from: " << glm::to_string(hitPoint) << ", blocked by object l: " << index << ", at position: "  << glm::to_string(intersection) << ", to light position: " << glm::to_string(randomLightSourcePoint) << "\n\n";
+  */   return 0.0;
+    
 }
