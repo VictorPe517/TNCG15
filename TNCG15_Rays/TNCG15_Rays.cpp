@@ -99,7 +99,7 @@ int main()
         Rectangle wallR(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), red);
         Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), orange);
         Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), white);
-        //wallL_F.theMaterial.isMirror = true;
+        wallL_F.theMaterial.isMirror = true;
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
@@ -107,7 +107,7 @@ int main()
         //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
-        Sphere sphere1(glm::dvec3(9, 0, 0), 2, white);
+        Sphere sphere1(glm::dvec3(9, -3, -3), 2, white);
         sphere1.theMaterial.isMirror = true;
         
         
@@ -173,17 +173,26 @@ int main()
     size_t maxSample = 4;
     double todaysSampleSize;
 
-    for (size_t i = 0; i < Camera::x_res; i++) {
+    concurrency::parallel_for(size_t(0), (size_t)Camera::x_res, [&](size_t i) 
+    {
         for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position - theEye, white, 0, 5);
+            Ray aRay(theEye, theCamera.thePixels[i * Camera::x_res + j].position - theEye, white, 0, 7);
 
             glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
-            
+
             theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
-                
-            writeCurrentPixelToFile(theCamera, i, j);
+
         }
-        if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
+        //if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
+    });
+
+    pixelIndex = 0;
+
+    for (size_t i = 0; i < Camera::x_res; i++) {
+        for (size_t j = 0; j < Camera::y_res; j++) {
+            writeCurrentPixelToFile(theCamera, i, j);
+
+        }
     }
 
     std::cout << "Render Successful.\n\n";

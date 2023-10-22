@@ -48,12 +48,12 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
                 intersection = possibleIntersection;
                 hitIndex = l;
 
-                if (!do_not_reflect && theObjects[l]->getMaterial().isMirror && bounces_left == 0) {
-                    //calculateLighting(intersection, Object::theObjects, theLight, 20);
-                    RayColor = (theObjects[l]->getColor());                     //Här blir spegelbollen bara vit när den ska ta färger från omgivningen...
-                    std::cout << "    Hit a mirror with 0 bounces left! Set color and terminated ray...\n";
-                    
-                }
+                //if (!do_not_reflect && theObjects[l]->getMaterial().isMirror && bounces_left == 0) {
+                //    //calculateLighting(intersection, Object::theObjects, theLight, 20);
+                //    RayColor = (theObjects[l]->getColor());                     //Här blir spegelbollen bara vit när den ska ta färger från omgivningen...
+                //    //std::cout << "    Hit a mirror with 0 bounces left! Set color and terminated ray...\n";
+                //    
+                //}
 
                 if (!do_not_reflect && theObjects[l]->getMaterial().isMirror && bounces_left > 0) {
                     //Bounce ray
@@ -63,7 +63,7 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
                     this->nextRay = new Ray(intersection, glm::reflect(direction, (theObjects[l])->normal(*this)), RayColor, 1.0, bounces_left - 1);
                     intersection = (* nextRay).getPointOfIntersection(theObjects, theLight);
 
-                    std::cout << "  Hit Mirror and reflected at point " << glm::to_string(intersection) <<", with normal "<< glm::to_string((theObjects[l])->normal(*this)) <<".  " << bounces_left << " bounces left\n";
+                    //std::cout << "  Hit Mirror and reflected at point " << glm::to_string(intersection) <<", with normal "<< glm::to_string((theObjects[l])->normal(*this)) <<".  " << bounces_left << " bounces left\n";
                     
                     
                     //calculateLighting(intersection, Object::theObjects, theLight, 20);
@@ -73,8 +73,7 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
                 }
                 else {
                     RayColor = (theObjects[l]->getColor());
-                    calculateLighting(intersection, Object::theObjects, theLight, 10);
-                    
+                    calculateLighting(intersection, Object::theObjects, theLight, 150);
                 }
                 //std::cout << "  Hit! r:" << RayColor.r << ", g: " << RayColor.g << ", b: " << RayColor.b << "\n";
             }
