@@ -18,6 +18,7 @@
 #include <thread>
 #include <ppl.h>
 #include "Object.h"
+#include "cube.h"
 
 class LightSource;
 
@@ -28,6 +29,7 @@ std::vector<Polygon*> Polygon::thePolygons;
 std::vector<Rectangle> Rectangle::theRectangles;
 std::vector<Triangle> Triangle::theTriangles;
 std::vector<Sphere*> Sphere::theSpheres;
+std::vector<Cube> Cube::theCubes;
 
 struct HitPoint{
 public:
@@ -103,10 +105,19 @@ int main()
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
         Sphere sphere1(glm::dvec3(9, -3, -3), 2, white);
         sphere1.theMaterial.isMirror = true;
+
+        Cube theCube(Rectangle(glm::dvec3(7, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
+            Rectangle( glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
+            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
+            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
+            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
+            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
+            white);
         
     std::cout << "Rendering & Writing image...\n\n";
 
-    //--------------------RENDERING LOOP--------------------//
+    //--------------------
+    // RENDERING LOOP--------------------//
     img << "P3" << std::endl;
     img << Camera::x_res << " " << Camera::y_res << std::endl;
     img << "255" << std::endl;
