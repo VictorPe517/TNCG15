@@ -92,10 +92,11 @@ int main()
         Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow);
         Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), white);
         Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), black);
+
         Rectangle wallR(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), red);
         Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), orange);
         Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), white);
-        wallL_F.theMaterial.isMirror = true;
+        wallL_F.theMaterial.isMirror = false;
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
@@ -104,15 +105,15 @@ int main()
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
         Sphere sphere1(glm::dvec3(9, -3, -3), 2, white);
-        sphere1.theMaterial.isMirror = true;
+        sphere1.theMaterial.isMirror = false;
 
-        Cube theCube(Rectangle(glm::dvec3(7, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
-            Rectangle( glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
-            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
-            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
-            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
-            Rectangle(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow),
-            white);
+        Cube theCube(
+            Rectangle(glm::dvec3(5, 3, 2.5), glm::dvec3(2.5, 6, 5), glm::dvec3(2.5, 3, -5),glm::dvec3(5, 3, -2.25), yellow),
+            Rectangle(glm::dvec3(0, -3, 2.5), glm::dvec3(-2.5, -3, 2.5), glm::dvec3(-2.5, -3, -2.5), glm::dvec3(0, -3, -2.5), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow), yellow);
         
     std::cout << "Rendering & Writing image...\n\n";
 

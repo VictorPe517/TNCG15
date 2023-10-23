@@ -16,8 +16,8 @@ public:
         }
     }
 
-    static const int x_res = 5000;   //Static:   Shared between all instances of Camera
-    static const int y_res = 5000;   //Const:    We pinky promise to the compiler that we won't change the resolution of the camera during runtime.
+    static const int x_res = 100;   //Static:   Shared between all instances of Camera
+    static const int y_res = 100;   //Const:    We pinky promise to the compiler that we won't change the resolution of the camera during runtime.
 
     glm::dvec3 c1, c2, c3, c4;
     std::vector<Pixel> thePixels;
