@@ -53,8 +53,6 @@ int minval = 999999;
 //-------------------------------------------------------------------------------------------------------//
 int main()
 {
-    std::vector<std::thread> threads; //Sets up multi-threading capabilities
-
     std::cout << "Compilation successful. Welcome back commander. \n";
 
     glm::dvec3 theEye(-1, 0, 0.0);
@@ -99,7 +97,7 @@ int main()
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
-        LightSource areaLight(glm::dvec3(4.0, 2.0, 4.5), glm::dvec3(6.0, 2.0, 4.5), glm::dvec3(4.0, -2.0, 4.5), glm::dvec3(6.0, -2.0, 4.5), 100, white);
+        LightSource areaLight(glm::dvec3(4.0, 2.0, 4.5), glm::dvec3(5.0, 2.0, 4.5), glm::dvec3(4.0, -2.0, 4.5), glm::dvec3(5.0, -2.0, 4.5), 100, white);
         //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
@@ -116,6 +114,9 @@ int main()
     size_t maxSample = 4;
     double todaysSampleSize;
 
+    int rowsDone = 0;
+    int totalRows = Camera::x_res;
+
     concurrency::parallel_for(size_t(0), (size_t)Camera::x_res, [&](size_t i) 
     {
     //for (size_t i = 0; i < Camera::x_res; i++) {
@@ -127,7 +128,9 @@ int main()
             theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
 
         }
-        //if (i % 50 == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \n";
+        rowsDone++;
+
+        if (rowsDone % 50 == 0) std::cout << ((double)rowsDone / (double)Camera::x_res) * 100.0 << "% \n";
     //}
     });
 
@@ -182,6 +185,9 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
         b = 255;
     }
 
+    //r = glm::clamp(r, 0, 255);
+    //g = glm::clamp(g, 0, 255);
+    //b = glm::clamp(b, 0, 255);
     if (r > 255) r = 255;
     if (g > 255) g = 255;
     if (b > 255) b = 255;

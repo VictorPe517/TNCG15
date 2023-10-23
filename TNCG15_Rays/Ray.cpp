@@ -57,7 +57,7 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
                 }
                 else {
                     RayColor = (theObjects[l]->getColor());
-                    calculateLighting(intersection, Object::theObjects, theLight, 750);
+                    calculateLighting(intersection, Object::theObjects, theLight, 600);
                 }
                 //std::cout << "  Hit! r:" << RayColor.r << ", g: " << RayColor.g << ", b: " << RayColor.b << "\n";
             }
