@@ -133,8 +133,8 @@ int main()
         //    Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
         //    Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow), yellow);
 
-        Cube newCube(glm::dvec3(4, -4, -2), 1.5);
-        newCube.setMirror(true);
+        Cube newCube(glm::dvec3(6, -4, -2), 1.5);
+       // newCube.setMirror(true);
         
         //newCube.theMaterial.isMirror = true;
         

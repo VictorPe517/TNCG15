@@ -16,10 +16,9 @@ ColorDBL Ray::calcIrradiance(glm::dvec3 objectNormal, glm::dvec3 lightNormal, do
 
     double G = (cos_omega_x * cos_omega_y) / (distance * distance);
 
-    //double shadowVar = calculateShadowRay(intersectionPoint, areaLightPoint, theObjects, theLight, debug);
+    double shadowVar = calculateShadowRay(intersectionPoint, areaLightPoint, theObjects, theLight, debug);
 
-
-    double E = 3200 * G * 1.0 * area * theLight.Watt/100.0;
+    double E = 3200 * G * shadowVar * area * theLight.Watt/100.0;
 
 
     if (E > maxE) {
