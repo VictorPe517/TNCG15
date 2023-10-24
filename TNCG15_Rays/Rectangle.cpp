@@ -2,7 +2,7 @@
 
 glm::dvec3 Rectangle::normal(Ray& theRay)  {
     glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
-
+    if (direction == glm::dvec3(-9999, -9999, -9999)) std::cout << "Something is really wrong with rectangleNormal\n";
     return direction / glm::length(direction);
 }
 
@@ -13,6 +13,9 @@ glm::dvec3 Rectangle::getIntersection(Ray& theRay){
     glm::dvec3 c2 = v1 - vertex;
 
     double t = glm::dot((vertex - theRay.startPosition), this->normal(theRay)) / (glm::dot(theRay.direction, this->normal(theRay)));
+
+    if (t < 0.001) t = -1.0;
+    if(t < 0) return glm::dvec3(-9999, -9999, -9999);
 
     glm::dvec3 possibleIntersection = theRay.startPosition + t * theRay.direction;
 

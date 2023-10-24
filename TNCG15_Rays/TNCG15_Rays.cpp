@@ -44,11 +44,13 @@ public:
 //IIIII-------SETTINGS-------IIIII//
 bool use_multicore = true;
 
+bool shadowRays = false;
+
 double exposureMultiplier = 10;
 
 double iterations = 50;
 
-int mirrorBounces = 25;
+int mirrorBounces = 5;
 
 //IIIII----------------------IIIII//
 int pixelIndex = 0;
@@ -105,7 +107,7 @@ int main()
         Rectangle wallR(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), red);
         Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), orange);
         Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), white);
-        wallL_F.theMaterial.isMirror = false;
+        wallL_F.theMaterial.isMirror = true;
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
@@ -113,25 +115,28 @@ int main()
         //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
-        Sphere sphere1(glm::dvec3(9, 0, -2), 2, red);
-        sphere1.theMaterial.isMirror = true;
+        //Sphere sphere1(glm::dvec3(9, 0, -2), 2, red);
+        //sphere1.theMaterial.isMirror = true;
 
         Sphere sphere2(glm::dvec3(8, 4, -4), 1, red);
         sphere2.theMaterial.isMirror = true;
 
-        Sphere sphere3(glm::dvec3(6, -3, -3), 2, white);
-        sphere3.theMaterial.isTransparent = true;
-        
-        Sphere sphere1(glm::dvec3(9, -3, -3), 2, white);
-        sphere1.theMaterial.isMirror = false;
+        //Sphere sphere3(glm::dvec3(6, -3, -3), 2, white);
+        //sphere3.theMaterial.isTransparent = true;
 
-        Cube theCube(
-            Rectangle(glm::dvec3(5, 3, 2.5), glm::dvec3(2.5, 6, 5), glm::dvec3(2.5, 3, -5),glm::dvec3(5, 3, -2.25), yellow),
-            Rectangle(glm::dvec3(0, -3, 2.5), glm::dvec3(-2.5, -3, 2.5), glm::dvec3(-2.5, -3, -2.5), glm::dvec3(0, -3, -2.5), yellow),
-            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
-            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
-            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
-            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow), yellow);
+
+        //Cube theCube(
+        //    Rectangle(glm::dvec3(5, 3, 2.5), glm::dvec3(2.5, 6, 5), glm::dvec3(2.5, 3, -5),glm::dvec3(5, 3, -2.25), yellow),
+        //    Rectangle(glm::dvec3(0, -3, 2.5), glm::dvec3(-2.5, -3, 2.5), glm::dvec3(-2.5, -3, -2.5), glm::dvec3(0, -3, -2.5), yellow),
+        //    Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+        //    Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+        //    Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+        //    Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow), yellow);
+
+        Cube newCube(glm::dvec3(4, -4, -2), 1.5);
+        newCube.setMirror(true);
+        
+        //newCube.theMaterial.isMirror = true;
         
     std::cout << "Rendering & Writing image...\n\n";
 

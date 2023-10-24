@@ -8,9 +8,11 @@
 
 class Rectangle : public Polygon {
 public:
-    Rectangle(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, glm::dvec3 _v4, ColorDBL _Color) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 }, v4{ _v4 }{
+    Rectangle(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, glm::dvec3 _v4, ColorDBL _Color, bool addToLists = true) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 }, v4{ _v4 }{
         theMaterial.MatColor = _Color;
-        theObjects.push_back(this);
+
+        if(addToLists) theObjects.push_back(this);
+
         thePolygons.push_back(this);
         theRectangles.push_back(*this);
     }

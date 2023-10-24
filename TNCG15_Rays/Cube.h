@@ -10,10 +10,9 @@
 
 class Cube : public Object {
 public:
+	Cube(glm::dvec3 midpoint, double sideLength, ColorDBL _Color = ColorDBL(1, 1, 1));
 
 	Cube(Rectangle _r1, Rectangle _r2, Rectangle _r3, Rectangle _r4, Rectangle _r5, Rectangle _r6, ColorDBL _Color);
-
-	Rectangle* latestHitRectangle = nullptr;
 
 	virtual glm::dvec3 normal(Ray& theRay) override;
 
@@ -22,6 +21,8 @@ public:
 	virtual ColorDBL getColor() override;
 
 	virtual Material getMaterial() override;
+
+	void setMirror(bool boolean);
 
 	std::vector<Rectangle*> theRects;
 	Material theMaterial = Material(0, 0, 0, false, ColorDBL(1, 1, 1));

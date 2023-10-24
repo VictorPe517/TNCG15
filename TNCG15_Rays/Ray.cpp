@@ -16,9 +16,10 @@ ColorDBL Ray::calcIrradiance(glm::dvec3 objectNormal, glm::dvec3 lightNormal, do
 
     double G = (cos_omega_x * cos_omega_y) / (distance * distance);
 
-    double shadowVar = calculateShadowRay(intersectionPoint, areaLightPoint, theObjects, theLight, debug);
+    //double shadowVar = calculateShadowRay(intersectionPoint, areaLightPoint, theObjects, theLight, debug);
 
-    double E = 3200 * G * shadowVar * area * theLight.Watt/100.0;
+
+    double E = 3200 * G * 1.0 * area * theLight.Watt/100.0;
 
 
     if (E > maxE) {
@@ -141,7 +142,7 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
     for (size_t iter = 0; iter < iterationAmt; iter++) {
         glm::dvec3 thePoint = (theLight).getRandomPoint();
 
-        Ray newRay(thePoint, hitPoint - thePoint, ColorDBL(1, 0, 1), (theLight).radiance, 20);
+        Ray newRay(thePoint, hitPoint - thePoint, ColorDBL(1, 0, 1), (theLight).radiance, 1);
             
         finalPixelColor += (RayColor *  newRay.calcIrradiance(((*Object::theObjects[hitIndex]).normal(newRay)), (theLight).normal(newRay), theLight.area, hitPoint, thePoint, theObjects, theLight, debug, hitIndex)) / (iterationAmt * 3200);
     }
