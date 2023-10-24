@@ -20,6 +20,7 @@
 #include "Object.h"
 #include <chrono>
 #include <ratio>
+#include "cube.h"
 
 class LightSource;
 
@@ -31,6 +32,7 @@ std::vector<Polygon*> Polygon::thePolygons;
 std::vector<Rectangle> Rectangle::theRectangles;
 std::vector<Triangle> Triangle::theTriangles;
 std::vector<Sphere*> Sphere::theSpheres;
+std::vector<Cube> Cube::theCubes;
 
 struct HitPoint{
 public:
@@ -99,10 +101,11 @@ int main()
         Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), yellow);
         Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), white);
         Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), black);
+
         Rectangle wallR(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), red);
         Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), orange);
         Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), white);
-        wallL_F.theMaterial.isMirror = true;
+        wallL_F.theMaterial.isMirror = false;
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
@@ -119,9 +122,21 @@ int main()
         Sphere sphere3(glm::dvec3(6, -3, -3), 2, white);
         sphere3.theMaterial.isTransparent = true;
         
+        Sphere sphere1(glm::dvec3(9, -3, -3), 2, white);
+        sphere1.theMaterial.isMirror = false;
+
+        Cube theCube(
+            Rectangle(glm::dvec3(5, 3, 2.5), glm::dvec3(2.5, 6, 5), glm::dvec3(2.5, 3, -5),glm::dvec3(5, 3, -2.25), yellow),
+            Rectangle(glm::dvec3(0, -3, 2.5), glm::dvec3(-2.5, -3, 2.5), glm::dvec3(-2.5, -3, -2.5), glm::dvec3(0, -3, -2.5), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow),
+            Rectangle(glm::dvec3(-1, 3, 5), glm::dvec3(-5, 6, 5), glm::dvec3(-5, 6, 0), glm::dvec3(-1, 3, 0), yellow), yellow);
+        
     std::cout << "Rendering & Writing image...\n\n";
 
-    //--------------------RENDERING LOOP--------------------//
+    //--------------------
+    // RENDERING LOOP--------------------//
     img << "P3" << std::endl;
     img << Camera::x_res << " " << Camera::y_res << std::endl;
     img << "255" << std::endl;
