@@ -12,7 +12,9 @@ public:
 	double reflectance = 0.0;
 	double roughness = 1.0;
 	double transmission = 0.0;
+	double refractiveIndex = 1.5;
 	bool isMirror = false;
+	bool isTransparent = false;
 	ColorDBL MatColor = ColorDBL(1,1,1);
 };
 

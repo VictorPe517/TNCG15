@@ -18,10 +18,13 @@
 #include <thread>
 #include <ppl.h>
 #include "Object.h"
+#include <chrono>
+#include <ratio>
 
 class LightSource;
 
 void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j);
+void displayLoadingBar(int& rowsDone, const int& x_res, bool currentlyWriting);
 
 std::vector<Object*> Object::theObjects;
 std::vector<Polygon*> Polygon::thePolygons;
@@ -35,14 +38,20 @@ public:
     Object* theObject;
 };
 
-double Ray::maxE = 0.0;
 
-//-------SETTINGS-------//
+//IIIII-------SETTINGS-------IIIII//
+bool use_multicore = true;
+
 double exposureMultiplier = 10;
+
 double iterations = 50;
 
-//----------------------//
+int mirrorBounces = 25;
+
+//IIIII----------------------IIIII//
 int pixelIndex = 0;
+bool currentlyWriting = false;
+double Ray::maxE = 0.0;
 
 std::ofstream img("picture.ppm");
 
@@ -50,10 +59,10 @@ std::ofstream img("picture.ppm");
 int maxval = -4000;
 int minval = 999999;
 
-//-------------------------------------------------------------------------------------------------------//
+//----------------------------------------//
 int main()
 {
-    std::cout << "Compilation successful. Welcome back commander. \n";
+    std::cout << "Compilation successful. Welcome back! \n";
 
     glm::dvec3 theEye(-1, 0, 0.0);
 
@@ -97,12 +106,18 @@ int main()
 
         Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), white); //In front of camera
 
-        LightSource areaLight(glm::dvec3(4.0, 2.0, 4.5), glm::dvec3(5.0, 2.0, 4.5), glm::dvec3(4.0, -2.0, 4.5), glm::dvec3(5.0, -2.0, 4.5), 100, white);
+        LightSource areaLight(glm::dvec3(4.0, 3.0, 4.5), glm::dvec3(5.0, 3.0, 4.5), glm::dvec3(4.0 , -3.0, 4.5), glm::dvec3(5.0, -3.0, 4.5), 100, white);
         //Rectangle wallTest(glm::dvec3(2.0, 1.0, 3), glm::dvec3(1.0, 1.0, 3), glm::dvec3(2.0, -1.0, 3), glm::dvec3(1.0, -1.0, 3), ColorDBL(0.4, 0.4, 0.4));
         //-----------------------//
         //Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
-        Sphere sphere1(glm::dvec3(9, -3, -3), 2, white);
+        Sphere sphere1(glm::dvec3(9, 0, -2), 2, red);
         sphere1.theMaterial.isMirror = true;
+
+        Sphere sphere2(glm::dvec3(8, 4, -4), 1, red);
+        sphere2.theMaterial.isMirror = true;
+
+        Sphere sphere3(glm::dvec3(6, -3, -3), 2, white);
+        sphere3.theMaterial.isTransparent = true;
         
     std::cout << "Rendering & Writing image...\n\n";
 
@@ -117,31 +132,57 @@ int main()
     int rowsDone = 0;
     int totalRows = Camera::x_res;
 
-    concurrency::parallel_for(size_t(0), (size_t)Camera::x_res, [&](size_t i) 
-    {
-    //for (size_t i = 0; i < Camera::x_res; i++) {
-        for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[i * Camera::x_res + j].position - theEye, white, 0, 5);
+    const auto start = std::chrono::high_resolution_clock::now();
 
-            glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
+    if (use_multicore) {
+        concurrency::parallel_for(size_t(0), (size_t)Camera::x_res, [&](size_t i) {
+            for (size_t j = 0; j < Camera::y_res; j++) {
+                Ray aRay(theEye, theCamera.thePixels[i * Camera::x_res + j].position - theEye, white, 0, mirrorBounces);
 
-            theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
+                glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
 
+                theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
+
+            }
+            rowsDone++;
+            //if ((int)floor((((double)Camera::x_res) / 100.0)) != 0 && rowsDone % (int)floor((((double)Camera::x_res) / 100.0)) == 0) std::cout << ((double)rowsDone / (double)Camera::x_res) * 100.0 << "% \r";
+            displayLoadingBar(rowsDone, Camera::x_res, currentlyWriting);
+            });
+    }
+    else {
+        for (size_t i = 0; i < Camera::x_res; i++) {
+            for (size_t j = 0; j < Camera::y_res; j++) {
+                Ray aRay(theEye, theCamera.thePixels[i * Camera::x_res + j].position - theEye, white, 0, mirrorBounces);
+
+                glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), areaLight);
+
+                theCamera.thePixels[i * Camera::x_res + j].pixelColor = aRay.RayColor;
+
+            }
+            rowsDone++;
+            //if ((int)floor((((double)Camera::x_res) / 100.0)) != 0 && rowsDone % (int)floor((((double)Camera::x_res) / 100.0)) == 0) std::cout << ((double)rowsDone / (double)Camera::x_res) * 100.0 << "% \r";
+            displayLoadingBar(rowsDone, Camera::x_res, currentlyWriting);
         }
-        rowsDone++;
+    }
 
-        if (rowsDone % 50 == 0) std::cout << ((double)rowsDone / (double)Camera::x_res) * 100.0 << "% \n";
-    //}
-    });
+    const auto stop = std::chrono::high_resolution_clock::now();
+    
+    const std::chrono::duration<double, std::ratio<3600>> duration = stop - start; //Log time in hours
+    
 
-    std::cout << "Writing pixel to file\n";
+    std::cout << "\n-------Rendering complete after "<< duration << "!-------\n\n";
+
+    std::cout << "Writing to file...\n";
     pixelIndex = 0;
 
     for (size_t i = 0; i < Camera::x_res; i++) {
         for (size_t j = 0; j < Camera::y_res; j++) {
             writeCurrentPixelToFile(theCamera, i, j);
         }
+        if ((int)floor((((double)Camera::x_res) / 100.0)) != 0 && i % (int)floor((((double)Camera::x_res) / 100.0)) == 0) std::cout << ((double)i / (double)Camera::x_res) * 100.0 << "% \r";
     }
+
+    std::cout << std::flush;
 
     std::cout << "Render Successful.\n\n";
 
@@ -154,6 +195,31 @@ int main()
     return 0;
 }
 
+void displayLoadingBar(int& rowsDone, const int& x_res, bool currentlyWriting) {
+
+    rowsDone++;
+
+    if (!currentlyWriting && (int)floor((((double)x_res) / 50.0)) != 0 && rowsDone % (int)floor((((double)x_res) / 50.0)) == 0) {
+        int percentDone = floor(((double)rowsDone / (double)x_res) * 100.0);
+        currentlyWriting = true;
+        std::cout << "[";
+
+        for (int i = 0; i < (int)floor((float)percentDone / 4.0); i++) {
+            std::cout << "I";
+        }
+
+        for (int i = 0; i < 50 - (int)floor((float)percentDone / 4.0); i++) {
+            std::cout << "-";
+        }
+
+        std::cout << "] : ";
+
+        std::cout << floor(((double)rowsDone / (double)x_res) * 50.0) << "% \r";
+
+        currentlyWriting = false;
+    }
+}
+
 void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
     //-------Write image to file-------//
     int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r * 255 * exposureMultiplier);
@@ -162,7 +228,7 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
 
     //Give the other two channels some of the intensity of the highest colors
     if (r > 255) {
-        int temp = (r - 255.0) / 50.0; 
+        int temp = (r - 255.0) / 2.0; 
         g += temp;
         b += temp;
 
@@ -170,7 +236,7 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
     }
 
     if (g > 255) {
-        int temp2 = (g - 255) / 50;
+        int temp2 = (g - 255) / 2;
         r += temp2;
         b += temp2;
 
@@ -178,23 +244,23 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j) {
     }
 
     if (b > 255) {
-        int temp3 = (b - 255) / 50;
+        int temp3 = (b - 255) / 2;
         r += temp3;
         g += temp3;
 
         b = 255;
     }
 
-    //r = glm::clamp(r, 0, 255);
-    //g = glm::clamp(g, 0, 255);
-    //b = glm::clamp(b, 0, 255);
-    if (r > 255) r = 255;
-    if (g > 255) g = 255;
-    if (b > 255) b = 255;
+    r = glm::clamp(r, 0, 255);
+    g = glm::clamp(g, 0, 255);
+    b = glm::clamp(b, 0, 255);
+    //if (r > 255) r = 255;
+    //if (g > 255) g = 255;
+    //if (b > 255) b = 255;
 
-    if (r < 0) r = 0;
-    if (g < 0) g = 0;
-    if (b < 0) b = 0;
+    //if (r < 0) r = 0;
+    //if (g < 0) g = 0;
+    //if (b < 0) b = 0;
 
     if ((r + g + b) / 3 > maxval) maxval = (r + g + b) / 3;
     if ((r + g + b) / 3 < minval) minval = (r + g + b) / 3;
