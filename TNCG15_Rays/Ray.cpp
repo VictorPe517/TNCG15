@@ -12,9 +12,9 @@ ColorDBL Ray::calcIrradiance(glm::dvec3 x_normal, glm::dvec3 y_normal, double ar
 
     double G = cos_omega_x * cos_omega_y / (distance * distance);
 
-    //double shadowVar = calculateShadowRay(intersectionPoint, areaLightPoint, theObjects, theLight);
+    double shadowVar = calculateShadowRay(intersectionPoint, areaLightPoint, theObjects, theLight);
 
-    double E = 3200 * G * 1.0 * area;
+    double E = 3200 * G * shadowVar * area;
 
     //std::cout << "Irradiance value is: " << E << "\n\n";
 
