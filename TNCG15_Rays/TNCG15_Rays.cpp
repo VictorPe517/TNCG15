@@ -36,9 +36,12 @@ std::vector<Cube> Cube::theCubes;
 std::vector<LightSource*> LightSource::theLightSources;
 
 
-//---------------------[ SETTINGS ]---------------------//
-glm::ivec2 renderResolution = glm::ivec2(1280, 720);
-double renderResolutionScale = 2.0;
+//---------------------[ STANDARD SETTINGS ]---------------------//
+glm::ivec2 renderResolution = glm::ivec2(2560, 1440);
+double renderResolutionScale = 0.66;
+
+std::string imagePath = "../resultImages";
+
 int iterations = 256;
 
 bool use_multicore = true;
@@ -47,10 +50,10 @@ bool shadowRays = false;
 
 double exposureMultiplier = 10;
 
-int mirrorBounces = 4;
+int mirrorBounces = 16;
 
 bool verboseDebugging = false;
-//-------------------------------------------------------//
+//---------------------------------------------------------------//
 
 
 int main()
@@ -63,10 +66,11 @@ int main()
 
 	glm::dvec3 theEye(-1, 0, 0.0);
 
-	std::cout << "Setting up primitives...\n\n";
-
+	std::cout << "Initializing Camera...\n\n";
+	//----------------------------------------------//
 	Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1), renderResolution.x, renderResolution.y, renderResolutionScale);
 
+	std::cout << "Initializing Scene Geometry...\n\n";
 	//------GEOMETRY------//
 	Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), ColorDBL::Magenta);
 	Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::Yellow);
@@ -89,23 +93,39 @@ int main()
 
 	Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), ColorDBL::White); //In front of camera
 
-	//----LIGHTS----//
-	LightSource areaLight2(glm::dvec3(6.0, 4.0, 4.5), glm::dvec3(8.0, 4.0, 4.5), glm::dvec3(6.0, -4.0, 4.5), glm::dvec3(8.0, -4.0, 4.5), 100, ColorDBL::White);
-
-	//-----------------------//
-
-	//Sphere sphere1(glm::dvec3(11, -1, 0), 2, white);
-	Sphere sphere1(glm::dvec3(9, 0, -2), 2, ColorDBL::Red);
-	sphere1.theMaterial.isMirror = true;
+	Sphere sphere1(glm::dvec3(9, 0, -2), 2, ColorDBL::White);
+	sphere1.theMaterial.isMirror = false;
 
 	Sphere sphere2(glm::dvec3(8, 4, -4), 1, ColorDBL::Red);
 	sphere2.theMaterial.isMirror = true;
 
+
 	Cube newCube(glm::dvec3(6, -4, -2), 1.5);
 	newCube.setMirror(true);
+
+	std::cout << "Initializing Lights...\n\n";
+	//----LIGHTS----//
+	LightSource areaLight2(glm::dvec3(6.0, 4.0, 4.5), glm::dvec3(8.0, 4.0, 4.5), glm::dvec3(6.0, -4.0, 4.5), glm::dvec3(8.0, -4.0, 4.5), 100, ColorDBL::White);
+
+	//LightSource areaLight3(glm::dvec3(6.0, 4.0, 4.5), glm::dvec3(8.0, 4.0, 4.5), glm::dvec3(6.0, -4.0, 4.5), glm::dvec3(8.0, -4.0, 4.5), 100, ColorDBL::White);
+	//areaLight3.Translate(glm::dvec3(4.0, 0.0, 0.0));
 	//-------------------------//
 
-	std::cout << "Rendering & Writing image...\n\n";
+	std::cout << "/==========[Current Settings]==========\\" << std::endl
+		<< "  Resolution:" << std::endl
+		<< "    " << renderResolution.x << " x " << renderResolution.y << std::endl
+		<< "  Render Scale:" << std::endl
+		<< "    " << renderResolutionScale << std::endl
+		<< "  Output Resolution:" << std::endl
+		<< "    " << theCamera.GetResX() << " x " << theCamera.GetResY() << std::endl << std::endl
+
+		<< "  Samples per pixel:" << std::endl
+		<< "    " << iterations << std::endl
+		<< "  Max amount of recursive mirror bounces:" << std::endl
+		<< "    " << mirrorBounces << std::endl
+		<< "\\======================================/" << std::endl << std::endl << std::endl;
+
+	std::cout << "Rendering Image:\n";
 
 	//--------------------RENDERING LOOP--------------------//
 	int rowsDone = 0; // Concurrency fix
@@ -127,7 +147,7 @@ int main()
 
 					// TODO: Get incoming light from different directions and sum up
 
-					// Save the resulting color into that ray
+					// Save the resulting color information into that ray
 					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor = aRay.RayColor;
 				}
 			}
@@ -158,7 +178,7 @@ int main()
 
 	// Stop timer
 	const auto stop = std::chrono::high_resolution_clock::now();
-	const std::chrono::duration<double, std::ratio<3600>> duration = stop - start; //Log time in hours
+	const std::chrono::duration<double, std::ratio<3600>> duration = stop - start; //Log time in hours for fun
 
 	// Create file to save
 	std::string fileName;
@@ -171,24 +191,34 @@ int main()
 	img << "255" << std::endl;
 
 	// Logging
-	std::cout << "\n-------Rendering complete after " << duration << "!-------\n\n";
-	std::cout << "Writing to file...\n";
+	std::cout << "\n =======Rendering complete after " << duration << "!========\n\n\n"
+		<< "Writing to file:\n";
+
 	pixelIndex = 0;
 
 	// ------------ Write all pixels to stream ------------ //
+	rowsDone = 0; // Concurrency fix
+
 	for (size_t i = 0; i < theCamera.GetResX(); i++) {
 		for (size_t j = 0; j < theCamera.GetResY(); j++) {
 			writeCurrentPixelToFile(theCamera, i, j, img, pixelIndex, maxval, minval);
+
 		}
+		rowsDone++;
+		DisplayLoadingBar(rowsDone, theCamera.GetResX(), false);
 	}
 
+	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 3600.0);
+
 	// Logging
-	std::cout << std::flush;
-	std::cout << "Render Successful.\n\n";
-	std::cout << "The image contains " << theCamera.thePixels.size() << " pixels.\n";
-	//std::cout << "The Ray::maxE was: " << Ray::maxE << "\n";
-	std::cout << "Minval: " << minval << ", Maxval: " << maxval << "\n\n";
-	std::cout << "Image saved as: " << fileName;
+	std::cout << std::flush
+		<< "/=================Render Successful!==================\ \n"
+		<< "  Total pixels processed: \n    " << theCamera.thePixels.size() << " px\n"
+		<< "  Time Elapsed: \n    " << round((duration.count() * 3600.0)) << " seconds\n"
+		<< "  Ray Tracing Speed: \n    " << round(pixelsPerSecond) << " px/s\n"
+		<< "  Minval: " << minval << ", Maxval: " << maxval << "\n\n"
+		<< "  Image saved as: \n    " << fileName << "\n"
+		<< "\=====================================================/\n\n";
 
 	return 0;
 }
@@ -202,7 +232,7 @@ void DisplayLoadingBar(int& rowsDone, const int& x_res, bool _currentlyWriting) 
 	if (!_currentlyWriting && (int)floor((((double)x_res) / 50.0)) != 0 && rowsDone % (int)floor((((double)x_res) / 50.0)) == 0) {
 		int percentDone = (int)floor(((double)rowsDone / (double)x_res) * 100.0);
 		_currentlyWriting = true;
-		std::cout << "[";
+		std::cout << "\r [";
 
 		for (int i = 0; i < (int)(floor((float)percentDone / 4.0)); i++) {
 			std::cout << "I";

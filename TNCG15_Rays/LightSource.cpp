@@ -2,7 +2,7 @@
 
 
 //Returns a normalized 3-dimensional vector pointing straight out of the surface
-glm::dvec3 LightSource::normal(Ray& theRay){
+glm::dvec3 LightSource::normal(Ray& theRay) {
 	glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
 
 	//std::cout << "	Light normal is: " << glm::to_string(direction) << "\n\n";
@@ -46,6 +46,14 @@ glm::dvec3 LightSource::getIntersection(Ray& theRay) {
 	else {
 		return glm::dvec3(-9999, -9999, -9999); //If vector is empty then no intersection
 	}
+}
+
+void LightSource::Translate(glm::dvec3 coordinates)
+{
+	v1 += coordinates;
+	v2 += coordinates;
+	v3 += coordinates;
+	v4 += coordinates;
 }
 
 

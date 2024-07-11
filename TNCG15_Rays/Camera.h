@@ -14,7 +14,6 @@ public:
 
 		double _yOffset = 1.0 - (double)y_res / (double)x_res;
 
-		// TODO: Make contigous in memory for potential speedup?
 		for (size_t i = 0; i < x_res; i++) {
 			for (size_t j = 0; j < y_res; j++) {
 				// Pixel order is (X+) RIGHT, (Y+) DOWN

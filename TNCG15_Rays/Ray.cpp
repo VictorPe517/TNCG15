@@ -42,19 +42,26 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 	RayColor = ColorDBL(0, 0, 0);
 
 	for (size_t l = 0; l < theObjects.size(); l++) {
-		if (glm::dot((*theObjects[l]).normal(*this), direction) < 0.0) {
+
+		glm::dvec3 theObjectNormal = (*theObjects[l]).normal(*this);
+		double theDotProduct = glm::dot(theObjectNormal, direction);
+
+		if (theDotProduct < 0.0) {
+
 			glm::dvec3 possibleIntersection = (theObjects[l])->getIntersection(*this);
 
-			if (possibleIntersection != glm::dvec3(-9999, -9999, -9999) && minLength >= glm::length(this->startPosition - possibleIntersection)) { //We hit the closest object
+			double lengthStartIntersection = glm::length(this->startPosition - possibleIntersection);
+
+			if (possibleIntersection != glm::dvec3(-9999, -9999, -9999) && minLength >= lengthStartIntersection) { //We hit the closest object
 				this->hitObject = theObjects[l];
-				minLength = glm::length(this->startPosition - possibleIntersection);
+				minLength = lengthStartIntersection;
 				intersection = possibleIntersection;
 				hitIndex = l;
 
 
 				if (!do_not_reflect && theObjects[l]->getMaterial().isMirror && bounces_left > 0) {
 					//-----------------MIRROR-----------------//
-					this->nextRay = new Ray(intersection, glm::reflect(direction, (theObjects[l])->normal(*this)), RayColor, 1.0, bounces_left - 1);
+					this->nextRay = new Ray(intersection, glm::reflect(direction, theObjectNormal), RayColor, 1.0, bounces_left - 1);
 					intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
 
 					RayColor = (*nextRay).RayColor;
@@ -62,7 +69,7 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 				}
 				else if (theObjects[l]->getMaterial().isTransparent && bounces_left > 0) {
 					//---------------TRANSPARENT--------------//
-					this->nextRay = new Ray(intersection, getRefractedDirection(intersection, (theObjects[l])->normal(*this), (*theObjects[l])), RayColor, 1.0, bounces_left - 1);
+					this->nextRay = new Ray(intersection, getRefractedDirection(intersection, theObjectNormal, (*theObjects[l])), RayColor, 1.0, bounces_left - 1);
 
 					intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
 
@@ -198,7 +205,7 @@ double Ray::calculateShadowRay(const glm::dvec3& hitPoint, const glm::dvec3& ran
 
 		if (shadowRay.hitObject != theObjects[l] && glm::length(prospectiveShadowImpact - randomLightSourcePoint) < testLength) {
 			shadowLength = glm::length(prospectiveShadowImpact);
-			intersection = (theObjects[l])->getIntersection(shadowRay);
+			intersection = prospectiveShadowImpact;
 			index = l;
 		}
 	}

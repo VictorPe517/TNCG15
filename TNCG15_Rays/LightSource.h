@@ -47,6 +47,8 @@ public:
 		return Material(1, 1, 1, 0, ColorDBL(0, 1, 1));
 	}
 
+	void Translate(glm::dvec3 coordinates);
+
 	ColorDBL Color = ColorDBL(1.0, 1.0, 1.0);
 
 	static std::vector<LightSource*> theLightSources;
