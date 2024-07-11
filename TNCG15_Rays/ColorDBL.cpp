@@ -3,59 +3,70 @@
 ColorDBL::ColorDBL(double _r, double _g, double _b) :r{ _r }, g{ _g }, b{ _b } {}
 
 ColorDBL ColorDBL::operator+=(ColorDBL rhs) {
-    r += rhs.r;
-    g += rhs.g;
-    b += rhs.b;
+	r += rhs.r;
+	g += rhs.g;
+	b += rhs.b;
 
-    return *this;
+	return *this;
 }
 
 ColorDBL ColorDBL::operator-(ColorDBL rhs) {
-    ColorDBL res(0, 0, 0);
+	ColorDBL res(0, 0, 0);
 
-    res.r = r - rhs.r;
-    res.g = g - rhs.g;
-    res.b = b - rhs.b;
+	res.r = r - rhs.r;
+	res.g = g - rhs.g;
+	res.b = b - rhs.b;
 
-    return res;
+	return res;
 }
 
 ColorDBL ColorDBL::operator/(double rhs) {
-    r /= rhs;
-    g /= rhs;
-    b /= rhs;
+	r /= rhs;
+	g /= rhs;
+	b /= rhs;
 
-    return *this;
+	return *this;
 }
 
 ColorDBL ColorDBL::operator*=(ColorDBL rhs) {
-    r *= rhs.r;
-    g *= rhs.g;
-    b *= rhs.b;
+	r *= rhs.r;
+	g *= rhs.g;
+	b *= rhs.b;
 
-    return *this;
+	return *this;
 }
 
 ColorDBL ColorDBL::operator*(double rhs) {
-    r *= rhs;
-    g *= rhs;
-    b *= rhs;
+	r *= rhs;
+	g *= rhs;
+	b *= rhs;
 
-    return *this;
+	return *this;
 }
 
 ColorDBL ColorDBL::operator*(ColorDBL rhs) {
-    ColorDBL finalColor = *this;
+	ColorDBL finalColor = *this;
 
-    finalColor.r *= rhs.r;
-    finalColor.g *= rhs.g;
-    finalColor.b *= rhs.b;
+	finalColor.r *= rhs.r;
+	finalColor.g *= rhs.g;
+	finalColor.b *= rhs.b;
 
-    return finalColor;
+	return finalColor;
 }
 
 std::string ColorDBL::ToString() {
-    std::string res("r: " + std::to_string(r) + ", b:" + std::to_string(b) + ", g: " + std::to_string(g) + "\n");
+	std::string res("r: " + std::to_string(r) + ", b:" + std::to_string(b) + ", g: " + std::to_string(g) + "\n");
 
-    return res;
+	return res;
 };
+
+const ColorDBL ColorDBL::Red = ColorDBL(1.0, 0.0, 0.0);
+const ColorDBL ColorDBL::Green = ColorDBL(0.0, 1.0, 0.0);
+const ColorDBL ColorDBL::Blue = ColorDBL(0.0, 0.0, 1.0);
+const ColorDBL ColorDBL::Cyan = ColorDBL(0.0, 1.0, 1.0);
+const ColorDBL ColorDBL::Magenta = ColorDBL(1.0, 0.0, 1.0);
+const ColorDBL ColorDBL::Yellow = ColorDBL(1.0, 1.0, 0.0);
+
+const ColorDBL ColorDBL::White = ColorDBL(1.0, 1.0, 1.0);
+
+const ColorDBL ColorDBL::Black = ColorDBL(0.0, 0.0, 0.0);

@@ -19,10 +19,10 @@ class Ray;
 class LightSource : public Object
 {
 public:
-	LightSource(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, glm::dvec3 _v4, double _watt, ColorDBL _color) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 }, v4{ _v4 }, Watt{ _watt }, Color{_color} {
+	LightSource(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, glm::dvec3 _v4, double _watt, ColorDBL _color) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 }, v4{ _v4 }, Watt{ _watt }, Color{ _color } {
 		area = calculateArea();
-		std::cout << area << std::endl;
 		theObjects.push_back(this);
+		theLightSources.push_back(this);
 	}
 
 	glm::dvec3 v1, v2, v3, v4;
@@ -44,9 +44,11 @@ public:
 	}
 
 	virtual Material getMaterial() override {
-		return Material(1,1,1,0,ColorDBL(0,1,1));
+		return Material(1, 1, 1, 0, ColorDBL(0, 1, 1));
 	}
 
 	ColorDBL Color = ColorDBL(1.0, 1.0, 1.0);
+
+	static std::vector<LightSource*> theLightSources;
 };
 

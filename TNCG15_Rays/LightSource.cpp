@@ -30,7 +30,9 @@ glm::dvec3 LightSource::getIntersection(Ray& theRay) {
 	glm::dvec3 c1 = v2 - vertex; //v3
 	glm::dvec3 c2 = v3 - vertex; //v1
 
-	double t = glm::dot((this->v2 - (theRay).startPosition), this->normal(theRay)) / (glm::dot((theRay).direction, this->normal(theRay)));
+	glm::dvec3 _theNormal = this->normal(theRay);
+
+	double t = glm::dot((this->v2 - (theRay).startPosition), _theNormal) / (glm::dot((theRay).direction, _theNormal));
 
 	glm::dvec3 possibleIntersection = (theRay).startPosition + t * (theRay).direction;
 

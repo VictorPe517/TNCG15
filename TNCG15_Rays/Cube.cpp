@@ -48,8 +48,8 @@ glm::dvec3 Cube::getIntersection(Ray& theRay) {
 	for (Rectangle* theRectangle : theRects) {
 		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
 
-		if (glm::length(intersection) < minLength) {
-			minLength = glm::length(intersection);
+		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection-theRay.startPosition) < minLength) {
+			minLength = glm::length(intersection - theRay.startPosition);
 			closest = intersection;		
 		}
 	}
@@ -68,8 +68,8 @@ glm::dvec3 Cube::normal(Ray& theRay) {
 	for (Rectangle* theRectangle : theRects) {
 		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
 
-		if (glm::length(intersection) < minLength) {
-			minLength = glm::length(intersection);
+		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection-theRay.startPosition) < minLength) {
+			minLength = glm::length(intersection-theRay.startPosition);
 			closest = intersection;
 			latestHitRectangle = theRectangle;
 		}

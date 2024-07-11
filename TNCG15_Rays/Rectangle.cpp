@@ -12,7 +12,9 @@ glm::dvec3 Rectangle::getIntersection(Ray& theRay){
     glm::dvec3 c1 = v3 - vertex;
     glm::dvec3 c2 = v1 - vertex;
 
-    double t = glm::dot((vertex - theRay.startPosition), this->normal(theRay)) / (glm::dot(theRay.direction, this->normal(theRay)));
+    glm::dvec3 theNormal = this->normal(theRay);
+
+    double t = glm::dot((vertex - theRay.startPosition), theNormal) / (glm::dot(theRay.direction, theNormal));
 
     if (t < 0.001) t = -1.0;
     if(t < 0) return glm::dvec3(-9999, -9999, -9999);
