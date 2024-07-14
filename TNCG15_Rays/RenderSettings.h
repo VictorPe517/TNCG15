@@ -12,7 +12,7 @@ public:
 	void WriteSettingsToScreen(Camera theCamera);
 	int GetTotalIterations();
 
-	int GetAAIterations();
+	size_t GetAAIterations();
 
 	glm::ivec2 s_renderingResolution = glm::ivec2(2560, 1440);
 	double s_resolutionScale = 1.33; // Resolution scale multiplier

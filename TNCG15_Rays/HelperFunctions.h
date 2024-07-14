@@ -3,6 +3,6 @@
 class HelperFunctions
 {
 public:
-	void DisplayLoadingBar(int& rowsDone, const int& x_res, bool currentlyWriting);
+	void DisplayLoadingBar(int& rowsDone, const int& x_res);
 };
 

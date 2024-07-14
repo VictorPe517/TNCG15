@@ -44,7 +44,6 @@ double exposureMultiplier = 10;
 
 int main()
 {
-	bool currentlyWriting = false;
 	size_t pixelIndex = 0;
 
 	int maxval = (int)-INFINITY;
@@ -117,7 +116,7 @@ int main()
 			}
 			rowsDone++; // Concurrency fix
 
-			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX(), currentlyWriting);
+			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
 
 			});
 	}
@@ -135,7 +134,7 @@ int main()
 				}
 			}
 			rowsDone++;
-			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX(), currentlyWriting);
+			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
 		}
 	}
 
@@ -153,11 +152,10 @@ int main()
 
 	for (size_t i = 0; i < theCamera.GetResX(); i++) {
 		for (size_t j = 0; j < theCamera.GetResY(); j++) {
-			theImageHandler.writeCurrentPixelToFile(theCamera, i, j, img, theRenderSettings);
-
+			theImageHandler.writeCurrentPixelToStream(theCamera, i, j, img, theRenderSettings);
 		}
 		rowsDone++;
-		theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX(), false);
+		theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
 	}
 
 	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 60.0);

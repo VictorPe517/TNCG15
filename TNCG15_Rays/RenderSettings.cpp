@@ -141,7 +141,7 @@ void RenderSettings::UserInputAndSettings() {
 	}
 }
 
-int RenderSettings::GetAAIterations() {
+size_t RenderSettings::GetAAIterations() {
 	return s_SSAAiterations;
 }
 

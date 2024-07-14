@@ -8,7 +8,7 @@
 class ImageHandler
 {
 public:
-	void writeCurrentPixelToFile(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, RenderSettings theRenderSettings);
+	void writeCurrentPixelToStream(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, RenderSettings theRenderSettings);
 	std::string GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration);
 	void DisplayRenderSuccessfulStats(Camera theCamera, double theDuration, double pixelsPerSec, std::string fileName);
 

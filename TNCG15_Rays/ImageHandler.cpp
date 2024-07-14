@@ -1,7 +1,7 @@
 #include "ImageHandler.h"
 
 // Converts the pixel values into integers between 0-255 and saves them to the imagestream "img"
-void ImageHandler::writeCurrentPixelToFile(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, RenderSettings theRenderSettings) {
+void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, RenderSettings theRenderSettings) {
 	//-------Write image to file-------//
 	int r = (int)floor(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.r * 255.0 * exposureMultiplier);
 	int g = (int)floor(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.g * 255.0 * exposureMultiplier);
@@ -46,7 +46,7 @@ void ImageHandler::writeCurrentPixelToFile(Camera& theCamera, size_t currentX, s
 			<< "  r: " << theCamera.thePixels[currentX * theCamera.GetResY() + currentY].pixelColor.r
 			<< ", g: " << theCamera.thePixels[currentX * theCamera.GetResY() + currentY].pixelColor.g
 			<< ", b: " << theCamera.thePixels[currentX * theCamera.GetResY() + currentY].pixelColor.b
-			<< "\n    With a mean of: " << (r + g + b) / 3.0 << "\n\n";
+			<< "\n    With a mean of: " << (double)(r + g + b) / 3.0 << "\n\n";
 	}
 
 	img << r << " " << g << " " << b << std::endl;
