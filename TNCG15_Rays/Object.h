@@ -8,16 +8,16 @@ class Ray;
 class Object
 {
 public:
-    Object() = default;
+	Object() = default;
 
-    virtual glm::dvec3 normal(Ray& theRay) = 0;
+	virtual glm::dvec3 normal(const Ray& theRay) = 0;
 
-    virtual ColorDBL getColor() = 0;
+	virtual ColorDBL getColor() = 0;
 
-    virtual glm::dvec3 getIntersection(Ray& theRay) = 0;
+	virtual glm::dvec3 getIntersection(const Ray& theRay) = 0;
 
-    virtual Material getMaterial() = 0;
+	virtual Material getMaterial() = 0;
 
-    static std::vector<Object*> theObjects;
+	static std::vector<Object*> theObjects;
 };
 

@@ -33,11 +33,11 @@ public:
 
 	double calculateArea();
 
-	virtual glm::dvec3 normal(Ray& theRay) override;
+	virtual glm::dvec3 normal(const Ray& theRay) override;
 
-	glm::dvec3 getRandomPoint();
+	glm::dvec3 const getRandomPoint();
 
-	virtual glm::dvec3 getIntersection(Ray& theRay) override;
+	virtual glm::dvec3 getIntersection(const Ray& theRay) override;
 
 	virtual ColorDBL getColor() override {
 		return Color;

@@ -12,14 +12,14 @@ class Sphere : public Object
 public:
 	Sphere(glm::dvec3 _position, double rad, ColorDBL _Color);
 
-	virtual glm::dvec3 getIntersection(Ray& theRay) override;
+	virtual glm::dvec3 getIntersection(const Ray& theRay) override;
 
 	//virtual glm::dvec3 normal(Ray theRay) override{
 	//	std::cout << "   normal() called for sphere - Invalid operation!";
 	//	return glm::dvec3(-9999, -9999, -9999);
 	//}
 
-	virtual glm::dvec3 normal(Ray& theRay);
+	virtual glm::dvec3 normal(const Ray& theRay);
 
 	virtual ColorDBL getColor() override;
 

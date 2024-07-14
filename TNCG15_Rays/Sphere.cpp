@@ -7,12 +7,12 @@ Sphere::Sphere(glm::dvec3 _position, double rad, ColorDBL _Color) : position{ _p
 	theObjects.push_back(this);
 }
 
-glm::dvec3 Sphere::getIntersection(Ray& theRay){
+glm::dvec3 Sphere::getIntersection(const Ray& theRay) {
 	double arg;
 
 	double c1 = glm::dot(theRay.direction, theRay.direction);
 	double c2 = glm::dot(2.0 * theRay.direction, theRay.startPosition - position);
-	double c3 = glm::length(theRay.startPosition - position)*glm::length(theRay.startPosition - position) - radius * radius;
+	double c3 = glm::length(theRay.startPosition - position) * glm::length(theRay.startPosition - position) - radius * radius;
 
 	arg = c2 * c2 - 4.0 * c1 * c3;
 
@@ -60,19 +60,19 @@ glm::dvec3 Sphere::getIntersection(Ray& theRay){
 }
 
 
-glm::dvec3 Sphere::normal(Ray& theRay) {
+glm::dvec3 Sphere::normal(const Ray& theRay) {
 
 	glm::dvec3 intersection = getIntersection(theRay);
-	
+
 	//std::cout << "Calculated normal: " << glm::to_string(glm::normalize(intersection - position)) << "\n";
 	return (glm::normalize(intersection - position));
 
 }
 
-ColorDBL Sphere::getColor(){
+ColorDBL Sphere::getColor() {
 	return theMaterial.MatColor;
 }
 
-Material Sphere::getMaterial(){
+Material Sphere::getMaterial() {
 	return theMaterial;
 }

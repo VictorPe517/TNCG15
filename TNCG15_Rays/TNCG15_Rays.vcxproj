@@ -151,6 +151,7 @@
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Rectangle.cpp" />
+    <ClCompile Include="RenderSettings.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="TNCG15_Rays.cpp" />
     <ClCompile Include="Triangle.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="Rectangle.h" />
+    <ClInclude Include="RenderSettings.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Triangle.h" />
   </ItemGroup>

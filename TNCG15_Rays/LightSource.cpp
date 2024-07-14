@@ -2,7 +2,7 @@
 
 
 //Returns a normalized 3-dimensional vector pointing straight out of the surface
-glm::dvec3 LightSource::normal(Ray& theRay) {
+glm::dvec3 LightSource::normal(const Ray& theRay) {
 	glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
 
 	//std::cout << "	Light normal is: " << glm::to_string(direction) << "\n\n";
@@ -12,7 +12,7 @@ glm::dvec3 LightSource::normal(Ray& theRay) {
 
 
 //Returns a random point in world-space anywhere on the light source
-glm::dvec3 LightSource::getRandomPoint() {
+glm::dvec3 const LightSource::getRandomPoint() {
 	double randY = (rand()) / ((RAND_MAX + 1.0));
 	double randX = (rand()) / ((RAND_MAX + 1.0));
 
@@ -24,7 +24,7 @@ glm::dvec3 LightSource::getRandomPoint() {
 
 
 //Returns the point of intersection between a ray and the particular light source in world-space
-glm::dvec3 LightSource::getIntersection(Ray& theRay) {
+glm::dvec3 LightSource::getIntersection(const Ray& theRay) {
 	glm::dvec3 vertex = v1;
 
 	glm::dvec3 c1 = v2 - vertex; //v3

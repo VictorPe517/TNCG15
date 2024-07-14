@@ -16,11 +16,11 @@ Cube::Cube(glm::dvec3 midpoint, double sideLength, ColorDBL _Color)
 	v8 = glm::dvec3(midpoint.x - l, midpoint.y - l, midpoint.z - l);
 
 	theRects.push_back(new Rectangle(v1, v2, v5, v3, _Color, false)); //Up
-	theRects.push_back(new Rectangle(v1,v4,v6,v2, _Color, false)); //Right
-	theRects.push_back(new Rectangle(v1,v3,v7,v4, _Color, false)); //Forward
-	theRects.push_back(new Rectangle(v3,v5,v8,v7, _Color, false)); //Left
-	theRects.push_back(new Rectangle(v5,v2,v6,v8, _Color, false)); //Back
-	theRects.push_back(new Rectangle(v7,v8,v6,v4, _Color, false)); //Down
+	theRects.push_back(new Rectangle(v1, v4, v6, v2, _Color, false)); //Right
+	theRects.push_back(new Rectangle(v1, v3, v7, v4, _Color, false)); //Forward
+	theRects.push_back(new Rectangle(v3, v5, v8, v7, _Color, false)); //Left
+	theRects.push_back(new Rectangle(v5, v2, v6, v8, _Color, false)); //Back
+	theRects.push_back(new Rectangle(v7, v8, v6, v4, _Color, false)); //Down
 
 	theMaterial.MatColor = _Color;
 
@@ -41,16 +41,16 @@ Cube::Cube(Rectangle _r1, Rectangle _r2, Rectangle _r3, Rectangle _r4, Rectangle
 	theCubes.push_back(*this);
 }
 
-glm::dvec3 Cube::getIntersection(Ray& theRay) {
+glm::dvec3 Cube::getIntersection(const Ray& theRay) {
 	double minLength = 99999999;
-	glm::dvec3 closest = glm::dvec3(-9999,-9999,-9999);
+	glm::dvec3 closest = glm::dvec3(-9999, -9999, -9999);
 
 	for (Rectangle* theRectangle : theRects) {
 		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
 
-		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection-theRay.startPosition) < minLength) {
+		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection - theRay.startPosition) < minLength) {
 			minLength = glm::length(intersection - theRay.startPosition);
-			closest = intersection;		
+			closest = intersection;
 		}
 	}
 	//if (minLength != glm::length(glm::dvec3(-9999, -9999, -9999)))std::cout << "Minlength: " << minLength << "\n";
@@ -59,7 +59,7 @@ glm::dvec3 Cube::getIntersection(Ray& theRay) {
 }
 
 
-glm::dvec3 Cube::normal(Ray& theRay) {
+glm::dvec3 Cube::normal(const Ray& theRay) {
 	Rectangle* latestHitRectangle = nullptr;
 
 	double minLength = 99999999;
@@ -68,14 +68,14 @@ glm::dvec3 Cube::normal(Ray& theRay) {
 	for (Rectangle* theRectangle : theRects) {
 		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
 
-		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection-theRay.startPosition) < minLength) {
-			minLength = glm::length(intersection-theRay.startPosition);
+		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection - theRay.startPosition) < minLength) {
+			minLength = glm::length(intersection - theRay.startPosition);
 			closest = intersection;
 			latestHitRectangle = theRectangle;
 		}
 	}
 	//std::cout << "Normal: " << glm::to_string(latestHitRectangle->normal(theRay)) << "\n";
-	if(latestHitRectangle != nullptr) return latestHitRectangle->normal(theRay);
+	if (latestHitRectangle != nullptr) return latestHitRectangle->normal(theRay);
 
 	return glm::dvec3(-9999, -9999, -9999);
 }

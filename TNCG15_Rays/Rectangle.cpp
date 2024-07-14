@@ -1,6 +1,6 @@
 #include "Rectangle.h"
 
-glm::dvec3 Rectangle::normal(Ray& theRay) {
+glm::dvec3 Rectangle::normal(const Ray& theRay) {
 	glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
 
 	if (direction == glm::dvec3(-9999, -9999, -9999))
@@ -11,7 +11,7 @@ glm::dvec3 Rectangle::normal(Ray& theRay) {
 	return direction / glm::length(direction);
 }
 
-glm::dvec3 Rectangle::getIntersection(Ray& theRay) {
+glm::dvec3 Rectangle::getIntersection(const Ray& theRay) {
 	glm::dvec3 vertex = v2;
 
 	glm::dvec3 c1 = v3 - vertex;

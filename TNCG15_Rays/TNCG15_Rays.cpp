@@ -4,28 +4,32 @@
 // MULTITHREADING: https://www.educative.io/blog/modern-multithreading-and-concurrency-in-cpp
 
 #include <iostream>
-#include "glm/glm.hpp"
-#include "glm/gtx/string_cast.hpp"
 #include <vector>
 #include <fstream>
 #include <math.h>
+#include <cassert>
+#include <thread>
+#include <ppl.h>
+#include <chrono>
+#include <ratio>
+
+#include "glm/glm.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "Camera.h"
+#include "RenderSettings.h"
 #include "Rectangle.h"
 #include "Triangle.h"
 #include "LightSource.h"
 #include "Sphere.h"
-#include <cassert>
-#include <thread>
-#include <ppl.h>
 #include "Object.h"
-#include <chrono>
-#include <ratio>
 #include "cube.h"
+
 
 class LightSource;
 
-void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j, std::ofstream& img, size_t& pixelIndex, int& maxval, int& minval);
+void writeCurrentPixelToFile(Camera& theCamera, size_t i, size_t j, std::ofstream& img, int& maxval, int& minval);
 void DisplayLoadingBar(int& rowsDone, const int& x_res, bool currentlyWriting);
+std::string GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration);
 
 std::vector<Object*> Object::theObjects;
 std::vector<Polygon*> Polygon::thePolygons;
@@ -35,40 +39,21 @@ std::vector<Sphere*> Sphere::theSpheres;
 std::vector<Cube> Cube::theCubes;
 std::vector<LightSource*> LightSource::theLightSources;
 
-
 //---------------------[ STANDARD SETTINGS ]---------------------//
-glm::ivec2 renderResolution = glm::ivec2(2560, 1440);
-double renderResolutionScale = 0.66;
-
-std::string imagePath = "../resultImages";
-
-int iterations = 256;
-
-bool use_multicore = true;
-
-bool shadowRays = false;
+RenderSettings theRenderSettings;
 
 double exposureMultiplier = 10;
-
-int mirrorBounces = 16;
-
-bool verboseDebugging = false;
 //---------------------------------------------------------------//
-
 
 int main()
 {
 	bool currentlyWriting = false;
-
 	size_t pixelIndex = 0;
-	int maxval = -4000;
-	int minval = 999999;
 
-	glm::dvec3 theEye(-1, 0, 0.0);
+	int maxval = -INFINITY;
+	int minval = INFINITY;
 
-	std::cout << "Initializing Camera...\n\n";
-	//----------------------------------------------//
-	Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1), renderResolution.x, renderResolution.y, renderResolutionScale);
+	glm::dvec3 theEye(-1.0, 0.0, 0.0);
 
 	std::cout << "Initializing Scene Geometry...\n\n";
 	//------GEOMETRY------//
@@ -93,59 +78,46 @@ int main()
 
 	Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), ColorDBL::White); //In front of camera
 
-	Sphere sphere1(glm::dvec3(9, 0, -2), 2, ColorDBL::White);
-	sphere1.theMaterial.isMirror = false;
+	std::cout << "Initializing Lights...\n\n";
 
+	//----LIGHTS----//
+	LightSource areaLight2(glm::dvec3(6.0, 4.0, 4.5), glm::dvec3(8.0, 4.0, 4.5), glm::dvec3(6.0, -4.0, 4.5), glm::dvec3(8.0, -4.0, 4.5), 100, ColorDBL::White);
+
+	//------------------------//
+
+	Sphere sphere1(glm::dvec3(9, 0, -2), 2, ColorDBL::White);
 	Sphere sphere2(glm::dvec3(8, 4, -4), 1, ColorDBL::Red);
+
+	sphere1.theMaterial.isTransparent = true;
 	sphere2.theMaterial.isMirror = true;
 
 
 	Cube newCube(glm::dvec3(6, -4, -2), 1.5);
 	newCube.setMirror(true);
 
-	std::cout << "Initializing Lights...\n\n";
-	//----LIGHTS----//
-	LightSource areaLight2(glm::dvec3(6.0, 4.0, 4.5), glm::dvec3(8.0, 4.0, 4.5), glm::dvec3(6.0, -4.0, 4.5), glm::dvec3(8.0, -4.0, 4.5), 100, ColorDBL::White);
+	//------------------------//
 
-	//LightSource areaLight3(glm::dvec3(6.0, 4.0, 4.5), glm::dvec3(8.0, 4.0, 4.5), glm::dvec3(6.0, -4.0, 4.5), glm::dvec3(8.0, -4.0, 4.5), 100, ColorDBL::White);
-	//areaLight3.Translate(glm::dvec3(4.0, 0.0, 0.0));
-	//-------------------------//
+	theRenderSettings.UserInputAndSettings();
 
-	std::cout << "/==========[Current Settings]==========\\" << std::endl
-		<< "  Resolution:" << std::endl
-		<< "    " << renderResolution.x << " x " << renderResolution.y << std::endl
-		<< "  Render Scale:" << std::endl
-		<< "    " << renderResolutionScale << std::endl
-		<< "  Output Resolution:" << std::endl
-		<< "    " << theCamera.GetResX() << " x " << theCamera.GetResY() << std::endl << std::endl
+	std::cout << "\nInitializing Camera...\n\n";
 
-		<< "  Samples per pixel:" << std::endl
-		<< "    " << iterations << std::endl
-		<< "  Max amount of recursive mirror bounces:" << std::endl
-		<< "    " << mirrorBounces << std::endl
-		<< "\\======================================/" << std::endl << std::endl << std::endl;
+	Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1), theRenderSettings);
 
-	std::cout << "Rendering Image:\n";
+	theRenderSettings.WriteSettingsToScreen(theCamera);
 
+	std::cout << "\nRendering Image:\n";
 	//--------------------RENDERING LOOP--------------------//
 	int rowsDone = 0; // Concurrency fix
 
 	const auto start = std::chrono::high_resolution_clock::now();
 
-	if (use_multicore) {
+	if (theRenderSettings.s_useMulticore) {
 		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
-
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
-
 				for (size_t l = 0; l < LightSource::theLightSources.size(); l++) {
-
 					// Importance ray
-					Ray aRay(theEye, theCamera.thePixels[_currentXpixel * theCamera.GetResY() + _currentYpixel].position - theEye, ColorDBL::White, 0, mirrorBounces);
-
-					// Get Intersections, shadowrays
-					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], iterations);
-
-					// TODO: Get incoming light from different directions and sum up
+					Ray aRay(theEye, theCamera.thePixels[_currentXpixel * theCamera.GetResY() + _currentYpixel].position - theEye, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
+					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], theRenderSettings.s_shadowrayIterations);
 
 					// Save the resulting color information into that ray
 					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor = aRay.RayColor;
@@ -163,15 +135,14 @@ int main()
 
 				for (size_t l = 0; l < LightSource::theLightSources.size(); l++) {
 
-					Ray aRay(theEye, theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].position - theEye, ColorDBL::White, 0, mirrorBounces);
+					Ray aRay(theEye, theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].position - theEye, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
 
-					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], iterations);
+					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], theRenderSettings.s_shadowrayIterations);
 
 					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += aRay.RayColor;
 				}
 			}
 			rowsDone++;
-			//if ((int)floor((((double)Camera::x_res) / 100.0)) != 0 && rowsDone % (int)floor((((double)Camera::x_res) / 100.0)) == 0) std::cout << ((double)rowsDone / (double)Camera::x_res) * 100.0 << "% \r";
 			DisplayLoadingBar(rowsDone, theCamera.GetResX(), currentlyWriting);
 		}
 	}
@@ -181,8 +152,7 @@ int main()
 	const std::chrono::duration<double, std::ratio<3600>> duration = stop - start; //Log time in hours for fun
 
 	// Create file to save
-	std::string fileName;
-	fileName = std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(iterations)) + "__time-" + std::to_string(duration.count()) + ".ppm";
+	std::string fileName = GenerateFilename(theRenderSettings, theCamera, duration.count());
 	std::ofstream img(fileName);
 
 	// Create image out stream
@@ -191,17 +161,15 @@ int main()
 	img << "255" << std::endl;
 
 	// Logging
-	std::cout << "\n =======Rendering complete after " << duration << "!========\n\n\n"
+	std::cout << "\n =====[ Rendering complete after " << duration << "! ]======\n\n"
 		<< "Writing to file:\n";
 
-	pixelIndex = 0;
-
-	// ------------ Write all pixels to stream ------------ //
+	// -----------{ Write all pixels to stream }----------- //
 	rowsDone = 0; // Concurrency fix
 
 	for (size_t i = 0; i < theCamera.GetResX(); i++) {
 		for (size_t j = 0; j < theCamera.GetResY(); j++) {
-			writeCurrentPixelToFile(theCamera, i, j, img, pixelIndex, maxval, minval);
+			writeCurrentPixelToFile(theCamera, i, j, img, maxval, minval);
 
 		}
 		rowsDone++;
@@ -209,14 +177,12 @@ int main()
 	}
 
 	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 3600.0);
-
 	// Logging
 	std::cout << std::flush
-		<< "/=================Render Successful!==================\ \n"
+		<< "/===============[ Render Successful! ]================\ \n"
 		<< "  Total pixels processed: \n    " << theCamera.thePixels.size() << " px\n"
-		<< "  Time Elapsed: \n    " << round((duration.count() * 3600.0)) << " seconds\n"
-		<< "  Ray Tracing Speed: \n    " << round(pixelsPerSecond) << " px/s\n"
-		<< "  Minval: " << minval << ", Maxval: " << maxval << "\n\n"
+		<< "  Time Elapsed: \n    " << round((duration.count() * 3600.0)) << " second(s)\n\n"
+		<< "  Ray Tracing Speed: \n    " << round((60.0 * pixelsPerSecond / 10000.0)) / 100.0 << " Mil pixels/minute\n\n"
 		<< "  Image saved as: \n    " << fileName << "\n"
 		<< "\=====================================================/\n\n";
 
@@ -252,7 +218,7 @@ void DisplayLoadingBar(int& rowsDone, const int& x_res, bool _currentlyWriting) 
 
 
 // Writes a pixel of a camera intro an image stream
-void writeCurrentPixelToFile(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, size_t& pixelIndex, int& maxval, int& minval) {
+void writeCurrentPixelToFile(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, int& maxval, int& minval) {
 	//-------Write image to file-------//
 	int r = (int)floor(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.r * 255 * exposureMultiplier);
 	int g = (int)floor(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.g * 255 * exposureMultiplier);
@@ -290,7 +256,7 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t currentX, size_t currentY
 	if ((r + g + b) / 3 > maxval) maxval = (int)round((r + g + b) / 3.0);
 	if ((r + g + b) / 3 < minval) minval = (int)round((r + g + b) / 3.0);
 
-	if (verboseDebugging) {
+	if (theRenderSettings.s_verboseDebugging) {
 		std::cout << "PIXEL: ( " << currentX << " , " << currentY << " )" << std::endl;
 		theCamera.DisplayPixelPosition(currentX, currentY);
 
@@ -304,7 +270,8 @@ void writeCurrentPixelToFile(Camera& theCamera, size_t currentX, size_t currentY
 	}
 
 	img << r << " " << g << " " << b << std::endl;
-
-	pixelIndex++;
 }
 
+std::string GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration) {
+	return std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_shadowrayIterations)) + "__time-" + std::to_string(duration) + ".ppm";
+}
