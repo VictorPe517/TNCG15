@@ -109,10 +109,10 @@ int main()
 	if (theRenderSettings.s_useMulticore) {
 		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
-				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.s_SSAAiterations; ssaa_sample++) {
+				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
 					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
 
-					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.s_SSAAiterations);
+					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations());
 					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position + pixelOffset - theEye;
 					int calculatedIterations = theRenderSettings.GetTotalIterations();
 
@@ -121,7 +121,7 @@ int main()
 					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
 
 
-					ColorDBL finalColor = aRay.RayColor / theRenderSettings.s_SSAAiterations;
+					ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
 					// Save the resulting color information into that ray
 					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
 				}
@@ -142,7 +142,7 @@ int main()
 
 					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], theRenderSettings.s_shadowrayIterations);
 
-					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += aRay.RayColor;
+					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += aRay.GetRayColor();
 				}
 			}
 			rowsDone++;
@@ -152,7 +152,7 @@ int main()
 
 	// Stop timer
 	const auto stop = std::chrono::high_resolution_clock::now();
-	const std::chrono::duration<double, std::ratio<3600>> duration = stop - start; //Log time in hours for fun
+	const std::chrono::duration<double, std::ratio<60>> duration = stop - start; //Log time in minutes for fun
 
 	// Create file to save
 	std::string fileName = GenerateFilename(theRenderSettings, theCamera, duration.count());
@@ -179,12 +179,12 @@ int main()
 		DisplayLoadingBar(rowsDone, theCamera.GetResX(), false);
 	}
 
-	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 3600.0);
+	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 60.0);
 	// Logging
 	std::cout << std::flush
 		<< "/===============[ Render Successful! ]================\ \n"
 		<< "  Total pixels processed: \n    " << theCamera.thePixels.size() << " px\n"
-		<< "  Time Elapsed: \n    " << round((duration.count() * 3600.0)) << " second(s)\n\n"
+		<< "  Time Elapsed: \n    " << round((duration.count() * 60.0)) << " second(s)\n\n"
 		<< "  Ray Tracing Speed: \n    " << round((60.0 * pixelsPerSecond / 10000.0)) / 100.0 << " Mil pixels/minute\n\n"
 		<< "  Image saved as: \n    " << fileName << "\n"
 		<< "\=====================================================/\n\n";

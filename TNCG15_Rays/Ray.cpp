@@ -1,5 +1,13 @@
 #include "Ray.h"
 
+void Ray::SetRayColor(ColorDBL theColor) {
+	RayColor = theColor;
+}
+
+ColorDBL Ray::GetRayColor() {
+	return RayColor;
+}
+
 double Ray::calcIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight) {
 	double E = 0.0;
 
@@ -62,7 +70,7 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 					this->nextRay = new Ray(intersection, glm::reflect(direction, theObjectNormal), RayColor, 1.0, bounces_left - 1);
 					intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
 
-					RayColor = (*nextRay).RayColor;
+					SetRayColor((*nextRay).GetRayColor());
 
 				}
 				else if (theObjects[l]->getMaterial().isTransparent && bounces_left > 0) {
@@ -71,11 +79,11 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 
 					intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
 
-					RayColor = (*nextRay).RayColor;
+					SetRayColor((*nextRay).GetRayColor());
 				}
 				else {
 					//-------------[ LAMBERTIAN ]-------------//
-					RayColor = (theObjects[l]->getColor());
+					SetRayColor((theObjects[l]->getColor()));
 					calculateLighting(intersection, Object::theObjects, theLight, iterations);
 				}
 				//std::cout << "  Hit! r:" << RayColor.r << ", g: " << RayColor.g << ", b: " << RayColor.b << "\n";

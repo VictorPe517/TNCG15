@@ -141,6 +141,10 @@ void RenderSettings::UserInputAndSettings() {
 	}
 }
 
+int RenderSettings::GetAAIterations() {
+	return s_SSAAiterations;
+}
+
 void RenderSettings::WriteSettingsToScreen(Camera theCamera) {
 	std::cout << "/=========[ Current Settings ]=========\\" << std::endl
 		<< "  Resolution:" << std::endl

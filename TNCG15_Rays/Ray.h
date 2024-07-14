@@ -24,6 +24,9 @@ public:
 
 	Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance, int _bounces) : startPosition{ start }, direction{ glm::normalize(dir) }, RayColor{ _RayColor = ColorDBL(1,1,1) }, radiance{ _radiance = 50.0 }, bounces_left{ _bounces = 5 } {    }
 
+	void SetRayColor(ColorDBL theColor);
+	ColorDBL GetRayColor();
+
 	// Get the point of intersection between an object and a light-source
 	glm::dvec3 getPointOfIntersection(std::vector<Object*> theObjects, LightSource& theLight, int iterations);
 
@@ -52,7 +55,8 @@ public:
 
 	Ray* prevRay = nullptr;
 	Ray* nextRay = nullptr;
-	ColorDBL RayColor = ColorDBL(0.0, 0.0, 0.0);
+
+
 
 	double radiance = 0.0;
 	double importance = 0.0;
@@ -66,6 +70,9 @@ public:
 	Object* hitObject = nullptr;
 
 	size_t hitIndex = 0;
+
+private:
+	ColorDBL RayColor = ColorDBL(0.0, 0.0, 0.0);
 
 };
 
