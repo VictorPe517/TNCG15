@@ -90,17 +90,12 @@ int main()
 
 	sphere1.theMaterial.isTransparent = true;
 	sphere2.theMaterial.isMirror = true;
-
-
 	Cube newCube(glm::dvec3(6, -4, -2), 1.5);
 	newCube.setMirror(true);
-
-	//------------------------//
 
 	theRenderSettings.UserInputAndSettings();
 
 	std::cout << "\nInitializing Camera...\n\n";
-
 	Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1), theRenderSettings);
 
 	theRenderSettings.WriteSettingsToScreen(theCamera);
@@ -115,8 +110,11 @@ int main()
 		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
 				for (size_t l = 0; l < LightSource::theLightSources.size(); l++) {
+					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
+					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position - theEye;
+
 					// Importance ray
-					Ray aRay(theEye, theCamera.thePixels[_currentXpixel * theCamera.GetResY() + _currentYpixel].position - theEye, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
+					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
 					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], theRenderSettings.s_shadowrayIterations);
 
 					// Save the resulting color information into that ray
