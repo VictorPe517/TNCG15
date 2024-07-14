@@ -95,6 +95,7 @@ glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfac
 	double k = 1.0 - pow(eta, 2.0) * (1.0 - pow(nDot, 2.0));
 
 	if (k < 0.0000000001) {
+		//return getReflectedDirection(surfaceNormal);
 		return glm::dvec3(0, 0, 0);
 	}
 
