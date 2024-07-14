@@ -109,16 +109,21 @@ int main()
 	if (theRenderSettings.s_useMulticore) {
 		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
-				for (size_t l = 0; l < LightSource::theLightSources.size(); l++) {
+				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.s_SSAAiterations; ssaa_sample++) {
 					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
-					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position - theEye;
 
-					// Importance ray
+					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.s_SSAAiterations);
+					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position + pixelOffset - theEye;
+					int calculatedIterations = theRenderSettings.GetTotalIterations();
+
+					// Create importance ray
 					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
-					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], theRenderSettings.s_shadowrayIterations);
+					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
 
+
+					ColorDBL finalColor = aRay.RayColor / theRenderSettings.s_SSAAiterations;
 					// Save the resulting color information into that ray
-					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor = aRay.RayColor;
+					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
 				}
 			}
 			rowsDone++; // Concurrency fix

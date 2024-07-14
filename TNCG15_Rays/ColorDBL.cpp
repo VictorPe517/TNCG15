@@ -37,11 +37,13 @@ ColorDBL ColorDBL::operator*=(ColorDBL rhs) {
 }
 
 ColorDBL ColorDBL::operator*(double rhs) {
-	r *= rhs;
-	g *= rhs;
-	b *= rhs;
+	ColorDBL finalColor = *this;
 
-	return *this;
+	finalColor.r *= rhs;
+	finalColor.g *= rhs;
+	finalColor.b *= rhs;
+
+	return finalColor;
 }
 
 ColorDBL ColorDBL::operator*(ColorDBL rhs) {

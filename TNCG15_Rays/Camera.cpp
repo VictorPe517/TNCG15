@@ -25,6 +25,32 @@ void Camera::DisplayPixelPosition(size_t x, size_t y)
 	std::cout << "At pos:( " << -(x * delta - 1.0) << " , " << -(y * delta - 1.0) << " )." << std::endl;
 }
 
+glm::dvec3 Camera::GetSuperSamplingPixelOffset(size_t currentIteration, size_t totalIterations)
+{
+	// Super quick & dirty implementation, offset each ray using a circle within the pixel 
+	// increase the frequency of the steps when totalIterations is increased.
+
+	if (totalIterations <= 1) return glm::dvec3(0.0, 0.0, 0.0);
+
+	double _delta = 2.0 / (double)x_res; // Pixel size
+	double degToCover = 360.0; // Degrees of the circle to cover
+
+	double degOffset = 45.0; // Offset to upper right
+	double deg2rad = (3.14159 / 180.0);
+
+	double degsPerSegment = (degToCover / (double)totalIterations);
+
+	double _radius = _delta / (double)2.5; // Chosen after quick testing for aesthetics
+
+	double radToEvaluate = (degOffset + degsPerSegment * currentIteration) * deg2rad;
+
+	double x = _radius * cos(radToEvaluate);
+	double y = _radius * sin(radToEvaluate);
+
+
+	return glm::dvec3(0.0, x, y);
+}
+
 const size_t Camera::GetResX()
 {
 	return x_res;

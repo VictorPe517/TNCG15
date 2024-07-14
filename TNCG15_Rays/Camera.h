@@ -12,6 +12,7 @@ public:
 	const size_t GetResX();
 	const size_t GetResY();
 	void DisplayPixelPosition(size_t x, size_t y);
+	glm::dvec3 GetSuperSamplingPixelOffset(size_t currentIteration, size_t totalIterations);
 
 	std::vector<Pixel> thePixels;
 

@@ -1,6 +1,6 @@
 #include "Ray.h"
 
-ColorDBL Ray::calcIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight) {
+double Ray::calcIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight) {
 	double E = 0.0;
 
 	// Todo: iterate over all lamps here
@@ -22,13 +22,13 @@ ColorDBL Ray::calcIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& 
 	E += 3200 * G * shadowVar * area * theLight.Watt / 100.0;
 	//--- end loop ---//
 
-	if (E < 0) {
-		this->irradiance = 0;
-		return ColorDBL(0, 0, 0);
+	if (E < DBL_EPSILON) {
+		this->irradiance = 0.0;
+		return 0.0;
 	}
 	else {
 		this->irradiance = E;
-		return ColorDBL(E, E, E);
+		return E;
 	}
 };
 
@@ -165,8 +165,8 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 	ColorDBL finalPixelColor(0, 0, 0);
 	bool debug = false;
 
-	if (dynamic_cast<LightSource*>((Object::theObjects[hitIndex])) != nullptr) { //If we hit a lamp just return the lamp color
-		RayColor = ColorDBL(1, 1, 1);
+	if (dynamic_cast<LightSource*>((Object::theObjects[hitIndex])) != nullptr) { //If we hit a lamp return the lamp color
+		RayColor = ColorDBL(1.0, 1.0, 1.0) / 10.0;
 		return;
 	}
 
@@ -174,8 +174,11 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 		glm::dvec3 thePoint = (theLight).getRandomPoint();
 
 		Ray newRay(thePoint, hitPoint - thePoint, ColorDBL(1, 0, 1), (theLight).radiance, 1);
+		glm::dvec3 surfaceNormal = ((*Object::theObjects[hitIndex]).normal(newRay));
 
-		finalPixelColor += (RayColor * newRay.calcIrradiance(((*Object::theObjects[hitIndex]).normal(newRay)), hitPoint, theObjects, theLight)) / (iterationAmt * 3200);
+		double dx = ((float)iterationAmt * 3200.0);
+
+		finalPixelColor += (RayColor * newRay.calcIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
 	}
 
 	RayColor = finalPixelColor;
@@ -203,7 +206,7 @@ double Ray::calculateShadowRay(const glm::dvec3& surfaceHitPoint, const glm::dve
 	}
 
 	if (index != -1 && dynamic_cast<LightSource*>((Object::theObjects[index])) != nullptr) {
-		//std::cout << "hit the light!\n";
+		// If we can cast the hit object to a LightSource, it is a lightsource, and we should return fullbright
 		return 1.0;
 	}
 
