@@ -1,14 +1,14 @@
 #include "Ray.h"
 
 void Ray::SetRayColor(ColorDBL theColor) {
-	RayColor = theColor;
+	RayRadianceColor = theColor;
 }
 
 ColorDBL Ray::GetRayColor() {
-	return RayColor;
+	return RayRadianceColor;
 }
 
-double Ray::calcIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight) {
+double Ray::CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight) {
 	double E = 0.0;
 
 	// Todo: iterate over all lamps here
@@ -25,26 +25,28 @@ double Ray::calcIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& in
 	if (cos_omega_y < 0.0) cos_omega_y = 0.0;
 
 	double G = (cos_omega_x * cos_omega_y) / (distance * distance);
-	double shadowVar = calculateShadowRay(intersectionPoint, randomPointOnLamp, theObjects);
+	double shadowVar = IsVisibleToPoint(intersectionPoint, randomPointOnLamp, theObjects);
 
 	E += 3200 * G * shadowVar * area * theLight.Watt / 100.0;
 	//--- end loop ---//
 
 	if (E < DBL_EPSILON) {
-		this->irradiance = 0.0;
+		this->Irradiance = 0.0;
 		return 0.0;
 	}
 	else {
-		this->irradiance = E;
+		this->Irradiance = E;
 		return E;
 	}
 };
 
 glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSource& theLight, int iterations) {
-	glm::dvec3 intersection = glm::dvec3(-1, -1, -1);
+	glm::dvec3 intersection = glm::dvec3(0, 0, 0);
 	double minLength = INFINITY;
 
-	RayColor = ColorDBL(0, 0, 0);
+	//std::cout << "current Dir outside func: " << glm::to_string(this->direction) << "\n";
+
+	RayRadianceColor = ColorDBL(0, 0, 0);
 
 	for (size_t l = 0; l < theObjects.size(); l++) {
 
@@ -58,16 +60,20 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 
 			double lengthStartIntersection = glm::length(this->startPosition - possibleIntersection);
 
-			if (possibleIntersection != glm::dvec3(-9999, -9999, -9999) && minLength >= lengthStartIntersection) { //We hit the closest object
+			if (possibleIntersection != glm::dvec3(NAN, NAN, NAN) && minLength >= lengthStartIntersection) { //We hit the closest object
 				this->hitObject = theObjects[l];
 				minLength = lengthStartIntersection;
 				intersection = possibleIntersection;
 				hitIndex = l;
 
+				endPosition = intersection;
 
 				if (theObjects[l]->getMaterial().isMirror && bounces_left > 0) {
 					//---------------[ MIRROR ]---------------//
-					this->nextRay = new Ray(intersection, glm::reflect(direction, theObjectNormal), RayColor, 1.0, bounces_left - 1);
+
+					this->nextRay = new Ray(intersection, getReflectedDirection(theObjectNormal), RayRadianceColor, 1.0, bounces_left - 1);
+					this->nextRay->startSurface = theObjects[l];
+
 					intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
 
 					SetRayColor((*nextRay).GetRayColor());
@@ -75,39 +81,75 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 				}
 				else if (theObjects[l]->getMaterial().isTransparent && bounces_left > 0) {
 					//-------------[ TRANSPARENT ]------------//
-					this->nextRay = new Ray(intersection, getRefractedDirection(intersection, theObjectNormal, (*theObjects[l])), RayColor, 1.0, 3);
+					double n1;
+					double n2;
 
-					intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
+					if (isInside) {
+						n1 = (theObjects[l]->getMaterial().refractiveIndex);
+						n2 = 1.0;
+					}
+					else {
+						n1 = 1.0;
+						n2 = (theObjects[l]->getMaterial().refractiveIndex);
+					}
 
-					SetRayColor((*nextRay).GetRayColor());
+					double ior = n1 / n2;
+
+					double R0 = pow((n1 - n2) / (n1 + n2), 2.0);
+					double inclination = this->GetInclination(theObjectNormal);
+					double radiance = R0 + (1.0 - R0) * pow((1.0 - cos(inclination)), 5.0);
+
+					double transmittance = 1.0 - radiance;
+
+					//std::cout << " Current Dir inside func: " << glm::to_string(this->direction) << "\n";
+
+					glm::dvec3 refractedDir = getRefractedDirection(intersection, theObjectNormal, (*theObjects[l]), n1, n2);
+
+					if (refractedDir != glm::dvec3(NAN, NAN, NAN)) {
+						this->nextRay = new Ray(intersection, refractedDir, RayRadianceColor, radiance, 3);
+						this->nextRay->startSurface = theObjects[l];
+						this->nextRay->isInside = !this->isInside;
+
+						intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
+						SetRayColor((*nextRay).GetRayColor());
+					}
 				}
 				else {
 					//-------------[ LAMBERTIAN ]-------------//
 					SetRayColor((theObjects[l]->getColor()));
-					calculateLighting(intersection, Object::theObjects, theLight, iterations);
+					CalculateLighting(intersection, Object::theObjects, theLight, iterations);
 				}
-				//std::cout << "  Hit! r:" << RayColor.r << ", g: " << RayColor.g << ", b: " << RayColor.b << "\n";
 			}
 		}
 	}
 	return intersection; //Return closest collision coordinates
 }
 
-glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject) {
+glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2) {
 	glm::dvec3 d0 = glm::normalize(this->direction);
 
-	double eta = theObject.getMaterial().refractiveIndex;
+	glm::dvec3 n = glm::normalize(surfaceNormal);
 
-	double nDot = glm::dot(surfaceNormal, d0);
+	double eta = n1 / n2;
+
+	double inclination = acos(GetInclination(surfaceNormal));
+
+	double nDot = glm::dot(d0, n);
 
 	double k = 1.0 - pow(eta, 2.0) * (1.0 - pow(nDot, 2.0));
 
-	if (k < 0.0000000001) {
-		//return getReflectedDirection(surfaceNormal);
-		return glm::dvec3(0, 0, 0);
+	if (k < 0.0) {
+		return glm::dvec3(NAN, NAN, NAN);
 	}
 
-	return glm::normalize(eta * d0 + surfaceNormal * (-1.0 * eta * (nDot)-sqrt(k)));
+	if ((n1 * sin(inclination) / n2) < 1.0) {
+		glm::dvec3 result = eta * d0 + n * (-1.0 * eta * (nDot)-sqrt(k));
+		return glm::normalize(result);
+	}
+	else {
+		return glm::dvec3(NAN, NAN, NAN);
+	}
+
 }
 
 glm::dvec3 Ray::getReflectedDirection(glm::dvec3 surfaceNormal) {
@@ -123,10 +165,10 @@ LocalDirection Ray::getRandomLocalDirection() // Returns random direction using 
 	LocalDirection result;
 
 	double azimuth = (rand()) / ((RAND_MAX + 1.0));
-	double omega = (rand()) / ((RAND_MAX + 1.0));
+	double inclination = (rand()) / ((RAND_MAX + 1.0));
 
 	result.azimuth = azimuth / (2 * std::numbers::pi);
-	result.omega = (1 - cos(omega) * cos(omega));
+	result.inclination = (1 - cos(inclination) * cos(inclination));
 
 	return result;
 }
@@ -151,9 +193,9 @@ glm::dvec3 Ray::localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 s
 	return res;
 }
 
-glm::dvec3 Ray::hemisphericalToLocalCartesian(LocalDirection dir)
+glm::dvec3 Ray::hemisphericalToCartesian(LocalDirection dir)
 {
-	return glm::dvec3(cos(dir.azimuth) * sin(dir.omega), sin(dir.azimuth) * sin(dir.omega), cos(dir.omega));
+	return glm::dvec3(cos(dir.azimuth) * sin(dir.inclination), sin(dir.azimuth) * sin(dir.inclination), cos(dir.inclination));
 }
 
 glm::dvec3 Ray::getRandomDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal)
@@ -162,7 +204,7 @@ glm::dvec3 Ray::getRandomDirection(glm::dvec3 intersection, glm::dvec3 surfaceNo
 
 	LocalDirection dir = getRandomLocalDirection();
 
-	glm::dvec3 localDir = hemisphericalToLocalCartesian(dir);
+	glm::dvec3 localDir = hemisphericalToCartesian(dir);
 	glm::dvec3 worldDir = glm::normalize(localCartesianToWorldCartesian(localDir, surfaceNormal));
 
 	if (glm::dot(worldDir, surfaceNormal) < 0.0f) worldDir = -1.0 * worldDir; //feels superflous with cumulative distribution function
@@ -170,12 +212,12 @@ glm::dvec3 Ray::getRandomDirection(glm::dvec3 intersection, glm::dvec3 surfaceNo
 	return worldDir;
 }
 
-void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt) {
+void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt) {
 	ColorDBL finalPixelColor(0, 0, 0);
 	bool debug = false;
 
 	if (dynamic_cast<LightSource*>((Object::theObjects[hitIndex])) != nullptr) { //If we hit a lamp return the lamp color
-		RayColor = ColorDBL(1.0, 1.0, 1.0) / 8.0;
+		RayRadianceColor = ColorDBL(1.0, 1.0, 1.0) / 8.0;
 		return;
 	}
 
@@ -187,21 +229,21 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 
 		double dx = ((float)iterationAmt * 3200.0);
 
-		finalPixelColor += (RayColor * newRay.calcIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
+		finalPixelColor += (RayRadianceColor * newRay.CalculateIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
 	}
 
-	RayColor = finalPixelColor;
+	RayRadianceColor = finalPixelColor;
 }
 
 // Calculates wether the surface is in shadow (returns 0.0) or in light (returns 1.0)
-double Ray::calculateShadowRay(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightSourcePoint, const std::vector<Object*>& theObjects) {
+double Ray::IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightSourcePoint, const std::vector<Object*>& theObjects) {
 	Ray shadowRay(surfaceHitPoint, randomLightSourcePoint - surfaceHitPoint, ColorDBL(1, 1, 1), 0, 0);
 
 	double testLength = glm::distance(surfaceHitPoint, randomLightSourcePoint);
 
 	glm::dvec3 prospectiveShadowImpact;
 	glm::dvec3 intersection;
-	double shadowLength = 999999.0;
+	double shadowLength = (double)INFINITY;
 	int index = -1;
 
 	for (size_t l = 0; l < theObjects.size(); l++) {
@@ -223,3 +265,24 @@ double Ray::calculateShadowRay(const glm::dvec3& surfaceHitPoint, const glm::dve
 	return 0.0;
 
 }
+
+double Ray::CalculateBRDF(glm::dvec3 thePoint, double azimuth, double inclination) {
+	double result;
+
+	return result;
+}
+
+LocalDirection Ray::WorldCartesianToHemispherical() {
+	LocalDirection result;
+
+	result.inclination = glm::acos(direction.z / (sqrt(pow(direction.x, 2.0) + pow(direction.y, 2.0) + pow(direction.z, 2.0))));
+	result.azimuth = glm::sign(direction.y) * acos(direction.x / (sqrt(pow(direction.x, 2.0) + pow(direction.y, 2.0))));
+
+	return result;
+}
+
+double Ray::GetInclination(glm::dvec3 surfaceNormal) {
+	glm::dvec3 vector = startPosition - endPosition;
+
+	return dot(-surfaceNormal, vector) / glm::length(vector);
+};

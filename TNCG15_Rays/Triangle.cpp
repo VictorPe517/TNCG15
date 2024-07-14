@@ -22,7 +22,7 @@ glm::dvec3 Triangle::getIntersection(const Ray& theRay) {
 
 	// Ray parallel till triangle
 	if (a > doubThreshold && a < doubThreshold) {
-		return glm::dvec3(-9999, -9999, -9999);
+		return glm::dvec3(NAN, NAN, NAN);
 	}
 
 	double f = 1.0 / a;
@@ -31,7 +31,7 @@ glm::dvec3 Triangle::getIntersection(const Ray& theRay) {
 
 	//Ray intersection utanför triangle 
 	if (u < 0.0 || u > 1.0) {
-		return glm::dvec3(-9999, -9999, -9999);
+		return glm::dvec3(NAN, NAN, NAN);
 	}
 
 	glm::dvec3 q = glm::cross(s, e1);
@@ -39,7 +39,7 @@ glm::dvec3 Triangle::getIntersection(const Ray& theRay) {
 
 	// Utanför triangle 
 	if (v < 0.0 || u + v > 1.0) {
-		return glm::dvec3(-9999, -9999, -9999);
+		return glm::dvec3(NAN, NAN, NAN);
 	}
 
 	double t = f * glm::dot(e2, q);
@@ -48,7 +48,7 @@ glm::dvec3 Triangle::getIntersection(const Ray& theRay) {
 		return theRay.startPosition + t * theRay.direction; // True ray intersection.
 	}
 
-	return glm::dvec3(-9999, -9999, -9999); // No intersection.
+	return glm::dvec3(NAN, NAN, NAN); // No intersection.
 }
 
 std::vector<Triangle> Triangle::get_vec() {

@@ -42,18 +42,18 @@ Cube::Cube(Rectangle _r1, Rectangle _r2, Rectangle _r3, Rectangle _r4, Rectangle
 }
 
 glm::dvec3 Cube::getIntersection(const Ray& theRay) {
-	double minLength = 99999999;
-	glm::dvec3 closest = glm::dvec3(-9999, -9999, -9999);
+	double minLength = (double)INFINITY;
+	glm::dvec3 closest = glm::dvec3(NAN, NAN, NAN);
 
 	for (Rectangle* theRectangle : theRects) {
 		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
 
-		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection - theRay.startPosition) < minLength) {
+		if (intersection != glm::dvec3(NAN, NAN, NAN) && glm::length(intersection - theRay.startPosition) < minLength) {
 			minLength = glm::length(intersection - theRay.startPosition);
 			closest = intersection;
 		}
 	}
-	//if (minLength != glm::length(glm::dvec3(-9999, -9999, -9999)))std::cout << "Minlength: " << minLength << "\n";
+	//if (minLength != glm::length(glm::dvec3(0.0, 0.0, 0.0)))std::cout << "Minlength: " << minLength << "\n";
 
 	return closest;
 }
@@ -62,13 +62,13 @@ glm::dvec3 Cube::getIntersection(const Ray& theRay) {
 glm::dvec3 Cube::normal(const Ray& theRay) {
 	Rectangle* latestHitRectangle = nullptr;
 
-	double minLength = 99999999;
-	glm::dvec3 closest = glm::dvec3(-9999, -9999, -9999);
+	double minLength = (double)INFINITY;
+	glm::dvec3 closest = glm::dvec3(NAN, NAN, NAN);
 
 	for (Rectangle* theRectangle : theRects) {
 		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
 
-		if (intersection != glm::dvec3(-9999, -9999, -9999) && glm::length(intersection - theRay.startPosition) < minLength) {
+		if (intersection != glm::dvec3(NAN, NAN, NAN) && glm::length(intersection - theRay.startPosition) < minLength) {
 			minLength = glm::length(intersection - theRay.startPosition);
 			closest = intersection;
 			latestHitRectangle = theRectangle;
@@ -77,7 +77,7 @@ glm::dvec3 Cube::normal(const Ray& theRay) {
 	//std::cout << "Normal: " << glm::to_string(latestHitRectangle->normal(theRay)) << "\n";
 	if (latestHitRectangle != nullptr) return latestHitRectangle->normal(theRay);
 
-	return glm::dvec3(-9999, -9999, -9999);
+	return glm::dvec3(NAN, NAN, NAN);
 }
 
 

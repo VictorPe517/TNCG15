@@ -72,14 +72,17 @@ int main()
 	//------LIGHTS------//
 	LightSource areaLight2(glm::dvec3(6.0, 4.0, 4.5), glm::dvec3(8.0, 4.0, 4.5), glm::dvec3(6.0, -4.0, 4.5), glm::dvec3(8.0, -4.0, 4.5), 100, ColorDBL::White);
 
-	//-----SUBJECTS-----//
-	Sphere sphere1(glm::dvec3(9, 0, -2), 2, ColorDBL::White);
+
+	////-----SUBJECTS-----//
+	Sphere sphere1(glm::dvec3(6.0, 3.0, -1), 1.0, ColorDBL::White);
 	sphere1.theMaterial.isTransparent = true;
 
-	Sphere sphere2(glm::dvec3(8, 4, -4), 1, ColorDBL::Red);
+
+	Sphere sphere2(glm::dvec3(8.0, 4.0, -4.0), 0.75, ColorDBL::Red);
 	sphere2.theMaterial.isMirror = true;
-	Cube newCube(glm::dvec3(6, -4, -2), 1.5);
-	newCube.setMirror(true);
+
+	Cube newCube(glm::dvec3(6, -5, -2), 1.5);
+	//newCube.theMaterial.isTransparent = true;
 
 	theRenderSettings.UserInputAndSettings();
 
@@ -124,13 +127,21 @@ int main()
 		for (size_t _currentXpixel = 0; _currentXpixel < theCamera.GetResX(); _currentXpixel++) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
 
-				for (size_t l = 0; l < LightSource::theLightSources.size(); l++) {
+				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
+					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
 
-					Ray aRay(theEye, theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].position - theEye, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
+					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations());
+					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position + pixelOffset - theEye;
 
-					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[l], theRenderSettings.s_shadowrayIterations);
+					int calculatedIterations = theRenderSettings.GetTotalIterations();
 
-					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += aRay.GetRayColor();
+					// Create importance ray
+					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
+					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
+
+					ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
+					// Save the resulting color information into that ray
+					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
 				}
 			}
 			rowsDone++;

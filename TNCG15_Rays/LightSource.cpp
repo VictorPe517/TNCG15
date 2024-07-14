@@ -44,7 +44,7 @@ glm::dvec3 LightSource::getIntersection(const Ray& theRay) {
 		return(possibleIntersection);
 	}
 	else {
-		return glm::dvec3(-9999, -9999, -9999); //If vector is empty then no intersection
+		return glm::dvec3(NAN, NAN, NAN); //If vector is empty then no intersection
 	}
 }
 

@@ -3,7 +3,7 @@
 glm::dvec3 Rectangle::normal(const Ray& theRay) {
 	glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
 
-	if (direction == glm::dvec3(-9999, -9999, -9999))
+	if (direction == glm::dvec3(NAN, NAN, NAN))
 	{
 		std::cout << "Something is really wrong with rectangleNormal\n";
 	}
@@ -21,8 +21,8 @@ glm::dvec3 Rectangle::getIntersection(const Ray& theRay) {
 
 	double t = glm::dot((vertex - theRay.startPosition), theNormal) / (glm::dot(theRay.direction, theNormal));
 
-	if (t < 0.001) t = -1.0;
-	if (t < 0) return glm::dvec3(-9999, -9999, -9999);
+	if (t < 0.00001) t = -1.0;
+	if (t < 0.0) return glm::dvec3(NAN, NAN, NAN);
 
 	glm::dvec3 possibleIntersection = theRay.startPosition + t * theRay.direction;
 
@@ -34,7 +34,7 @@ glm::dvec3 Rectangle::getIntersection(const Ray& theRay) {
 	}
 	else {
 		//std::cout << "    Non-intersecting rectangle met \n\n";
-		return glm::dvec3(-9999, -9999, -9999); //If vector is empty then no intersection
+		return glm::dvec3(NAN, NAN, NAN); //If vector is empty then no intersection
 	}
 }
 

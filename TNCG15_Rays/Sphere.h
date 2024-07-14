@@ -16,7 +16,7 @@ public:
 
 	//virtual glm::dvec3 normal(Ray theRay) override{
 	//	std::cout << "   normal() called for sphere - Invalid operation!";
-	//	return glm::dvec3(-9999, -9999, -9999);
+	//	return glm::dvec3(0.0, 0.0, 0.0);
 	//}
 
 	virtual glm::dvec3 normal(const Ray& theRay);
