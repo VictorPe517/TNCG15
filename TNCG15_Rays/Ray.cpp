@@ -193,6 +193,7 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 	RayColor = finalPixelColor;
 }
 
+// Calculates wether the surface is in shadow (returns 0.0) or in light (returns 1.0)
 double Ray::calculateShadowRay(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightSourcePoint, const std::vector<Object*>& theObjects) {
 	Ray shadowRay(surfaceHitPoint, randomLightSourcePoint - surfaceHitPoint, ColorDBL(1, 1, 1), 0, 0);
 
@@ -214,7 +215,7 @@ double Ray::calculateShadowRay(const glm::dvec3& surfaceHitPoint, const glm::dve
 	}
 
 	if (index != -1 && dynamic_cast<LightSource*>((Object::theObjects[index])) != nullptr) {
-		// If we can cast the hit object to a LightSource, it is a lightsource, and we should return fullbright
+		// If we can cast the hit object to a LightSource, it IS a lightsource, and we should return fullbright
 		return 1.0;
 	}
 

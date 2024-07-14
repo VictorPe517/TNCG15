@@ -140,7 +140,7 @@ int main()
 	}
 
 	const auto stop = std::chrono::high_resolution_clock::now();
-	const std::chrono::duration<double, std::ratio<60>> duration = stop - start; //Log time in minutes for fun
+	const std::chrono::duration<double, std::ratio<60>> duration = stop - start; //Log time in minutes
 
 	std::string fileName = theImageHandler.GenerateFilename(theRenderSettings, theCamera, duration.count());
 	std::ofstream img(fileName);

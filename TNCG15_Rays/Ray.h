@@ -29,26 +29,17 @@ public:
 
 	// Get the point of intersection between an object and a light-source
 	glm::dvec3 getPointOfIntersection(std::vector<Object*> theObjects, LightSource& theLight, int iterations);
-
 	glm::dvec3 getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject);
-
 	glm::dvec3 getReflectedDirection(glm::dvec3 surfaceNormal);
 
 	glm::dvec3 localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 surfaceNormal);
-
 	glm::dvec3 hemisphericalToLocalCartesian(LocalDirection dir);
-
 	glm::dvec3 getRandomDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal);
-
 	LocalDirection getRandomLocalDirection();
 
 	double calcIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight);
-
 	void calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt);
-
 	double calculateShadowRay(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects);
-
-	int bounces_left = 5;
 
 	glm::dvec3 startPosition = glm::dvec3(0, 0, 0);
 	glm::dvec3 direction = glm::dvec3(0, 0, 0);
@@ -56,19 +47,15 @@ public:
 	Ray* prevRay = nullptr;
 	Ray* nextRay = nullptr;
 
-	bool isInside = false;
-
 private:
 	ColorDBL RayColor = ColorDBL(0.0, 0.0, 0.0);
 
 	double radiance = 0.0;
-	double importance = 0.0;
-	double reflectivity = 1.0;
 	double irradiance = 0.0;
+	int bounces_left = 5;
 
 	Object* hitObject = nullptr;
 	size_t hitIndex = 0;
-
 };
 
 

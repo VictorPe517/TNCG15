@@ -1,5 +1,6 @@
 #include "ImageHandler.h"
 
+// Converts the pixel values into integers between 0-255 and saves them to the imagestream "img"
 void ImageHandler::writeCurrentPixelToFile(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, RenderSettings theRenderSettings) {
 	//-------Write image to file-------//
 	int r = (int)floor(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.r * 255.0 * exposureMultiplier);
@@ -51,10 +52,13 @@ void ImageHandler::writeCurrentPixelToFile(Camera& theCamera, size_t currentX, s
 	img << r << " " << g << " " << b << std::endl;
 }
 
+
+// Generates a unique filename for the file preventing overwrite
 std::string ImageHandler::GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration) {
 	return std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_shadowrayIterations)) + "__time-" + std::to_string(duration) + ".ppm";
 }
 
+// Displays stats after a successful render
 void ImageHandler::DisplayRenderSuccessfulStats(Camera theCamera, double theDuration, double pixelsPerSec, std::string fileName)
 {
 	std::cout << std::flush
