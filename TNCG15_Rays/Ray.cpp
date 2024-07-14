@@ -65,7 +65,7 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 				hitIndex = l;
 
 
-				if (!do_not_reflect && theObjects[l]->getMaterial().isMirror && bounces_left > 0) {
+				if (theObjects[l]->getMaterial().isMirror && bounces_left > 0) {
 					//---------------[ MIRROR ]---------------//
 					this->nextRay = new Ray(intersection, glm::reflect(direction, theObjectNormal), RayColor, 1.0, bounces_left - 1);
 					intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
@@ -175,7 +175,7 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 	bool debug = false;
 
 	if (dynamic_cast<LightSource*>((Object::theObjects[hitIndex])) != nullptr) { //If we hit a lamp return the lamp color
-		RayColor = ColorDBL(1.0, 1.0, 1.0) / 10.0;
+		RayColor = ColorDBL(1.0, 1.0, 1.0) / 8.0;
 		return;
 	}
 
@@ -194,7 +194,6 @@ void Ray::calculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 }
 
 double Ray::calculateShadowRay(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightSourcePoint, const std::vector<Object*>& theObjects) {
-	shadowCalculated = true;
 	Ray shadowRay(surfaceHitPoint, randomLightSourcePoint - surfaceHitPoint, ColorDBL(1, 1, 1), 0, 0);
 
 	double testLength = glm::distance(surfaceHitPoint, randomLightSourcePoint);

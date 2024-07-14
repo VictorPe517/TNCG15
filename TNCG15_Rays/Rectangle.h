@@ -17,6 +17,20 @@ public:
 		theRectangles.push_back(*this);
 	}
 
+	Rectangle(glm::dvec3 centerPoint, glm::dvec3 size, ColorDBL _Color, bool addToLists = true) {
+		v1 = centerPoint + glm::dvec3(-size.x, size.y, size.z);
+		v2 = centerPoint + glm::dvec3(size.x, size.y, size.z);
+		v3 = centerPoint + glm::dvec3(size.x, -size.y, -size.z);
+		v4 = centerPoint + glm::dvec3(-size.x, -size.y, -size.z);
+
+		theMaterial.MatColor = _Color;
+
+		if (addToLists) theObjects.push_back(this);
+
+		thePolygons.push_back(this);
+		theRectangles.push_back(*this);
+	}
+
 	virtual glm::dvec3 normal(const Ray& theRay) override;
 
 	virtual glm::dvec3 getIntersection(const Ray& theRay) override;

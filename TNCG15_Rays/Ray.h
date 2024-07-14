@@ -56,23 +56,18 @@ public:
 	Ray* prevRay = nullptr;
 	Ray* nextRay = nullptr;
 
+	bool isInside = false;
 
+private:
+	ColorDBL RayColor = ColorDBL(0.0, 0.0, 0.0);
 
 	double radiance = 0.0;
 	double importance = 0.0;
 	double reflectivity = 1.0;
 	double irradiance = 0.0;
 
-	bool isInside = false;
-	bool do_not_reflect = false;
-	bool shadowCalculated = false;
-
 	Object* hitObject = nullptr;
-
 	size_t hitIndex = 0;
-
-private:
-	ColorDBL RayColor = ColorDBL(0.0, 0.0, 0.0);
 
 };
 
