@@ -84,7 +84,7 @@ int main()
 	Cube newCube(glm::dvec3(6, -5, -2), 1.5);
 	//newCube.theMaterial.isTransparent = true;
 
-	theRenderSettings.UserInputAndSettings();
+	theRenderSettings.HandleUserInputAndSettings();
 
 	std::cout << "\nInitializing Camera...\n\n";
 	Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1), theRenderSettings);
@@ -102,17 +102,16 @@ int main()
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
 				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
 					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
+					int calculatedIterations = theRenderSettings.GetTotalIterations();
 
 					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations());
 					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position + pixelOffset - theEye;
-
-					int calculatedIterations = theRenderSettings.GetTotalIterations();
 
 					// Create importance ray
 					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
 					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
 
-					ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
+					ColorDBL finalColor = aRay.GetRayColor() / (float)theRenderSettings.GetAAIterations();
 					// Save the resulting color information into that ray
 					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
 				}

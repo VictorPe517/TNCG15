@@ -8,7 +8,7 @@ class Camera;
 
 class RenderSettings {
 public:
-	void UserInputAndSettings();
+	void HandleUserInputAndSettings();
 	void WriteSettingsToScreen(Camera theCamera);
 	int GetTotalIterations();
 

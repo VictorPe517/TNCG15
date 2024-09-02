@@ -97,18 +97,24 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 
 					double R0 = pow((n1 - n2) / (n1 + n2), 2.0);
 					double inclination = this->GetInclination(theObjectNormal);
-					double radiance = R0 + (1.0 - R0) * pow((1.0 - cos(inclination)), 5.0);
+					double R = R0 + (1.0 - R0) * pow((1.0 - cos(inclination)), 5.0);
 
-					double transmittance = 1.0 - radiance;
+					double T = 1.0 - R;
 
-					//std::cout << " Current Dir inside func: " << glm::to_string(this->direction) << "\n";
+					glm::dvec3 refractedDir;
+					if (DrawRandom()) {
+						refractedDir = getReflectedDirection(theObjectNormal);
+					}
+					else {
+						refractedDir = getRefractedDirection(intersection, theObjectNormal, (*theObjects[l]), n1, n2);
+					}
 
-					glm::dvec3 refractedDir = getRefractedDirection(intersection, theObjectNormal, (*theObjects[l]), n1, n2);
 
 					if (refractedDir != glm::dvec3(NAN, NAN, NAN)) {
-						this->nextRay = new Ray(intersection, refractedDir, RayRadianceColor, radiance, 3);
+						this->nextRay = new Ray(intersection, refractedDir, RayRadianceColor, R, 3);
 						this->nextRay->startSurface = theObjects[l];
-						this->nextRay->isInside = !this->isInside;
+
+						this->nextRay->isInside = !this->isInside; //If we hit a surface and we're inside, the next won't be
 
 						intersection = (*nextRay).getPointOfIntersection(theObjects, theLight, iterations);
 						SetRayColor((*nextRay).GetRayColor());
@@ -116,8 +122,20 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 				}
 				else {
 					//-------------[ LAMBERTIAN ]-------------//
-					SetRayColor((theObjects[l]->getColor()));
-					CalculateLighting(intersection, Object::theObjects, theLight, iterations);
+					if (DrawRandom()) {
+						CalculateLighting(intersection, Object::theObjects, theLight, iterations);
+
+						CalculateFinalIrradiance(intersection, Object::theObjects, theLight, iterations);
+					}
+					else {
+						double newL = this->L * (1.0 / std::numbers::pi);
+
+						//Incoming radiance
+						this->nextRay = new Ray(intersection, hemisphericalToCartesian(getRandomLocalDirection()), RayRadianceColor, newL, 3);
+						this->nextRay->startSurface = theObjects[l];
+
+						SetRayColor((theObjects[l]->getColor()));
+					}
 				}
 			}
 		}
@@ -125,17 +143,18 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 	return intersection; //Return closest collision coordinates
 }
 
+bool Ray::DrawRandom() {
+	return rand() > (RAND_MAX / 2);
+}
+
 glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2) {
 	glm::dvec3 d0 = glm::normalize(this->direction);
-
 	glm::dvec3 n = glm::normalize(surfaceNormal);
 
 	double eta = n1 / n2;
-
 	double inclination = acos(GetInclination(surfaceNormal));
 
 	double nDot = glm::dot(d0, n);
-
 	double k = 1.0 - pow(eta, 2.0) * (1.0 - pow(nDot, 2.0));
 
 	if (k < 0.0) {
@@ -149,7 +168,6 @@ glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfac
 	else {
 		return glm::dvec3(NAN, NAN, NAN);
 	}
-
 }
 
 glm::dvec3 Ray::getReflectedDirection(glm::dvec3 surfaceNormal) {
@@ -212,27 +230,27 @@ glm::dvec3 Ray::getRandomDirection(glm::dvec3 intersection, glm::dvec3 surfaceNo
 	return worldDir;
 }
 
-void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt) {
-	ColorDBL finalPixelColor(0, 0, 0);
+ColorDBL Ray::CalculateFinalIrradiance(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt) {
+	ColorDBL radianceColor(0, 0, 0);
 	bool debug = false;
 
 	if (dynamic_cast<LightSource*>((Object::theObjects[hitIndex])) != nullptr) { //If we hit a lamp return the lamp color
 		RayRadianceColor = ColorDBL(1.0, 1.0, 1.0) / 8.0;
-		return;
+		return RayRadianceColor;
 	}
 
 	for (size_t iter = 0; iter < iterationAmt; iter++) {
 		glm::dvec3 thePoint = (theLight).getRandomPoint();
 
-		Ray newRay(thePoint, hitPoint - thePoint, ColorDBL(1, 0, 1), (theLight).radiance, 1);
+		Ray newRay(thePoint, hitPoint - thePoint, ColorDBL(0, 0, 0), (theLight).radiance, 1);
 		glm::dvec3 surfaceNormal = ((*Object::theObjects[hitIndex]).normal(newRay));
 
 		double dx = ((float)iterationAmt * 3200.0);
 
-		finalPixelColor += (RayRadianceColor * newRay.CalculateIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
+		radianceColor += (RayRadianceColor * newRay.CalculateIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
 	}
 
-	RayRadianceColor = finalPixelColor;
+	return radianceColor;
 }
 
 // Calculates wether the surface is in shadow (returns 0.0) or in light (returns 1.0)
@@ -286,3 +304,37 @@ double Ray::GetInclination(glm::dvec3 surfaceNormal) {
 
 	return dot(-surfaceNormal, vector) / glm::length(vector);
 };
+
+void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt) {
+	//Vi har sista rayen där vi terminateat
+	Ray* currentRay = this;
+
+	if (dynamic_cast<LightSource*>((currentRay->hitObject)) != nullptr) {
+		currentRay->RayRadianceColor = hitObject->getColor();
+	}
+
+	if (!currentRay->hitObject->getMaterial().isTransparent && !currentRay->hitObject->getMaterial().isMirror) {
+		currentRay->RayRadianceColor = CalculateFinalIrradiance(currentRay->endPosition, theObjects, theLight, iterationAmt);
+	}
+
+	if (currentRay->nextRay != nullptr) currentRay = currentRay->nextRay;
+
+	//Vi jobbar oss tillbaks till kameran
+	while (currentRay->prevRay != nullptr) {
+		Ray* PreviousRay = currentRay->nextRay;
+
+		if (currentRay->hitObject->getMaterial().isTransparent && currentRay->nextRay != nullptr) {
+			currentRay->RayRadianceColor = PreviousRay->RayRadianceColor;
+		}
+		else if (currentRay->hitObject->getMaterial().isMirror && currentRay->nextRay != nullptr) {
+
+		}
+		else {
+
+		}
+
+
+
+		currentRay = currentRay->prevRay;
+	}
+}

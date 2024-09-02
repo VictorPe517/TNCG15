@@ -3,11 +3,6 @@
 glm::dvec3 Rectangle::normal(const Ray& theRay) {
 	glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
 
-	if (direction == glm::dvec3(NAN, NAN, NAN))
-	{
-		std::cout << "Something is really wrong with rectangleNormal\n";
-	}
-
 	return direction / glm::length(direction);
 }
 

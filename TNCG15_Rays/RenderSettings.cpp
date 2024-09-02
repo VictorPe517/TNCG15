@@ -2,7 +2,7 @@
 #include "Camera.h"
 
 
-void RenderSettings::UserInputAndSettings() {
+void RenderSettings::HandleUserInputAndSettings() {
 	int res = 0;
 	int scale = 0;
 	int shadowIter = 0;
