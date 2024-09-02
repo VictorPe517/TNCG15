@@ -34,7 +34,7 @@ public:
 
 	glm::dvec3 localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 surfaceNormal);
 	glm::dvec3 hemisphericalToCartesian(LocalDirection dir);
-	glm::dvec3 getRandomDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal);
+	glm::dvec3 getRandomDirection(glm::dvec3 surfaceNormal);
 	double GetInclination(glm::dvec3 surfaceNormal);
 
 	LocalDirection WorldCartesianToHemispherical();
@@ -45,6 +45,8 @@ public:
 	double IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects);
 
 	double CalculateBRDF(glm::dvec3 thePoint, double direction, double inclination);
+
+	bool DrawRandom();
 
 	glm::dvec3 startPosition = glm::dvec3(0, 0, 0);
 	glm::dvec3 endPosition = glm::dvec3(0, 0, 0);

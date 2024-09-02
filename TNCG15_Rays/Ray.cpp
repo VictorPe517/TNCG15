@@ -116,13 +116,26 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 				}
 				else {
 					//-------------[ LAMBERTIAN ]-------------//
-					SetRayColor((theObjects[l]->getColor()));
-					CalculateLighting(intersection, Object::theObjects, theLight, iterations);
+					if (DrawRandom()) {
+						this->nextRay = new Ray(intersection, getRandomDirection(theObjectNormal), RayRadianceColor, 1.0, 10);
+						intersection = this->nextRay->getPointOfIntersection(theObjects, theLight, iterations);
+						SetRayColor(theObjects[l]->getColor());
+						CalculateLighting(intersection, Object::theObjects, theLight, iterations);
+					}
+					else {
+						
+
+					}
 				}
 			}
 		}
 	}
 	return intersection; //Return closest collision coordinates
+}
+
+bool Ray::DrawRandom() {
+
+	return rand() > RAND_MAX / 2.0;
 }
 
 glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2) {
@@ -198,7 +211,7 @@ glm::dvec3 Ray::hemisphericalToCartesian(LocalDirection dir)
 	return glm::dvec3(cos(dir.azimuth) * sin(dir.inclination), sin(dir.azimuth) * sin(dir.inclination), cos(dir.inclination));
 }
 
-glm::dvec3 Ray::getRandomDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal)
+glm::dvec3 Ray::getRandomDirection(glm::dvec3 surfaceNormal)
 {
 	double twoPi = 2 * std::numbers::pi;
 
