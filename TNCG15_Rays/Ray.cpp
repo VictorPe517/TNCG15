@@ -232,6 +232,8 @@ void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 		finalPixelColor += (RayRadianceColor * newRay.CalculateIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
 	}
 
+	// new branch
+
 	RayRadianceColor = finalPixelColor;
 }
 
