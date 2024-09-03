@@ -3,23 +3,23 @@
 #include "Pixel.h"
 #include <vector>
 
+class RenderSettings;
+
 class Camera {
 public:
-    Camera(glm::dvec3 _c1, glm::dvec3 _c2, glm::dvec3 _c3, glm::dvec3 _c4) : c1{ _c1 }, c2{ _c2 }, c3{ _c3 }, c4{ _c4 } {
-        double delta = 2.0 / x_res;
-        //We have our camera position from the above corners, !!!  X = 0  !!!
-        //We need to set the position of each pixel in the camera to make sense
-        for (size_t i = 0; i < x_res; i++) {
-            for (size_t j = 0; j < y_res; j++) {
-                thePixels.push_back(Pixel(glm::dvec3(0.0, -1.0 * (j * delta - (1.0f - delta)), -1.0 * (i * delta - (1.0f - delta))))); //TODO: wtf multiplicera in minustecken
-            }
-        }
-    }
+	Camera(glm::dvec3 _c1, glm::dvec3 _c2, glm::dvec3 _c3, glm::dvec3 _c4, RenderSettings aRenderSetting);
 
-    static const int x_res = 300;   //Static:   Shared between all instances of Camera
-    static const int y_res = 300;   //Const:    We pinky promise to the compiler that we won't change the resolution of the camera during runtime.
+	const size_t GetResX();
+	const size_t GetResY();
+	void DisplayPixelPosition(size_t x, size_t y);
+	glm::dvec3 GetSuperSamplingPixelOffset(size_t currentIteration, size_t totalIterations);
 
-    glm::dvec3 c1, c2, c3, c4;
-    std::vector<Pixel> thePixels;
+	std::vector<Pixel> thePixels;
+
+private:
+	size_t x_res;
+	size_t y_res;
+
+	glm::dvec3 c1, c2, c3, c4;
 };
 

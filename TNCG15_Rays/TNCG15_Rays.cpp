@@ -1,84 +1,160 @@
 // TNCG15_Rays.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 // INHERITANCE: https://msbrijuniversity.ac.in/assets/uploads/newsupdate/InheritanceinC++.pdf
+// MULTITHREADING: https://www.educative.io/blog/modern-multithreading-and-concurrency-in-cpp
 
 #include <iostream>
-#include "glm/glm.hpp"
-#include "glm/gtx/string_cast.hpp"
 #include <vector>
 #include <fstream>
 #include <math.h>
+#include <cassert>
+#include <thread>
+#include <ppl.h>
+#include <chrono>
+#include <ratio>
+
+#include "glm/glm.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "Camera.h"
+#include "RenderSettings.h"
 #include "Rectangle.h"
 #include "Triangle.h"
 #include "LightSource.h"
+#include "Sphere.h"
+#include "Object.h"
+#include "cube.h"
+#include "ImageHandler.h"
+#include "HelperFunctions.h"
 
-std::vector<Polygon> Polygon::thePolygons;
+std::vector<Object*> Object::theObjects;
+std::vector<Polygon*> Polygon::thePolygons;
 std::vector<Rectangle> Rectangle::theRectangles;
 std::vector<Triangle> Triangle::theTriangles;
-double Ray::maxE = 0.0;
+std::vector<Sphere*> Sphere::theSpheres;
+std::vector<Cube> Cube::theCubes;
+std::vector<LightSource*> LightSource::theLightSources;
 
+//---------------------[ STANDARD SETTINGS ]---------------------//
+RenderSettings theRenderSettings;
+ImageHandler theImageHandler;
+HelperFunctions theHelperFunctions;
 
-//-------------------------------------------------------------------------------------------------------//
+double exposureMultiplier = 10;
+//---------------------------------------------------------------//
+
 int main()
 {
+	size_t pixelIndex = 0;
 
-    std::cout << "Compilation successful. Welcome back commander. \n";
+	int maxval = (int)-INFINITY;
+	int minval = (int)INFINITY;
 
-    glm::dvec3 theEye(-1.0, 0.0, 0.0);
+	glm::dvec3 theEye(-1.0, 0.0, 0.0);
 
-    ColorDBL magenta = ColorDBL(1.0, 0.0, 1.0);
-    ColorDBL red = ColorDBL(1.0,0.0,0.0);
-    ColorDBL orange = ColorDBL(0.9, 0.4, 0.0);
-    ColorDBL yellow = ColorDBL(1.0, 1.0, 0.0);
-    ColorDBL green = ColorDBL(0.0, 1.0, 0.0);
-    ColorDBL cyan = ColorDBL(0.0,1.0,1.0);
-    ColorDBL blue = ColorDBL(0.0, 0.0, 1.0);
-    ColorDBL white = ColorDBL(1.0, 1.0, 1.0);
+	std::cout << "Initializing Scene Geometry...\n\n";
 
-
-
-
-    std::cout << "Setting up primitives...\n\n";
-
-    //------GEOMETRY------//
-        //------CIELING------//
-        Rectangle cielingRect(glm::dvec3(0, 6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, -6, 5), glm::dvec3(0, -6, 5), red);
-        Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), orange);
-        Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), yellow);
-        
-        //-------FLOOR-------//
-        Rectangle floorRect(glm::dvec3(10, 6, -5), glm::dvec3(0, 6, -5), glm::dvec3(0, -6, -5), glm::dvec3(10, -6, -5), blue);
-        Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), cyan);
-        Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), magenta);
-        
-        //-------WALLS-------//
-        Rectangle wallN(glm::dvec3(10, 6, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, 6, -5), glm::dvec3(10, 6, -5), green);
-        Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), green);
-        Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), green);
-        Rectangle wallS(glm::dvec3(0, -6, 5), glm::dvec3(10, -6, 5), glm::dvec3(10, -6, -5), glm::dvec3(0, -6, -5), green);
-        Rectangle wallSW(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), green);
-        Rectangle wallSE(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), green);
-
-        Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1));
+#pragma region Scene_1
+	////------GEOMETRY------//
+	//Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
+	//Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::White);
+	//Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
+	//Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), ColorDBL::White);
+	//Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);  //Behind camera
+	//Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), ColorDBL::White); //In front of camera
+	////-------WALLS-------//
+	//Rectangle wallN(glm::dvec3(5.0, 6.0, 0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
+	//Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), ColorDBL::White);
+	//Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);
+	//Rectangle wallR(glm::dvec3(5.0, -6.0, 0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
+	//Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), ColorDBL::Blue);
+	//Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), ColorDBL::White);
+	//wallL_F.theMaterial.isMirror = true;
+	//std::cout << "Initializing Lights...\n\n";
+	////------LIGHTS------//
+	//LightSource areaLight2(glm::dvec3(8.0, 4.0, 5), glm::dvec3(10.0, 4.0, 5), glm::dvec3(8.0, -4.0, 5), glm::dvec3(10.0, -4.0, 5), 100, ColorDBL::White);
 
 
-        LightSource areaLight(glm::dvec3(0, 3, 4.8), glm::dvec3(5, 3, 4.8), glm::dvec3(5, -3, 4.8), glm::dvec3(0, -3, 4.8), 100, white);
-        //-----------------------//
+	//////-----SUBJECTS-----//
+	//Sphere sphere1(glm::dvec3(10.0, 0.0, -3), 1.0, ColorDBL::White);
+	//sphere1.theMaterial.isTransparent = true;
 
 
-    std::cout << "Rendering image...\n\n";
+	//Sphere sphere2(glm::dvec3(8.0, 4.0, -4.0), 0.75, ColorDBL::Red);
+	//sphere2.theMaterial.isMirror = true;
 
-    //--------------------RENDERING LOOP--------------------//
-    int pixelIndex = 0;
+	//Cube newCube(glm::dvec3(6, -5, -2), 1.5);
+	//newCube.theMaterial.isMirror = true;
 
-    for (size_t i = 0; i < Camera::x_res; i++) {
+#pragma endregion
 
+#pragma region Cage
+	// X+ = forward, Y+ = left, Z+ = up
+	Rectangle ceiling(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 5.0, 0.0), ColorDBL::White);
+	Rectangle floor(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 5.0, 0.0), ColorDBL::White);
+
+	Rectangle wall_F(glm::dvec3(10.0, 0.0, 0.0), glm::dvec3(0.0, 5.0, 5.0), ColorDBL::White);
+	Rectangle wall_L(glm::dvec3(5.0, 5.0, 0.0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
+	Rectangle wall_R(glm::dvec3(5.0, -5.0, 0.0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
+
+	Sphere sphere1(glm::dvec3(8.0, 2.0, -3), 1.5, ColorDBL::White);
+	sphere1.theMaterial.isMirror = true;
+
+	Sphere sphere2(glm::dvec3(8.0, -2.0, -3.0), 1.5, ColorDBL::White);
+	sphere2.theMaterial.isTransparent = true;
+
+	LightSource areaLight2(glm::dvec3(3.0, 2.0, 4.99), glm::dvec3(7.0, 2.0, 4.99), glm::dvec3(3.0, -2.0, 4.99), glm::dvec3(7.0, -2.0, 4.99), 100, ColorDBL::White);
+
+#pragma endregion
+
+	theRenderSettings.UserInputAndSettings();
+
+	std::cout << "\nInitializing Camera...\n\n";
+	Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1), theRenderSettings);
+
+	theRenderSettings.WriteSettingsToScreen(theCamera);
+	std::cout << "\nRendering Image:\n";
+
+
+	//--------------------RENDERING LOOP--------------------//
+	int rowsDone = 0; // Concurrency fix
+	const auto start = std::chrono::high_resolution_clock::now();
+
+	if (theRenderSettings.s_useMulticore) {
+		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
+			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
+				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
+					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
+
+					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations());
+					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position + pixelOffset - theEye;
+
+					int calculatedIterations = theRenderSettings.GetTotalIterations();
+
+					// Create importance ray
+					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
+					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
+
+<<<<<<< HEAD
         for (size_t j = 0; j < Camera::y_res; j++) {
             Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, yellow, 0);
+=======
+					ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
+					// Save the resulting color information into that ray
+					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
+				}
+			}
+			rowsDone++; // Concurrency fix
+>>>>>>> oneFinalAttempt
 
+			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
 
+			});
+	}
+	else {
+		for (size_t _currentXpixel = 0; _currentXpixel < theCamera.GetResX(); _currentXpixel++) {
+			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
 
+<<<<<<< HEAD
             for (size_t l = 0; l < Rectangle::theRectangles.size(); l++) {
                 if (glm::dot(Rectangle::theRectangles[l].normal(), aRay.direction) < 0 && Rectangle::theRectangles[l].getIntersection(aRay) != glm::dvec3(0,0,0)) {
                     //std::cout << "Intersection found!\n";
@@ -86,15 +162,17 @@ int main()
                     for (size_t iter = 0; iter < 90; iter++) {
                         glm::dvec3 thePoint = areaLight.getRandomPoint();
                         Ray newRay(thePoint, Rectangle::theRectangles[l].getIntersection(aRay) - thePoint, yellow, areaLight.radiance);
+=======
+				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
+					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
+>>>>>>> oneFinalAttempt
 
-                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Rectangle::theRectangles[l].normal(), areaLight.normal(), newRay.radiance); //Give color of rectangle or triangle to pixel
-                    }
+					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations());
+					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position + pixelOffset - theEye;
 
-                    
-                }
-                //theCamera.thePixels[i * Camera::x_res + j].pixelColor *= Rectangle::theRectangles[l].Color;
-            }
+					int calculatedIterations = theRenderSettings.GetTotalIterations();
 
+<<<<<<< HEAD
             for (size_t l = 0; l < Triangle::theTriangles.size(); l++) {
                 if (glm::dot(Triangle::theTriangles[l].normal(), aRay.direction) < 0 && Triangle::theTriangles[l].getIntersection(aRay) != glm::dvec3(0, 0, 0)) {
                     //std::cout << "Intersection found!\n";
@@ -102,22 +180,35 @@ int main()
                     for (size_t iter = 0; iter < 90; iter++) {
                         glm::dvec3 thePoint = areaLight.getRandomPoint();
                         Ray newRay(thePoint, Triangle::theTriangles[l].getIntersection(aRay) - thePoint, yellow, areaLight.radiance);
+=======
+					// Create importance ray
+					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
+					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
+>>>>>>> oneFinalAttempt
 
-                        theCamera.thePixels[i * Camera::x_res + j].pixelColor += newRay.calcIrradiance(Triangle::theTriangles[l].normal(), areaLight.normal(), newRay.radiance); //Give color of rectangle or triangle to pixel
-                    }
+					ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
+					// Save the resulting color information into that ray
+					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
+				}
+			}
+			rowsDone++;
+			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
+		}
+	}
 
+	const auto stop = std::chrono::high_resolution_clock::now();
+	const std::chrono::duration<double, std::ratio<60>> duration = stop - start; //Log time in minutes
 
-                }
-                //theCamera.thePixels[i * Camera::x_res + j].pixelColor *= Triangle::theTriangles[l].Color;
-            }
+	std::string fileName = theImageHandler.GenerateFilename(theRenderSettings, theCamera, duration.count());
+	std::ofstream img(fileName);
 
-            pixelIndex++;
-        }
-    }
-    std::cout << "Rendering Successful.\n";
+	theImageHandler.CreateImageStream(img, theCamera);
 
-    std::cout << "The image contains " << theCamera.thePixels.size() << " pixels.\n";
+	// Logging
+	std::cout << "\n =====[ Rendering complete after " << duration << "! ]======\n\n" << "Writing to file:\n";
+	rowsDone = 0;
 
+<<<<<<< HEAD
     std::cout << "Writing the image to disk... \n";
     
     //--------------------WRITING THE IMAGE TO PICTURE.PPM---------------//
@@ -125,25 +216,21 @@ int main()
     img << "P3" << std::endl;
     img << Camera::x_res << " " << Camera::y_res << std::endl;
     img << "255" << std::endl;
+=======
+	for (size_t i = 0; i < theCamera.GetResX(); i++) {
+		for (size_t j = 0; j < theCamera.GetResY(); j++) {
+			theImageHandler.writeCurrentPixelToStream(theCamera, i, j, img, theRenderSettings);
+		}
+		rowsDone++;
+		theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
+	}
+>>>>>>> oneFinalAttempt
 
-    for (int i = 0; i < sqrt(theCamera.thePixels.size()); i++) {
-        for (int j = 0; j < sqrt(theCamera.thePixels.size()); j++) {
-            int r = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.r / Ray::maxE * 254.0);
-            int g = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.g / Ray::maxE * 254.0);
-            int b = floor(theCamera.thePixels[i * Camera::x_res + j].pixelColor.b / Ray::maxE * 254.0);
+	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 60.0);
+	theImageHandler.DisplayRenderSuccessfulStats(theCamera, duration.count(), pixelsPerSecond, fileName);
 
-            //std::cout << (r + b + g) / 3.0 << "\n";
-
-            img << r << " " << g << " " << b << std::endl;
-        }
-    }
-
-    system("explorer picture.ppm");
-    
+	return 0;
 }
 
 
-Pixel::Pixel()
-{
-}
 
