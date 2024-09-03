@@ -136,17 +136,12 @@ int main()
 					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
 					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
 
-<<<<<<< HEAD
-        for (size_t j = 0; j < Camera::y_res; j++) {
-            Ray aRay(theEye, theCamera.thePixels[pixelIndex].position-theEye, yellow, 0);
-=======
 					ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
 					// Save the resulting color information into that ray
 					theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
 				}
 			}
 			rowsDone++; // Concurrency fix
->>>>>>> oneFinalAttempt
 
 			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
 
@@ -156,37 +151,17 @@ int main()
 		for (size_t _currentXpixel = 0; _currentXpixel < theCamera.GetResX(); _currentXpixel++) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
 
-<<<<<<< HEAD
-            for (size_t l = 0; l < Rectangle::theRectangles.size(); l++) {
-                if (glm::dot(Rectangle::theRectangles[l].normal(), aRay.direction) < 0 && Rectangle::theRectangles[l].getIntersection(aRay) != glm::dvec3(0,0,0)) {
-                    //std::cout << "Intersection found!\n";
-                    //theCamera.thePixels[i * Camera::x_res + j].pixelColor = Rectangle::theRectangles[l].Color; //Give color of rectangle or triangle to pixel
-                    for (size_t iter = 0; iter < 90; iter++) {
-                        glm::dvec3 thePoint = areaLight.getRandomPoint();
-                        Ray newRay(thePoint, Rectangle::theRectangles[l].getIntersection(aRay) - thePoint, yellow, areaLight.radiance);
-=======
 				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
 					int currentIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel;
->>>>>>> oneFinalAttempt
 
 					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations());
 					glm::dvec3 importanceDirection = theCamera.thePixels[currentIndex].position + pixelOffset - theEye;
 
 					int calculatedIterations = theRenderSettings.GetTotalIterations();
 
-<<<<<<< HEAD
-            for (size_t l = 0; l < Triangle::theTriangles.size(); l++) {
-                if (glm::dot(Triangle::theTriangles[l].normal(), aRay.direction) < 0 && Triangle::theTriangles[l].getIntersection(aRay) != glm::dvec3(0, 0, 0)) {
-                    //std::cout << "Intersection found!\n";
-                    //theCamera.thePixels[i * Camera::x_res + j].pixelColor = Rectangle::theRectangles[l].Color; //Give color of rectangle or triangle to pixel
-                    for (size_t iter = 0; iter < 90; iter++) {
-                        glm::dvec3 thePoint = areaLight.getRandomPoint();
-                        Ray newRay(thePoint, Triangle::theTriangles[l].getIntersection(aRay) - thePoint, yellow, areaLight.radiance);
-=======
 					// Create importance ray
 					Ray aRay(theEye, importanceDirection, ColorDBL::White, 0, theRenderSettings.s_maxMirrorBounces);
 					glm::dvec3 hitPos = aRay.getPointOfIntersection((Object::theObjects), *LightSource::theLightSources[0], calculatedIterations);
->>>>>>> oneFinalAttempt
 
 					ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
 					// Save the resulting color information into that ray
@@ -210,15 +185,6 @@ int main()
 	std::cout << "\n =====[ Rendering complete after " << duration << "! ]======\n\n" << "Writing to file:\n";
 	rowsDone = 0;
 
-<<<<<<< HEAD
-    std::cout << "Writing the image to disk... \n";
-    
-    //--------------------WRITING THE IMAGE TO PICTURE.PPM---------------//
-    std::ofstream img("GlobalenPicture.ppm");
-    img << "P3" << std::endl;
-    img << Camera::x_res << " " << Camera::y_res << std::endl;
-    img << "255" << std::endl;
-=======
 	for (size_t i = 0; i < theCamera.GetResX(); i++) {
 		for (size_t j = 0; j < theCamera.GetResY(); j++) {
 			theImageHandler.writeCurrentPixelToStream(theCamera, i, j, img, theRenderSettings);
@@ -226,13 +192,9 @@ int main()
 		rowsDone++;
 		theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
 	}
->>>>>>> oneFinalAttempt
 
 	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 60.0);
 	theImageHandler.DisplayRenderSuccessfulStats(theCamera, duration.count(), pixelsPerSecond, fileName);
 
 	return 0;
 }
-
-
-

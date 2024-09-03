@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "glm/glm.hpp"
 #include <vector>
 #include "ColorDBL.h"
@@ -9,8 +9,6 @@
 #include "glm/gtx/string_cast.hpp"
 #include "LightSource.h"
 
-<<<<<<< HEAD
-=======
 struct LocalDirection {
 public:
 	double azimuth = 0.0;
@@ -20,28 +18,11 @@ public:
 class LightSource;
 #define _USE_MATH_DEFINES
 
->>>>>>> oneFinalAttempt
 class Ray {
 public:
 	Ray() = default;
 
-<<<<<<< HEAD
-    Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance) : startPosition{ start }, direction{ glm::normalize(dir) }, RayColor { _RayColor }, radiance{_radiance} {}
-    
-    static double maxE;
-    
-    glm::dvec3 startPosition = glm::dvec3(0, 0, 0);
-    glm::dvec3 direction = glm::dvec3(0, 0, 0);
-    Ray* prevRay = nullptr;
-    Ray* nextRay = nullptr;
-    //Polygon* Surface = nullptr;
-    ColorDBL RayColor = ColorDBL(0.0,0.0,0.0);
-    double radiance = 0.0;
-    double importance = 0.0;
-    double reflectivity = 1.0;
-=======
 	Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance, int _bounces) : startPosition{ start }, direction{ glm::normalize(dir) }, RayRadianceColor{ _RayColor = ColorDBL(1,1,1) }, L{ _radiance = 50.0 }, bounces_left{ _bounces = 5 } {    }
->>>>>>> oneFinalAttempt
 
 	void SetRayColor(ColorDBL theColor);
 	ColorDBL GetRayColor();
@@ -51,27 +32,6 @@ public:
 	glm::dvec3 getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2);
 	glm::dvec3 getReflectedDirection(glm::dvec3 surfaceNormal);
 
-<<<<<<< HEAD
-        glm::dvec3 d = (y-x);
-        double distance = glm::length(d);
-
-
-        double cos_omega_x = glm::dot((x_normal), glm::normalize(d)) / (distance * distance);
-        double cos_omega_y = glm::dot(-1.0*(y_normal), glm::normalize(d)) / (distance * distance);
-
-        double G = cos_omega_x * cos_omega_y / (distance * distance);
-
-        double E = Lradiance/std::numbers::pi * G;
-
-        //std::cout << "E value is: " << E << "\n";
-
-        if (E > maxE) {
-            maxE = E;
-        }
-
-        return ColorDBL(E, E, E);
-    };
-=======
 	glm::dvec3 localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 surfaceNormal);
 	glm::dvec3 hemisphericalToCartesian(LocalDirection dir);
 	glm::dvec3 getRandomDirection(glm::dvec3 surfaceNormal);
@@ -113,10 +73,6 @@ private:
 	Object* startSurface = nullptr;
 	Object* hitObject = nullptr;
 	size_t hitIndex = 0;
->>>>>>> oneFinalAttempt
 
 	bool isInside = false;
 };
-
-
-
