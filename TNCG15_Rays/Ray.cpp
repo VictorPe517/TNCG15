@@ -116,15 +116,11 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 				}
 				else {
 					//-------------[ LAMBERTIAN ]-------------//
-					if (DrawRandom()) {
-						SetRayColor(theObjects[l]->getColor());
+					if (DrawRandom()) {  //todo: skapa ray path och sen calla p� calclightning och ber�kna genom hela pathen
 						this->nextRay = new Ray(intersection, getRandomDirection(theObjectNormal), RayRadianceColor, 1.0, 10);
 						intersection = this->nextRay->getPointOfIntersection(theObjects, theLight, iterations);
 						SetRayColor(theObjects[l]->getColor());
 						CalculateLighting(intersection, Object::theObjects, theLight, iterations);
-					}
-					else {
-
 					}
 				}
 			}
@@ -226,6 +222,9 @@ glm::dvec3 Ray::getRandomDirection(glm::dvec3 surfaceNormal)
 }
 
 void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt) {
+
+	ColorDBL final(0, 0, 0);
+
 	ColorDBL finalPixelColor(0, 0, 0);
 	bool debug = false;
 
@@ -243,12 +242,30 @@ void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 		double dx = ((float)iterationAmt * 3200.0);
 
 		finalPixelColor += (RayRadianceColor * newRay.CalculateIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
+		final = finalPixelColor;
 	}
 
-	// new branch
+	ColorDBL rayPathColor(0, 0, 0);
 
-	RayRadianceColor = finalPixelColor;
+	if (DrawRandom()) { // funkar men det �r weird att vi har 2 drawRandom. Denna bit skulle egentligen bara k�ra genom ray pathen och ge sluut resultatet. Nu k�r den egentligen bara randomly.
+
+		glm::dvec3 randomDirection = getRandomDirection(Object::theObjects[hitIndex]->normal(*this));
+		this->nextRay = new Ray(hitPoint, randomDirection, RayRadianceColor, 1.0, bounces_left - 1);
+
+		glm::dvec3 nextIntersection = nextRay->getPointOfIntersection(theObjects, theLight, iterationAmt);
+		if (this->nextRay->hitObject) {
+			nextRay->CalculateLighting(nextIntersection, theObjects, theLight, iterationAmt);
+			rayPathColor = nextRay->GetRayColor();
+		}
+
+		final.r = finalPixelColor.r + rayPathColor.r;
+		final.g = finalPixelColor.g + rayPathColor.g;
+		final.b = finalPixelColor.b + rayPathColor.b;
+	}
+
+	RayRadianceColor = final;
 }
+
 
 // Calculates wether the surface is in shadow (returns 0.0) or in light (returns 1.0)
 double Ray::IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightSourcePoint, const std::vector<Object*>& theObjects) {
@@ -281,11 +298,11 @@ double Ray::IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3
 
 }
 
-double Ray::CalculateBRDF(glm::dvec3 thePoint, double azimuth, double inclination) {
-	double result;
-
-	return result;
-}
+//double Ray::CalculateBRDF(glm::dvec3 thePoint, double azimuth, double inclination) {
+//	double result;
+//
+//	return result;
+//}
 
 LocalDirection Ray::WorldCartesianToHemispherical() {
 	LocalDirection result;
