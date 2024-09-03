@@ -92,8 +92,10 @@ int main()
 	Rectangle ceiling(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 5.0, 0.0), ColorDBL::White);
 	Rectangle floor(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 5.0, 0.0), ColorDBL::White);
 
-	Rectangle wall_F(glm::dvec3(10.0, 0.0, 0.0), glm::dvec3(0.0, 5.0, 5.0), ColorDBL::White);
-	Rectangle wall_L(glm::dvec3(5.0, 5.0, 0.0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
+	Rectangle wall_F(glm::dvec3(10.0, 0.0, 0.0), glm::dvec3(0.0, -5.0, 5.0), ColorDBL::White);
+	wall_F.theMaterial.isMirror = true;
+
+	Rectangle wall_L(glm::dvec3(5.0, 2.0, 0.0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
 	Rectangle wall_R(glm::dvec3(5.0, -5.0, 0.0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
 
 	Sphere sphere1(glm::dvec3(8.0, 2.0, -3), 1.5, ColorDBL::White);
