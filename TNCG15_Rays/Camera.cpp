@@ -29,24 +29,33 @@ glm::dvec3 Camera::GetSuperSamplingPixelOffset(size_t currentIteration, size_t t
 {
 	// Super quick & dirty implementation, offset each ray using a circle within the pixel 
 	// increase the frequency of the steps when totalIterations is increased.
+	bool useLegacyAA = false;
+
+	double x = 0.0;
+	double y = 0.0;
 
 	if (totalIterations <= 1) return glm::dvec3(0.0, 0.0, 0.0);
 
-	double _delta = 2.0 / (double)x_res; // Pixel size
-	double degToCover = 360.0; // Degrees of the circle to cover
+	if (useLegacyAA) {
+		double _delta = 2.0 / (double)x_res; // Pixel size
+		double _radius = _delta / 2.5; // Chosen after quick testing for aesthetics
 
-	double degOffset = 45.0; // Offset to upper right
-	double deg2rad = (3.14159 / 180.0);
+		double degToCover = 360.0; // Degrees of the circle to cover
+		double degOffset = 45.0; // Offset to upper right
+		double deg2rad = (3.14159 / 180.0);
 
-	double degsPerSegment = (degToCover / (double)totalIterations);
+		double degsPerSegment = (degToCover / (double)totalIterations);
+		double radToEvaluate = (degOffset + degsPerSegment * currentIteration) * deg2rad;
 
-	double _radius = _delta / (double)2.5; // Chosen after quick testing for aesthetics
+		x = _radius * cos(radToEvaluate);
+		y = _radius * sin(radToEvaluate);
+	}
+	else {
+		double pixelDelta = 1.0 / (double)x_res;
 
-	double radToEvaluate = (degOffset + degsPerSegment * currentIteration) * deg2rad;
-
-	double x = _radius * cos(radToEvaluate);
-	double y = _radius * sin(radToEvaluate);
-
+		x = (((double)rand() / (double)RAND_MAX) * 2.0 - 1.0) * pixelDelta;
+		y = (((double)rand() / (double)RAND_MAX) * 2.0 - 1.0) * pixelDelta;
+	}
 
 	return glm::dvec3(0.0, x, y);
 }

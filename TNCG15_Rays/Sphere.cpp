@@ -26,7 +26,7 @@ glm::dvec3 Sphere::getIntersection(const Ray& theRay) {
 		return theRay.startPosition + theRay.direction * (-c2 + glm::sqrt(arg)) / (2.0 * c1);
 	}
 
-	if (arg > 0) {
+	if (arg > 0.0) {
 		//Two Solutions
 		//std::cout << " Entered and exited sphere, calculating tmin \n";
 

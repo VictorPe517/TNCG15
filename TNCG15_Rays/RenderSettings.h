@@ -19,7 +19,7 @@ public:
 
 	size_t s_SSAAiterations = 2; // off = 1;
 
-	size_t s_maxMirrorBounces = 16;
+	size_t s_maxMirrorBounces = 32;
 	size_t s_shadowrayIterations = 16;
 
 	bool s_useMulticore = true;

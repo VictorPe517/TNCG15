@@ -110,11 +110,12 @@ void RenderSettings::UserInputAndSettings() {
 
 	std::cout << "\nDesired Super-Sampling Anti-Aliasing amples:\n"
 		<< " Fast - 1: Off \n"
-		<< "        2: 2 \n"
-		<< "        3: 4 \n"
-		<< "        4: 8 \n"
-		<< "        5: 16 \n"
-		<< " Slow - 6: 32 \n"
+		<< "        2: 8 \n"
+		<< "        3: 16 \n"
+		<< "        4: 32 \n"
+		<< "        5: 128 \n"
+		<< "        6: 256 \n"
+		<< " Slow - 7: 512 \n"
 		<< "[Input:] ";
 
 	std::cin >> SSAAIter;
@@ -124,19 +125,22 @@ void RenderSettings::UserInputAndSettings() {
 		s_SSAAiterations = 1;
 		break;
 	case 2:
-		s_SSAAiterations = 2;
-		break;
-	case 3:
-		s_SSAAiterations = 4;
-		break;
-	case 4:
 		s_SSAAiterations = 8;
 		break;
-	case 5:
+	case 3:
 		s_SSAAiterations = 16;
 		break;
-	case 6:
+	case 4:
 		s_SSAAiterations = 32;
+		break;
+	case 5:
+		s_SSAAiterations = 128;
+		break;
+	case 6:
+		s_SSAAiterations = 256;
+		break;
+	case 7:
+		s_SSAAiterations = 512;
 		break;
 	}
 }
@@ -151,10 +155,10 @@ void RenderSettings::WriteSettingsToScreen(Camera theCamera) {
 		<< "    " << s_renderingResolution.x << " x " << s_renderingResolution.y <<
 		" [x" << s_resolutionScale << "] --> ( " << theCamera.GetResX() << " x " << theCamera.GetResY() << " ) " << std::endl
 
-		<< "  Shadowray Iterations per pixel:" << std::endl
+		<< "  Shadowray Iterations:" << std::endl
 		<< "    " << s_shadowrayIterations << std::endl
-		<< "  Max recursive mirror bounces:" << std::endl
-		<< "    " << s_maxMirrorBounces << std::endl
+		<< "  SSAA Iterations:" << std::endl
+		<< "    " << s_SSAAiterations << std::endl
 		<< "\\======================================/" << std::endl;
 }
 

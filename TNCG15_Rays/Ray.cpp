@@ -117,13 +117,13 @@ glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSou
 				else {
 					//-------------[ LAMBERTIAN ]-------------//
 					if (DrawRandom()) {
+						SetRayColor(theObjects[l]->getColor());
 						this->nextRay = new Ray(intersection, getRandomDirection(theObjectNormal), RayRadianceColor, 1.0, 10);
 						intersection = this->nextRay->getPointOfIntersection(theObjects, theLight, iterations);
 						SetRayColor(theObjects[l]->getColor());
 						CalculateLighting(intersection, Object::theObjects, theLight, iterations);
 					}
 					else {
-						
 
 					}
 				}
@@ -177,11 +177,11 @@ LocalDirection Ray::getRandomLocalDirection() // Returns random direction using 
 {
 	LocalDirection result;
 
-	double azimuth = (rand()) / ((RAND_MAX + 1.0));
-	double inclination = (rand()) / ((RAND_MAX + 1.0));
+	double azimuth = ((double)rand()) / (((double)RAND_MAX + 1.0));
+	double inclination = ((double)rand()) / (((double)RAND_MAX + 1.0));
 
-	result.azimuth = azimuth / (2 * std::numbers::pi);
-	result.inclination = (1 - cos(inclination) * cos(inclination));
+	result.azimuth = azimuth / (2.0 * std::numbers::pi);
+	result.inclination = (1.0 - cos(inclination) * cos(inclination));
 
 	return result;
 }
