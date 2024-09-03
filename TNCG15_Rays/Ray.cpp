@@ -1,5 +1,7 @@
 #include "Ray.h"
 
+int counter = 0;
+
 void Ray::SetRayColor(ColorDBL theColor) {
 	RayRadianceColor = theColor;
 }
@@ -39,6 +41,8 @@ double Ray::CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec
 		return E;
 	}
 };
+
+
 
 glm::dvec3 Ray::getPointOfIntersection(std::vector<Object*> theObjects, LightSource& theLight, int iterations) {
 	glm::dvec3 intersection = glm::dvec3(0, 0, 0);
@@ -222,11 +226,8 @@ glm::dvec3 Ray::getRandomDirection(glm::dvec3 surfaceNormal)
 }
 
 void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt) {
-
-	ColorDBL final(0, 0, 0);
-
-	ColorDBL finalPixelColor(0, 0, 0);
-	bool debug = false;
+	ColorDBL directIllumination(0, 0, 0);
+	ColorDBL indirectIllumination(0, 0, 0);
 
 	if (dynamic_cast<LightSource*>((Object::theObjects[hitIndex])) != nullptr) { //If we hit a lamp return the lamp color
 		RayRadianceColor = ColorDBL(1.0, 1.0, 1.0) / 8.0;
@@ -239,32 +240,26 @@ void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 		Ray newRay(thePoint, hitPoint - thePoint, ColorDBL(1, 0, 1), (theLight).radiance, 1);
 		glm::dvec3 surfaceNormal = ((*Object::theObjects[hitIndex]).normal(newRay));
 
-		double dx = ((float)iterationAmt * 3200.0);
+		double dx = (static_cast<double>(iterationAmt) * 3200.0);
 
-		finalPixelColor += (RayRadianceColor * newRay.CalculateIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
-		final = finalPixelColor;
+		directIllumination += (RayRadianceColor * newRay.CalculateIrradiance(surfaceNormal, hitPoint, theObjects, theLight)) / dx;
+		indirectIllumination = directIllumination;
 	}
 
-	ColorDBL rayPathColor(0, 0, 0);
-
-	if (DrawRandom()) { // funkar men det �r weird att vi har 2 drawRandom. Denna bit skulle egentligen bara k�ra genom ray pathen och ge sluut resultatet. Nu k�r den egentligen bara randomly.
-
+	if (bounces_left > 0) {
 		glm::dvec3 randomDirection = getRandomDirection(Object::theObjects[hitIndex]->normal(*this));
-		this->nextRay = new Ray(hitPoint, randomDirection, RayRadianceColor, 1.0, bounces_left - 1);
-
-		glm::dvec3 nextIntersection = nextRay->getPointOfIntersection(theObjects, theLight, iterationAmt);
-		if (this->nextRay->hitObject) {
-			nextRay->CalculateLighting(nextIntersection, theObjects, theLight, iterationAmt);
-			rayPathColor = nextRay->GetRayColor();
+		Ray indirectRay(hitPoint, randomDirection, RayRadianceColor, 1.0, bounces_left - 1);
+		indirectRay.getPointOfIntersection(theObjects, theLight, iterationAmt);
+		if (indirectRay.hitObject) {
+			indirectIllumination = indirectRay.GetRayColor();
 		}
-
-		final.r = finalPixelColor.r + rayPathColor.r;
-		final.g = finalPixelColor.g + rayPathColor.g;
-		final.b = finalPixelColor.b + rayPathColor.b;
 	}
 
-	RayRadianceColor = final;
+	RayRadianceColor.r = indirectIllumination.r;
+	RayRadianceColor.g = indirectIllumination.g;
+	RayRadianceColor.b = indirectIllumination.b;
 }
+
 
 
 // Calculates wether the surface is in shadow (returns 0.0) or in light (returns 1.0)
