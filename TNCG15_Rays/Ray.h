@@ -28,7 +28,7 @@ public:
 	ColorDBL GetRayColor();
 
 	// Get the point of intersection between an object and a light-source
-	glm::dvec3 getPointOfIntersection(std::vector<Object*> theObjects, LightSource& theLight, int iterations);
+	glm::dvec3 getPointOfIntersection(std::vector<Object*> theObjects, LightSource& theLight);
 	glm::dvec3 getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2);
 	glm::dvec3 getReflectedDirection(glm::dvec3 surfaceNormal);
 
@@ -41,7 +41,7 @@ public:
 	LocalDirection getRandomLocalDirection();
 
 	double CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight);
-	void CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight, int iterationAmt);
+	void CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight);
 	double IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects);
 
 	double CalculateBRDF(glm::dvec3 thePoint, double direction, double inclination);
