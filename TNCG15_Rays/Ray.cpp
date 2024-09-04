@@ -247,21 +247,21 @@ void Ray::CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects
 
 	ColorDBL rayPathColor(0, 0, 0);
 
-	if (DrawRandom()) { // funkar men det �r weird att vi har 2 drawRandom. Denna bit skulle egentligen bara k�ra genom ray pathen och ge sluut resultatet. Nu k�r den egentligen bara randomly.
+	// funkar men det �r weird att vi har 2 drawRandom. Denna bit skulle egentligen bara k�ra genom ray pathen och ge sluut resultatet. Nu k�r den egentligen bara randomly.
 
-		glm::dvec3 randomDirection = getRandomDirection(Object::theObjects[hitIndex]->normal(*this));
-		this->nextRay = new Ray(hitPoint, randomDirection, RayRadianceColor, 1.0, bounces_left - 1);
+	glm::dvec3 randomDirection = getRandomDirection(Object::theObjects[hitIndex]->normal(*this));
+	this->nextRay = new Ray(hitPoint, randomDirection, RayRadianceColor, 1.0, bounces_left - 1);
 
-		glm::dvec3 nextIntersection = nextRay->getPointOfIntersection(theObjects, theLight, iterationAmt);
-		if (this->nextRay->hitObject) {
-			nextRay->CalculateLighting(nextIntersection, theObjects, theLight, iterationAmt);
-			rayPathColor = nextRay->GetRayColor();
-		}
-
-		final.r = finalPixelColor.r + rayPathColor.r;
-		final.g = finalPixelColor.g + rayPathColor.g;
-		final.b = finalPixelColor.b + rayPathColor.b;
+	glm::dvec3 nextIntersection = nextRay->getPointOfIntersection(theObjects, theLight, iterationAmt);
+	if (this->nextRay->hitObject) {
+		nextRay->CalculateLighting(nextIntersection, theObjects, theLight, iterationAmt);
+		rayPathColor = nextRay->GetRayColor();
 	}
+
+	final.r = finalPixelColor.r + rayPathColor.r;
+	final.g = finalPixelColor.g + rayPathColor.g;
+	final.b = finalPixelColor.b + rayPathColor.b;
+
 
 	RayRadianceColor = final;
 }

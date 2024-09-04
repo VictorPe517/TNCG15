@@ -185,6 +185,8 @@ int main()
 	std::cout << "\n =====[ Rendering complete after " << duration << "! ]======\n\n" << "Writing to file:\n";
 	rowsDone = 0;
 
+#pragma region WriteToFile
+
 	for (size_t i = 0; i < theCamera.GetResX(); i++) {
 		for (size_t j = 0; j < theCamera.GetResY(); j++) {
 			theImageHandler.writeCurrentPixelToStream(theCamera, i, j, img, theRenderSettings);
@@ -195,6 +197,7 @@ int main()
 
 	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 60.0);
 	theImageHandler.DisplayRenderSuccessfulStats(theCamera, duration.count(), pixelsPerSecond, fileName);
+#pragma endregion
 
 	return 0;
 }
