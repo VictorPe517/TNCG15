@@ -54,47 +54,47 @@ int main()
 	std::cout << "Initializing Scene Geometry...\n\n";
 
 #pragma region Scene_1
-	////------GEOMETRY------//
-	//Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
-	//Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::White);
-	//Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
-	//Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), ColorDBL::White);
-	//Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);  //Behind camera
-	//Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), ColorDBL::White); //In front of camera
-	////-------WALLS-------//
-	//Rectangle wallN(glm::dvec3(5.0, 6.0, 0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
-	//Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), ColorDBL::White);
-	//Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);
-	//Rectangle wallR(glm::dvec3(5.0, -6.0, 0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
-	//Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), ColorDBL::Blue);
-	//Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), ColorDBL::White);
-	//wallL_F.theMaterial.isMirror = true;
-	//std::cout << "Initializing Lights...\n\n";
-	////------LIGHTS------//
-	//LightSource areaLight2(glm::dvec3(8.0, 4.0, 5), glm::dvec3(10.0, 4.0, 5), glm::dvec3(8.0, -4.0, 5), glm::dvec3(10.0, -4.0, 5), 100, ColorDBL::White);
+	//------GEOMETRY------//
+	Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
+	Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::White);
+	Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
+	Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), ColorDBL::White);
+	Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);  //Behind camera
+	Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), ColorDBL::White); //In front of camera
+	//-------WALLS-------//
+	Rectangle wallN(glm::dvec3(5.0, 6.0, 0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
+	Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), ColorDBL::White);
+	Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);
+	Rectangle wallR(glm::dvec3(5.0, -6.0, 0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
+	Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), ColorDBL::Blue);
+	Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), ColorDBL::White);
+	wallL_F.theMaterial.isMirror = true;
+	std::cout << "Initializing Lights...\n\n";
+	//------LIGHTS------//
+	LightSource areaLight2(glm::dvec3(8.0, 4.0, 5), glm::dvec3(10.0, 4.0, 5), glm::dvec3(8.0, -4.0, 5), glm::dvec3(10.0, -4.0, 5), 100, ColorDBL::White);
 
 
-	//////-----SUBJECTS-----//
-	//Sphere sphere1(glm::dvec3(10.0, 0.0, -3), 1.0, ColorDBL::White);
-	//sphere1.theMaterial.isTransparent = true;
+	////-----SUBJECTS-----//
+	Sphere sphere1(glm::dvec3(10.0, 0.0, -3), 1.0, ColorDBL::White);
+	sphere1.theMaterial.isTransparent = true;
 
 
-	//Sphere sphere2(glm::dvec3(8.0, 4.0, -4.0), 0.75, ColorDBL::Red);
-	//sphere2.theMaterial.isMirror = true;
+	Sphere sphere2(glm::dvec3(8.0, 4.0, -4.0), 0.75, ColorDBL::Red);
+	sphere2.theMaterial.isMirror = true;
 
-	//Cube newCube(glm::dvec3(6, -5, -2), 1.5);
-	//newCube.theMaterial.isMirror = true;
+	Cube newCube(glm::dvec3(6, -5, -2), 1.5);
+	newCube.theMaterial.isMirror = true;
 
 #pragma endregion
 
 #pragma region Cage
 	// X+ = forward, Y+ = left, Z+ = up
-	Rectangle ceiling(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 5.0, 0.0), ColorDBL::White);
+	/*Rectangle ceiling(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 5.0, 0.0), ColorDBL::White);
 	Rectangle floor(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 5.0, 0.0), ColorDBL::White);
 
 	Rectangle wall_F(glm::dvec3(10.0, 0.0, 0.0), glm::dvec3(0.0, -5.0, 5.0), ColorDBL::White);
 	wall_F.theMaterial.isMirror = true;
-
+	s
 	Rectangle wall_L(glm::dvec3(5.0, 2.0, 0.0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
 	Rectangle wall_R(glm::dvec3(5.0, -5.0, 0.0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
 
@@ -104,7 +104,7 @@ int main()
 	Sphere sphere2(glm::dvec3(8.0, -2.0, -3.0), 1.5, ColorDBL::White);
 	sphere2.theMaterial.isTransparent = true;
 
-	LightSource areaLight2(glm::dvec3(3.0, 2.0, 4.99), glm::dvec3(7.0, 2.0, 4.99), glm::dvec3(3.0, -2.0, 4.99), glm::dvec3(7.0, -2.0, 4.99), 100, ColorDBL::White);
+	LightSource areaLight2(glm::dvec3(3.0, 2.0, 4.99), glm::dvec3(7.0, 2.0, 4.99), glm::dvec3(3.0, -2.0, 4.99), glm::dvec3(7.0, -2.0, 4.99), 100, ColorDBL::White);*/
 
 #pragma endregion
 
