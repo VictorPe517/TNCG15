@@ -30,7 +30,7 @@ public:
 	void setMirror(bool boolean);
 
 	std::vector<Rectangle*> theRects;
-	Material theMaterial = Material(0, 0, 0, false, ColorDBL(1, 1, 1));
+	Material theMaterial = Material(1, 1, 1, false, ColorDBL(1, 1, 1));
 	static std::vector<Cube> theCubes;
 
 

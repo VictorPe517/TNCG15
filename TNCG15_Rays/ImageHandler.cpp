@@ -3,9 +3,9 @@
 // Converts the pixel values into integers between 0-255 and saves them to the imagestream "img"
 void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, RenderSettings theRenderSettings) {
 	//-------Write image to file-------//
-	int r = (int)round(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.r * 255.0 * exposureMultiplier);
-	int g = (int)round(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.g * 255.0 * exposureMultiplier);
-	int b = (int)round(theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.b * 255.0 * exposureMultiplier);
+	int r = (int)round((theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.r) * 255.0 * exposureMultiplier);
+	int g = (int)round((theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.g) * 255.0 * exposureMultiplier);
+	int b = (int)round((theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.b) * 255.0 * exposureMultiplier);
 
 	//Give the other two channels some of the intensity of the highest colors
 	if (r > 255) {
@@ -55,7 +55,7 @@ void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t currentX,
 
 // Generates a unique filename for the file preventing overwrite
 std::string ImageHandler::GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration) {
-	return std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_shadowrayIterations)) + "__time-" + std::to_string(duration) + ".ppm";
+	return std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_SSAAiterations)) + "__time-" + std::to_string(duration) + ".ppm";
 }
 
 // Displays stats after a successful render

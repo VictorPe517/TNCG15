@@ -72,44 +72,9 @@ void RenderSettings::UserInputAndSettings() {
 		break;
 	}
 
-	std::cout << "\nDesired shadow ray samples per pixel:\n"
-		<< " Fast - 1: 8 \n"
-		<< "        2: 16 \n"
-		<< "        3: 64 \n"
-		<< "        4: 256 \n"
-		<< "        5: 512 \n"
-		<< "        6: 1024 \n"
-		<< " Slow - 7: 2048 \n"
-		<< "[Input:] ";
-
-	std::cin >> shadowIter;
-
-	switch (shadowIter) {
-	case 1:
-		s_shadowrayIterations = 8;
-		break;
-	case 2:
-		s_shadowrayIterations = 16;
-		break;
-	case 3:
-		s_shadowrayIterations = 64;
-		break;
-	case 4:
-		s_shadowrayIterations = 256;
-		break;
-	case 5:
-		s_shadowrayIterations = 512;
-		break;
-	case 6:
-		s_shadowrayIterations = 1024;
-		break;
-	case 7:
-		s_shadowrayIterations = 2048;
-		break;
-	}
 
 	std::cout << "\nDesired Super-Sampling Anti-Aliasing amples:\n"
-		<< " Fast - 1: Off \n"
+		<< " Fast - 1: 1 \n"
 		<< "        2: 8 \n"
 		<< "        3: 16 \n"
 		<< "        4: 32 \n"
@@ -122,16 +87,16 @@ void RenderSettings::UserInputAndSettings() {
 
 	switch (SSAAIter) {
 	case 1:
-		s_SSAAiterations = 1;
+		s_SSAAiterations = 2;
 		break;
 	case 2:
-		s_SSAAiterations = 8;
-		break;
-	case 3:
 		s_SSAAiterations = 16;
 		break;
-	case 4:
+	case 3:
 		s_SSAAiterations = 32;
+		break;
+	case 4:
+		s_SSAAiterations = 64;
 		break;
 	case 5:
 		s_SSAAiterations = 128;
@@ -155,8 +120,6 @@ void RenderSettings::WriteSettingsToScreen(Camera theCamera) {
 		<< "    " << s_renderingResolution.x << " x " << s_renderingResolution.y <<
 		" [x" << s_resolutionScale << "] --> ( " << theCamera.GetResX() << " x " << theCamera.GetResY() << " ) " << std::endl
 
-		<< "  Shadowray Iterations:" << std::endl
-		<< "    " << s_shadowrayIterations << std::endl
 		<< "  SSAA Iterations:" << std::endl
 		<< "    " << s_SSAAiterations << std::endl
 		<< "\\======================================/" << std::endl;
@@ -164,5 +127,5 @@ void RenderSettings::WriteSettingsToScreen(Camera theCamera) {
 
 int RenderSettings::GetTotalIterations()
 {
-	return (int)round(s_shadowrayIterations / s_SSAAiterations);
+	return (int)round(s_SSAAiterations);
 }

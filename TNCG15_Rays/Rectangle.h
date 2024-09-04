@@ -8,7 +8,7 @@
 
 class Rectangle : public Polygon {
 public:
-	Rectangle(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, glm::dvec3 _v4, ColorDBL _Color, bool addToLists = true) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 }, v4{ _v4 }{
+	Rectangle(glm::dvec3 _v1, glm::dvec3 _v2, glm::dvec3 _v3, glm::dvec3 _v4, ColorDBL _Color = ColorDBL(1.0, 1.0, 1.0), bool addToLists = true) : v1{ _v1 }, v2{ _v2 }, v3{ _v3 }, v4{ _v4 }{
 		theMaterial.MatColor = _Color;
 
 		if (addToLists) theObjects.push_back(this);
@@ -41,7 +41,7 @@ public:
 
 	glm::dvec3 v1, v2, v3, v4;
 	//ColorDBL Color = ColorDBL(0, 0, 0);
-	Material theMaterial = Material(1, 0, 0, false, ColorDBL(0, 0, 0));
+	Material theMaterial = Material(1, 1, 1, false, ColorDBL(1, 1, 1));
 	static std::vector<Rectangle> theRectangles;
 };
 

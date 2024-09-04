@@ -10,7 +10,7 @@
 class Sphere : public Object
 {
 public:
-	Sphere(glm::dvec3 _position, double rad, ColorDBL _Color);
+	Sphere(glm::dvec3 _position, double rad, ColorDBL _Color = ColorDBL(1.0, 1.0, 1.0));
 
 	virtual glm::dvec3 getIntersection(const Ray& theRay) override;
 
@@ -29,7 +29,7 @@ public:
 	double radius = 0;
 	//ColorDBL Color = ColorDBL(0,0,0);
 
-	Material theMaterial = Material(1, 0, 1, false, ColorDBL(1, 1, 1));
+	Material theMaterial = Material(1, 1, 1, false, ColorDBL(1.0, 1.0, 1.0));
 
 	static std::vector<Sphere*> theSpheres;
 };

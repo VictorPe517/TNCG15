@@ -20,6 +20,8 @@ public:
 
 	ColorDBL operator*(ColorDBL rhs);
 
+	double distance();
+
 	std::string ToString();
 
 	double r, g, b;

@@ -48,7 +48,7 @@ glm::dvec3 Cube::getIntersection(const Ray& theRay) {
 	for (Rectangle* theRectangle : theRects) {
 		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
 
-		if (intersection != glm::dvec3(NAN, NAN, NAN) && glm::length(intersection - theRay.startPosition) < minLength) {
+		if (!glm::all(glm::isnan(intersection)) && glm::length(intersection - theRay.startPosition) < minLength) {
 			minLength = glm::length(intersection - theRay.startPosition);
 			closest = intersection;
 		}

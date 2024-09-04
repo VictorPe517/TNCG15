@@ -22,7 +22,7 @@ class Ray {
 public:
 	Ray() = default;
 
-	Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor, double _radiance, int _bounces) : startPosition{ start }, direction{ glm::normalize(dir) }, RayRadianceColor{ _RayColor = ColorDBL(1,1,1) }, L{ _radiance = 50.0 }, bounces_left{ _bounces = 5 } {    }
+	Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor) : startPosition{ start }, direction{ glm::normalize(dir) }, RayRadianceColor{ _RayColor = ColorDBL(1,1,1) } {    }
 
 	void SetRayColor(ColorDBL theColor);
 	ColorDBL GetRayColor();
@@ -32,21 +32,30 @@ public:
 	glm::dvec3 getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2);
 	glm::dvec3 getReflectedDirection(glm::dvec3 surfaceNormal);
 
+
+
 	glm::dvec3 localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 surfaceNormal);
 	glm::dvec3 hemisphericalToCartesian(LocalDirection dir);
 	glm::dvec3 getRandomDirection(glm::dvec3 surfaceNormal);
 	double GetInclination(glm::dvec3 surfaceNormal);
 
 	LocalDirection WorldCartesianToHemispherical();
+	LocalDirection WorldCartesianToHemispherical(glm::dvec3 direction);
 	LocalDirection getRandomLocalDirection();
 
-	double CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight);
+	ColorDBL CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight, int hitIndex);
 	void CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight);
+	void CalculateRayPath(std::vector<Object*> theObjects, LightSource& theLight);
 	double IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects);
 
 	double CalculateBRDF(glm::dvec3 thePoint, double direction, double inclination);
 
 	bool DrawRandom();
+	double DrawRandomNormalized();
+
+	void CalculateRadianceFlow(std::vector<Object*> theObjects, LightSource& theLight);
+
+	void ToString();
 
 	glm::dvec3 startPosition = glm::dvec3(0, 0, 0);
 	glm::dvec3 endPosition = glm::dvec3(0, 0, 0);
@@ -60,19 +69,14 @@ private:
 
 	// W: Importance
 	double W = 1.0;
-
 	// L: Radiance
 	double L = 0.0;
-
 	// E: Irradiance, the light arriving from the scene to the point
 	double Irradiance = 0.0;
 
-
-	int bounces_left = 5;
-
 	Object* startSurface = nullptr;
 	Object* hitObject = nullptr;
-	size_t hitIndex = 0;
+	size_t hitIndex = -1;
 
 	bool isInside = false;
 };

@@ -24,7 +24,7 @@ public:
 	glm::dvec3 v1, v2, v3;
 	ColorDBL Color = ColorDBL(0.0, 0.0, 0.0);
 	static std::vector<Triangle> theTriangles;
-	Material theMaterial = Material(1, 0, 1, false, ColorDBL(1, 1, 1));
+	Material theMaterial = Material(1.0, 1.0, 1.0, false, ColorDBL(1.0, 1.0, 1.0));
 
 private:
 	double doubThreshold = 1e-6;

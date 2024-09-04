@@ -15,6 +15,6 @@ public:
 	void CreateImageStream(std::ofstream& img, Camera theCamera);
 
 private:
-	int exposureMultiplier = 1;
+	int exposureMultiplier = 1.0;
 };
 

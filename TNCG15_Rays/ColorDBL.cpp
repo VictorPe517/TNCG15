@@ -56,6 +56,10 @@ ColorDBL ColorDBL::operator*(ColorDBL rhs) {
 	return finalColor;
 }
 
+double ColorDBL::distance() {
+	return sqrt(r * r + g * g + b * b);
+}
+
 std::string ColorDBL::ToString() {
 	std::string res("r: " + std::to_string(r) + ", b:" + std::to_string(b) + ", g: " + std::to_string(g) + "\n");
 
