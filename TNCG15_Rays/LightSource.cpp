@@ -12,7 +12,7 @@ glm::dvec3 LightSource::normal(const Ray& theRay) {
 
 
 //Returns a random point in world-space anywhere on the light source
-glm::dvec3 const LightSource::getRandomPoint() {
+const glm::dvec3 const LightSource::getRandomPoint() {
 	double randY = (rand()) / ((RAND_MAX + 1.0));
 	double randX = (rand()) / ((RAND_MAX + 1.0));
 

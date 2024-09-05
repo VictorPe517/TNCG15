@@ -1,11 +1,11 @@
 #include "ImageHandler.h"
 
 // Converts the pixel values into integers between 0-255 and saves them to the imagestream "img"
-void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t currentX, size_t currentY, std::ofstream& img, RenderSettings theRenderSettings) {
+void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t index, std::ofstream& img, RenderSettings theRenderSettings) {
 	//-------Write image to file-------//
-	int r = (int)round((theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.r) * 255.0 * exposureMultiplier);
-	int g = (int)round((theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.g) * 255.0 * exposureMultiplier);
-	int b = (int)round((theCamera.thePixels[currentX * (theCamera.GetResY()) + currentY].pixelColor.b) * 255.0 * exposureMultiplier);
+	int r = (int)round((theCamera.thePixels[index].pixelColor.r) * 255.0 * exposureMultiplier);
+	int g = (int)round((theCamera.thePixels[index].pixelColor.g) * 255.0 * exposureMultiplier);
+	int b = (int)round((theCamera.thePixels[index].pixelColor.b) * 255.0 * exposureMultiplier);
 
 	//Give the other two channels some of the intensity of the highest colors
 	if (r > 255) {
@@ -36,20 +36,7 @@ void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t currentX,
 	g = glm::clamp(g, 0, 255);
 	b = glm::clamp(b, 0, 255);
 
-	if (theRenderSettings.s_verboseDebugging) {
-		std::cout << "PIXEL: ( " << currentX << " , " << currentY << " )" << std::endl;
-		theCamera.DisplayPixelPosition(currentX, currentY);
-
-		std::cout << theCamera.thePixels[currentX * theCamera.GetResY() + currentY].pixelColor.ToString()
-			<< "Which corresponds to ints r: " << r << ", g: " << g << ", b: " << b
-			<< "\n Raw pixelCol"
-			<< "  r: " << theCamera.thePixels[currentX * theCamera.GetResY() + currentY].pixelColor.r
-			<< ", g: " << theCamera.thePixels[currentX * theCamera.GetResY() + currentY].pixelColor.g
-			<< ", b: " << theCamera.thePixels[currentX * theCamera.GetResY() + currentY].pixelColor.b
-			<< "\n    With a mean of: " << (double)(r + g + b) / 3.0 << "\n\n";
-	}
-
-	img << r << " " << g << " " << b << std::endl;
+	img << r << " " << g << " " << b << "\n";
 }
 
 
@@ -74,6 +61,6 @@ void ImageHandler::CreateImageStream(std::ofstream& img, Camera theCamera)
 {
 	// Create image out stream
 	img << "P3" << std::endl;
-	img << theCamera.GetResX() << " " << theCamera.GetResY() << std::endl;
+	img << theCamera.GetResY() << " " << theCamera.GetResX() << std::endl;
 	img << "255" << std::endl;
 }

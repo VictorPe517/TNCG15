@@ -10,7 +10,7 @@ ColorDBL Ray::GetRayColor() {
 	return RayRadianceColor;
 }
 
-ColorDBL Ray::CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight, int hitIndex) {
+ColorDBL Ray::CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects,LightSource& theLight,const int& hitIndex) {
 	double E = 0.0;
 	ColorDBL irradiance = ColorDBL(0, 0, 0);
 
@@ -40,6 +40,15 @@ ColorDBL Ray::CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dv
 	return irradiance;
 };
 
+Ray::~Ray() {
+	delete nextRay;
+	//Ray* current = this;  // Start from the current Ray (this)
+	//while (current != nullptr) {
+	//	Ray* next = current->nextRay;  // Store the next Ray before deleting
+	//	delete current;                // Delete the current Ray
+	//	current = next;                // Move to the next Ray
+	//}
+}
 
 
 bool Ray::DrawRandom() {
@@ -51,7 +60,7 @@ double Ray::DrawRandomNormalized() {
 	return (double)rand() / (double)RAND_MAX;
 }
 
-glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2) {
+glm::dvec3 Ray::getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double n1, double n2) {
 	glm::dvec3 d0 = glm::normalize(this->direction);
 
 	glm::dvec3 n = glm::normalize(surfaceNormal);
@@ -82,7 +91,7 @@ glm::dvec3 Ray::getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfac
 
 }
 
-glm::dvec3 Ray::getReflectedDirection(glm::dvec3 surfaceNormal) {
+glm::dvec3 Ray::getReflectedDirection(glm::dvec3& surfaceNormal) {
 	glm::dvec3 dir;
 
 	dir = direction - 2.0 * (glm::dot(direction, glm::normalize(surfaceNormal)) * glm::normalize(surfaceNormal));
@@ -104,7 +113,7 @@ LocalDirection Ray::getRandomLocalDirection() // Returns random direction using 
 }
 
 
-glm::dvec3 Ray::localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 surfaceNormal)
+glm::dvec3 Ray::localCartesianToWorldCartesian(const glm::dvec3& localDir, const glm::dvec3& surfaceNormal)
 {
 	// Local system in the local system: x = ( 1, 0, 0 ), y = ( 0, 1, 0 ), z = ( 0, 0, 1 )
 	// Local system   in  global system: x = (a1,a2,a3 ), y = (b1,b2,b3 ), z = (c1,c2,c3 )
@@ -126,12 +135,12 @@ glm::dvec3 Ray::localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 s
 	return res;
 }
 
-glm::dvec3 Ray::hemisphericalToCartesian(LocalDirection dir)
+glm::dvec3 Ray::hemisphericalToCartesian(const LocalDirection& dir)
 {
 	return glm::dvec3(cos(dir.azimuth) * sin(dir.inclination), sin(dir.azimuth) * sin(dir.inclination), cos(dir.inclination));
 }
 
-glm::dvec3 Ray::getRandomDirection(glm::dvec3 surfaceNormal)
+glm::dvec3 Ray::getRandomDirection(const glm::dvec3& surfaceNormal)
 {
 	double twoPi = 2.0 * std::numbers::pi;
 
@@ -147,7 +156,7 @@ glm::dvec3 Ray::getRandomDirection(glm::dvec3 surfaceNormal)
 	return worldDir;
 }
 
-void Ray::CalculateRayPath(std::vector<Object*> theObjects, LightSource& theLight)
+void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSource& theLight)
 {
 	glm::dvec3 intersection = glm::dvec3(0, 0, 0);
 	glm::dvec3 possibleIntersection = glm::dvec3(0.0, 0.0, 0.0);
@@ -318,7 +327,7 @@ LocalDirection Ray::WorldCartesianToHemispherical() {
 	return result;
 }
 
-LocalDirection Ray::WorldCartesianToHemispherical(glm::dvec3 direction) {
+LocalDirection Ray::WorldCartesianToHemispherical(glm::dvec3& direction) {
 	LocalDirection result;
 
 	result.inclination = glm::acos(direction.z / (sqrt(pow(direction.x, 2.0) + pow(direction.y, 2.0) + pow(direction.z, 2.0))));
@@ -327,7 +336,7 @@ LocalDirection Ray::WorldCartesianToHemispherical(glm::dvec3 direction) {
 	return result;
 }
 
-double Ray::GetInclination(glm::dvec3 surfaceNormal) {
+double Ray::GetInclination(const glm::dvec3& surfaceNormal) {
 	LocalDirection localDir = this->WorldCartesianToHemispherical();
 	glm::dvec3 cartesianLocal = hemisphericalToCartesian(localDir);
 	glm::dvec3 dir = localCartesianToWorldCartesian(cartesianLocal, surfaceNormal);
@@ -336,7 +345,7 @@ double Ray::GetInclination(glm::dvec3 surfaceNormal) {
 	return localDir.inclination;
 };
 
-void Ray::CalculateRadianceFlow(std::vector<Object*> theObjects, LightSource& theLight) {
+void Ray::CalculateRadianceFlow(std::vector<Object*>& theObjects, LightSource& theLight) {
 	Ray* traversalPointer = this;
 
 	// Traverse to end of ray list

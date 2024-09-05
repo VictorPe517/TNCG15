@@ -19,7 +19,7 @@ public:
 
 	size_t s_SSAAiterations = 2; // off = 1;
 
-	bool s_useMulticore = false;
+	bool s_useMulticore = true;
 	bool s_useAntiAliasing = true;
 	bool s_verboseDebugging = false;
 };

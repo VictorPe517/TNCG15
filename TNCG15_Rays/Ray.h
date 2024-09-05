@@ -28,24 +28,23 @@ public:
 	ColorDBL GetRayColor();
 
 	// Get the point of intersection between an object and a light-source
-	glm::dvec3 getPointOfIntersection(std::vector<Object*> theObjects, LightSource& theLight);
-	glm::dvec3 getRefractedDirection(glm::dvec3 intersection, glm::dvec3 surfaceNormal, Object& theObject, double n1, double n2);
-	glm::dvec3 getReflectedDirection(glm::dvec3 surfaceNormal);
+	glm::dvec3 getPointOfIntersection(const std::vector<Object*>& theObjects, const LightSource& theLight);
+	glm::dvec3 getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double n1, double n2);
+	glm::dvec3 getReflectedDirection(glm::dvec3& surfaceNormal);
 
 
 
-	glm::dvec3 localCartesianToWorldCartesian(glm::dvec3 localDir, glm::dvec3 surfaceNormal);
-	glm::dvec3 hemisphericalToCartesian(LocalDirection dir);
-	glm::dvec3 getRandomDirection(glm::dvec3 surfaceNormal);
-	double GetInclination(glm::dvec3 surfaceNormal);
+	glm::dvec3 localCartesianToWorldCartesian(const glm::dvec3& localDir, const glm::dvec3& surfaceNormal);
+	glm::dvec3 hemisphericalToCartesian(const LocalDirection& dir);
+	glm::dvec3 getRandomDirection(const glm::dvec3& surfaceNormal);
+	double GetInclination(const glm::dvec3& surfaceNormal);
 
 	LocalDirection WorldCartesianToHemispherical();
-	LocalDirection WorldCartesianToHemispherical(glm::dvec3 direction);
+	LocalDirection WorldCartesianToHemispherical(glm::dvec3& direction);
 	LocalDirection getRandomLocalDirection();
 
-	ColorDBL CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, LightSource& theLight, int hitIndex);
-	void CalculateLighting(glm::dvec3 hitPoint, std::vector<Object*> theObjects, LightSource& theLight);
-	void CalculateRayPath(std::vector<Object*> theObjects, LightSource& theLight);
+	ColorDBL CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects,LightSource& theLight,const int& hitIndex);
+	void CalculateRayPath(const std::vector<Object*>& theObjects, const LightSource& theLight);
 	double IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects);
 
 	double CalculateBRDF(glm::dvec3 thePoint, double direction, double inclination);
@@ -53,9 +52,13 @@ public:
 	bool DrawRandom();
 	double DrawRandomNormalized();
 
-	void CalculateRadianceFlow(std::vector<Object*> theObjects, LightSource& theLight);
+	void CalculateRadianceFlow(std::vector<Object*>& theObjects, LightSource& theLight);
 
 	void ToString();
+
+	void DeallocateRaypath();
+
+	~Ray();
 
 	glm::dvec3 startPosition = glm::dvec3(0, 0, 0);
 	glm::dvec3 endPosition = glm::dvec3(0, 0, 0);

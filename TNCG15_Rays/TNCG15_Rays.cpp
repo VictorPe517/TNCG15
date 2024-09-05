@@ -80,19 +80,19 @@ int main()
 
 	Cube newCube(glm::dvec3(7, 4, 3), 1);
 	newCube.theMaterial.MatColor = ColorDBL::White;
-	newCube.theMaterial.isMirror = true;
+	newCube.theMaterial.isMirror = false;
 	newCube.theMaterial.isTransparent = false;
 
 	////-----SUBJECTS-----//
 	Sphere sphere1(glm::dvec3(8.0, 0.0, -2), 1.75, ColorDBL::White);
 	sphere1.theMaterial.MatColor = ColorDBL::White;
-	sphere1.theMaterial.isTransparent = true;
+	sphere1.theMaterial.isTransparent = false;
 	sphere1.theMaterial.isMirror = false;
 
 
 	Sphere sphere2(glm::dvec3(9.0, 4.0, -2.0), 0.75, ColorDBL::White);
 	sphere2.theMaterial.MatColor = ColorDBL::White;
-	sphere2.theMaterial.isMirror = false;
+	sphere2.theMaterial.isMirror = true;
 	sphere2.theMaterial.isTransparent = false;
 
 
@@ -141,30 +141,28 @@ int main()
 	pixelRays.reserve(theCamera.GetResX() * theCamera.GetResY() * theRenderSettings.GetAAIterations());
 	pixelIndices.reserve(theCamera.GetResX() * theCamera.GetResY() * theRenderSettings.GetAAIterations());
 
-	// Construct raypath
-
 	if (theRenderSettings.s_useMulticore) {
 		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
+				int currentPixelIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel; // The pixel we are processing
+				//std::cout << " Index : [" << currentPixelIndex << "]\n";
+
 				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
-					int currentPixelIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel; // The pixel we are processing
-					int pixelAndSampleIndex = currentPixelIndex + ssaa_sample * _currentYpixel * theRenderSettings.GetAAIterations(); // Keep track of each ray for every sample
 
 					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations()); // Get random pixel offset
 					glm::dvec3 importanceDirection = theCamera.thePixels[currentPixelIndex].position + pixelOffset - theEye; // Direction of import
 
 					Ray* importanceRay = new Ray(theEye, importanceDirection, ColorDBL::White);
 					importanceRay->CalculateRayPath((Object::theObjects), *LightSource::theLightSources[0]);
-					pixelRays[pixelAndSampleIndex] = (importanceRay);
-					pixelIndices[pixelAndSampleIndex] = currentPixelIndex;
+					importanceRay->CalculateRadianceFlow((Object::theObjects), *LightSource::theLightSources[0]);
 
-					//ColorDBL finalColor = aRay.GetRayColor() / theRenderSettings.GetAAIterations();
-					//// Save the resulting color information into that ray
-					//theCamera.thePixels[_currentYpixel * theCamera.GetResX() + _currentXpixel].pixelColor += finalColor;
+					ColorDBL finalColor = importanceRay->GetRayColor() / (double)theRenderSettings.GetAAIterations();
+					theCamera.thePixels[currentPixelIndex].pixelColor += finalColor;
+
+					delete importanceRay;
 				}
 			}
-			rowsDone++; // Concurrency fix
-
+			rowsDone++;
 			theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
 
 			});
@@ -172,17 +170,22 @@ int main()
 	else {
 		for (size_t _currentXpixel = 0; _currentXpixel < theCamera.GetResX(); _currentXpixel++) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
+				int currentPixelIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel; // The pixel we are processing
+				//std::cout << " Index : [" << currentPixelIndex << "]\n";
+				
 				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
-					int currentPixelIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel; // The pixel we are processing
-					int pixelAndSampleIndex = _currentYpixel * theCamera.GetResX() + _currentXpixel; // This is the index of the current sample
-
+					
 					glm::dvec3 pixelOffset = theCamera.GetSuperSamplingPixelOffset(ssaa_sample, theRenderSettings.GetAAIterations()); // Get random pixel offset
 					glm::dvec3 importanceDirection = theCamera.thePixels[currentPixelIndex].position + pixelOffset - theEye; // Direction of import
 
 					Ray* importanceRay = new Ray(theEye, importanceDirection, ColorDBL::White);
 					importanceRay->CalculateRayPath((Object::theObjects), *LightSource::theLightSources[0]);
-					pixelRays.push_back(importanceRay);
-					pixelIndices.push_back(pixelAndSampleIndex);
+					importanceRay->CalculateRadianceFlow((Object::theObjects), *LightSource::theLightSources[0]);
+
+					ColorDBL finalColor = importanceRay->GetRayColor() / (double)theRenderSettings.GetAAIterations();
+					theCamera.thePixels[currentPixelIndex].pixelColor += finalColor;
+
+					delete importanceRay;
 				}
 			}
 			rowsDone++;
@@ -192,32 +195,6 @@ int main()
 
 	// Rendering function
 	std::cout << "\n Calculating Lighting: \n";
-
-	//for (Ray* theRay : pixelRays) {
-	for (int i = 0; i < pixelRays.size(); i++) {
-		pixelRays[i]->CalculateRadianceFlow((Object::theObjects), *LightSource::theLightSources[0]);
-		ColorDBL finalColor = pixelRays[i]->GetRayColor() / (double)theRenderSettings.GetAAIterations();
-
-		// Save the resulting color information into that ray
-		//std::cout << finalColor.ToString() << "\n";
-		theCamera.thePixels[pixelIndices[i]].pixelColor += finalColor;
-
-		int pixelsDone = i;
-		//theHelperFunctions.DisplayLoadingBar(pixelsDone, pixelRays.size());
-	}
-
-	//double maxRGBdistance = -INFINITY;
-	//double minRGBdistance = INFINITY;
-
-	//for (int i = 0; i < theCamera.thePixels.size(); i++) {
-	//	if (theCamera.thePixels[i].pixelColor.distance() > maxRGBdistance) {
-	//		maxRGBdistance = theCamera.thePixels[i].pixelColor.distance();
-	//	}
-
-	//	if (theCamera.thePixels[i].pixelColor.distance() < minRGBdistance) {
-	//		minRGBdistance = theCamera.thePixels[i].pixelColor.distance();
-	//	}
-	//}
 
 	const auto stop = std::chrono::high_resolution_clock::now();
 	const std::chrono::duration<double, std::ratio<60>> duration = stop - start; //Log time in minutes
@@ -235,8 +212,10 @@ int main()
 
 	for (size_t i = 0; i < theCamera.GetResX(); i++) {
 		for (size_t j = 0; j < theCamera.GetResY(); j++) {
+			int currentPixelIndex = i * theCamera.GetResY() + j;
+			//std::cout << " Writing Index : [" << currentPixelIndex << "]\n";
 			//theImageHandler.writeCurrentPixelToStream(theCamera, i, j, img, theRenderSettings, maxRGBdistance, minRGBdistance);
-			theImageHandler.writeCurrentPixelToStream(theCamera, i, j, img, theRenderSettings);
+			theImageHandler.writeCurrentPixelToStream(theCamera, currentPixelIndex, img, theRenderSettings);
 		}
 		rowsDone++;
 		theHelperFunctions.DisplayLoadingBar(rowsDone, theCamera.GetResX());
