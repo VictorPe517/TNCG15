@@ -14,9 +14,16 @@ glm::dvec3 Sphere::getIntersection(const Ray& theRay) {
 	double c2 = glm::dot(2.0 * theRay.direction, theRay.startPosition - position);
 	double c3 = glm::length(theRay.startPosition - position) * glm::length(theRay.startPosition - position) - radius * radius;
 
+	
+
 	arg = c2 * c2 - (4.0 * c1 * c3);
 
+	
+
 	if (arg < 0.0) {
+		//std::cout << arg << "\n";
+		//std::cout << "rayStartPosition: " << glm::to_string(theRay.startPosition) << ", sphere center:" << glm::to_string(position) << "\n";
+		//std::cout << "ERROR: Intersection[sphere]: ARG < 0\n\n";
 		return glm::dvec3(NAN, NAN, NAN);
 	}
 
@@ -37,7 +44,7 @@ glm::dvec3 Sphere::getIntersection(const Ray& theRay) {
 		if (t2 < 0.000001) t2 = -1;
 
 		if (t1 < 0.0 && t2 < 0.0) {
-			//std::cout << "Intersection is behind the origin!\n";
+			//std::cout << "ERROR: Intersection[sphere]: t1 && t2 < 0 !!\n";
 			return glm::dvec3(NAN, NAN, NAN);
 		}
 
@@ -55,6 +62,7 @@ glm::dvec3 Sphere::getIntersection(const Ray& theRay) {
 
 	}
 	else {
+		std::cout << "NAN INTERSECTION\n";
 		return glm::dvec3(NAN, NAN, NAN);
 	}
 }
@@ -64,10 +72,11 @@ glm::dvec3 Sphere::normal(const Ray& theRay) {
 
 	glm::dvec3 intersection = getIntersection(theRay);
 
-	if (intersection != glm::dvec3(NAN, NAN, NAN)) {
+	if (!glm::all(glm::isnan(intersection))) {
 		return (glm::normalize(intersection - position));
 	}
 	else {
+		std::cout << "NAN NORMAL DETECTED\n";
 		return glm::dvec3(NAN, NAN, NAN);
 	}
 	//std::cout << "Calculated normal: " << glm::to_string(glm::normalize(intersection - position)) << "\n";

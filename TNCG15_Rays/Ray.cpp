@@ -62,36 +62,25 @@ double Ray::DrawRandomNormalized() {
 
 glm::dvec3 Ray::getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double n1, double n2) {
 	glm::dvec3 d0 = glm::normalize(this->direction);
-
 	glm::dvec3 n = glm::normalize(surfaceNormal);
 
 	double eta = n1 / n2;
+	double nDot = glm::dot(-d0, n);
 
-	double inclination = acos(GetInclination(surfaceNormal));
-
-
-
-	double nDot = glm::dot(d0, n);
-
-	double k = 1.0 - pow(eta, 2.0) * (1.0 - pow(nDot, 2.0));
+	double k = 1.0 - eta * eta * (1.0 - nDot * nDot);
 
 	if (k < 0.0) {
-
-		return glm::dvec3(NAN, NAN, NAN);
+		return glm::dvec3(NAN,NAN,NAN);
 	}
 
-	if ((n1 * sin(inclination) / n2) < 1.0) {
+	// Calculate the refracted direction using Snell's law
+	glm::dvec3 refractedDir = eta * d0 + (eta * nDot - sqrt(k)) * n;
 
-		glm::dvec3 result = eta * d0 + n * (-1.0 * eta * (nDot)-sqrt(k));
-		return glm::normalize(result);
-	}
-	else {
-		return glm::dvec3(NAN, NAN, NAN);
-	}
+	return glm::normalize(refractedDir);
 
 }
 
-glm::dvec3 Ray::getReflectedDirection(glm::dvec3& surfaceNormal) {
+glm::dvec3 Ray::getReflectedDirection(const glm::dvec3& surfaceNormal) {
 	glm::dvec3 dir;
 
 	dir = direction - 2.0 * (glm::dot(direction, glm::normalize(surfaceNormal)) * glm::normalize(surfaceNormal));
@@ -106,8 +95,12 @@ LocalDirection Ray::getRandomLocalDirection() // Returns random direction using 
 	double azimuth = (2.0 * std::numbers::pi) * ((double)rand()) / (((double)RAND_MAX));
 	double inclination = ((double)rand()) / (((double)RAND_MAX));
 
+	
+
 	result.azimuth = azimuth;
 	result.inclination = acos(sqrt(1.0 - inclination));
+
+	//std::cout << "  Azimuth: " << result.azimuth * 57.2957795 << "\n  Inclination: " << result.inclination*57.2957795 << "\n\n";
 
 	return result;
 }
@@ -122,17 +115,20 @@ glm::dvec3 Ray::localCartesianToWorldCartesian(const glm::dvec3& localDir, const
 	double y_0 = localDir.y;
 	double z_0 = localDir.z;
 
-	glm::dvec3 z_l = surfaceNormal;
+	glm::dvec3 z_l = glm::normalize(surfaceNormal);
+
+	glm::dvec3 arbitraryVec = (glm::abs(z_l.x) > 0.99) ? glm::dvec3(0.0, 1.0, 0.0) : glm::dvec3(1.0, 0.0, 0.0);
 
 	//glm::normalize(-1.0 * localDir + glm::dot(surfaceNormal, localDir) * surfaceNormal);
-	glm::dvec3 x_l = glm::dvec3(1.0, 0.0, 0.0);
-	glm::dvec3 y_l = glm::cross(surfaceNormal, x_l);
+	//glm::dvec3 x_l = glm::dvec3(1.0, 0.0, 0.0);
+	glm::dvec3 x_l = glm::normalize(glm::cross(arbitraryVec, z_l));
+	glm::dvec3 y_l = glm::cross(z_l, x_l);
 
 	glm::dvec3 res(x_0 * x_l.x + y_0 * y_l.x + z_0 * z_l.x,
 		x_0 * x_l.y + y_0 * y_l.y + z_0 * z_l.y,
 		x_0 * x_l.z + y_0 * y_l.z + z_0 * z_l.z);
 
-	return res;
+	return glm::normalize(res);
 }
 
 glm::dvec3 Ray::hemisphericalToCartesian(const LocalDirection& dir)
@@ -149,7 +145,7 @@ glm::dvec3 Ray::getRandomDirection(const glm::dvec3& surfaceNormal)
 	glm::dvec3 localDir = hemisphericalToCartesian(dir);
 	glm::dvec3 worldDir = glm::normalize(localCartesianToWorldCartesian(localDir, surfaceNormal));
 
-	std::cout << glm::to_string(worldDir) << "\n";
+	//std::cout << glm::to_string(worldDir) << "\n";
 
 	if (glm::dot(worldDir, surfaceNormal) < 0.0f) worldDir = -1.0 * worldDir; //feels superflous with cumulative distribution function
 
@@ -165,6 +161,7 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 	RayRadianceColor = ColorDBL(0, 0, 0);
 	double minLength = (double)INFINITY;
 	double lengthStartIntersection = (double)INFINITY;
+	direction = glm::normalize(direction);
 	//std::cout << "current Dir outside func: " << glm::to_string(this->direction) << "\n";
 
 	// Find the closest object in the direction of the ray
@@ -191,7 +188,7 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 	}
 
 
-	if (minLength != INFINITY && hitIndex != -1) {
+	if (minLength != INFINITY && hitIndex != -1 && !glm::any(glm::isnan(intersection))) {
 		if (theObjects[hitIndex]->getMaterial().isMirror) {
 			//---------------[ MIRROR ]---------------//
 			this->nextRay = new Ray(intersection, getReflectedDirection(theObjectNormal), RayRadianceColor);
@@ -201,56 +198,84 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 		}
 		else if (theObjects[hitIndex]->getMaterial().isTransparent) {
 			//-------------[ TRANSPARENT ]------------//
-
-
-
 			double n1;
 			double n2;
+
+			glm::dvec3 adjustedNormal = theObjectNormal;
 
 			if (isInside) {
 				n1 = (theObjects[hitIndex]->getMaterial().refractiveIndex);
 				n2 = 1.0;
+				adjustedNormal = -theObjectNormal;
 			}
 			else {
 				n1 = 1.0;
 				n2 = (theObjects[hitIndex]->getMaterial().refractiveIndex);
+
 			}
 
 			double ior = n1 / n2;
 
 			double R0 = pow((n1 - n2) / (n1 + n2), 2.0);
-			double inclination = this->GetInclination(theObjectNormal);
 
-			//std::cout << inclination << "\n";
-			double Reflectance = (R0 + (1.0 - R0) * pow((1.0 - cos(inclination)), 5.0)) * 10.0;
+			double inclination = this->GetInclination(adjustedNormal);
+			double cosInclination = glm::clamp(cos(inclination), 0.0, 1.0);
 
+			glm::dvec3 normalizedDirection = glm::normalize(this->direction); // Normalize ray direction
+			glm::dvec3 normalizedNormal = glm::normalize(adjustedNormal); // Normalize fucking shit normal
+
+			double cosInclinationDirect = glm::dot(-normalizedDirection, normalizedNormal);
+			//std::cout << "Raw cosInclinationDirect: " << cosInclinationDirect << "\n";
+			cosInclinationDirect = glm::clamp(cosInclinationDirect, -1.0, 1.0);
+
+
+
+			//std::cout << "n1: " << n1 << ", n2: " << n2 << ", cosInclinationDirect: " << cosInclinationDirect << "\n";
+			//std::cout << "Ray Direction: " << glm::to_string(normalizedDirection) << "\n";
+			//std::cout << "Surface Normal: " << glm::to_string(normalizedNormal) << "\n\n";
+			double Reflectance = (R0 + (1.0 - R0) * pow((1.0 - glm::abs(cosInclinationDirect)), 5.0));
 			double Transmittance = 1.0 - Reflectance;
 
 			glm::dvec3 newDirection = glm::dvec3(0, 0, 0);
-			bool isReflected = false;
+			bool isReflected;
 
 			double rand = DrawRandomNormalized();
-
-			//std::cout << "Reflectance: " << Reflectance << ", rand: " << rand << "\n";
-
+			
 			if (rand < Reflectance) {
-				newDirection = getRefractedDirection(intersection, theObjectNormal, (*theObjects[hitIndex]), n1, n2);
-
-				isReflected = false;
+				newDirection = getReflectedDirection(adjustedNormal);
+				isReflected = true;
 			}
 			else {
-				newDirection = getReflectedDirection(theObjectNormal);
-				isReflected = true;
-
+				newDirection = getRefractedDirection(intersection, adjustedNormal, (*theObjects[hitIndex]), n1, n2);
+				if (glm::any(glm::isnan(newDirection))) {
+					
+					newDirection = getReflectedDirection(adjustedNormal);
+					isReflected = true;
+				}
+				else {
+					isReflected = false;
+				}
 			}
 
-			if (newDirection != glm::dvec3(NAN, NAN, NAN)) {
-				this->nextRay = new Ray(intersection, newDirection, RayRadianceColor);
-				this->nextRay->startSurface = theObjects[hitIndex];
-				if (!isReflected) this->nextRay->isInside = !this->isInside;
-				this->nextRay->prevRay = this;
-				this->nextRay->CalculateRayPath(theObjects, theLight);
+			newDirection = glm::normalize(newDirection);
+			glm::dvec3 newIntersection = intersection + newDirection * 1e-3;
+			if (!glm::any(glm::isnan(newDirection))) {
+				nextRay = new Ray(intersection, newDirection, RayRadianceColor);
+				nextRay->startSurface = theObjects[hitIndex];
+				nextRay->prevRay = this;
+				
+				if (!isReflected) {
+					//std::cout << "Switched isInside to: "<< !isInside <<"\n";
+					nextRay->isInside = !isInside;
+					
+				}
+
+				nextRay->CalculateRayPath(theObjects, theLight);
 			}
+			else {
+				std::cout << "Encountered NAN\n";
+			}
+			
 		}
 		else {
 			//-------------[ LAMBERTIAN ]-------------//
@@ -259,6 +284,7 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 
 			double continueNum = DrawRandom() ? 1.0 : 0.0;
 
+			
 			if (newRandomDirection.azimuth <= 2.0 * std::numbers::pi * continueNum) {
 				glm::dvec3 localDir = hemisphericalToCartesian(newRandomDirection);
 				glm::dvec3 theDirection = localCartesianToWorldCartesian(localDir, theObjectNormal);
@@ -337,12 +363,18 @@ LocalDirection Ray::WorldCartesianToHemispherical(glm::dvec3& direction) {
 }
 
 double Ray::GetInclination(const glm::dvec3& surfaceNormal) {
-	LocalDirection localDir = this->WorldCartesianToHemispherical();
-	glm::dvec3 cartesianLocal = hemisphericalToCartesian(localDir);
-	glm::dvec3 dir = localCartesianToWorldCartesian(cartesianLocal, surfaceNormal);
-	localDir = WorldCartesianToHemispherical(dir);
+	//LocalDirection localDir = this->WorldCartesianToHemispherical();
+	//glm::dvec3 cartesianLocal = hemisphericalToCartesian(localDir);
+	//glm::dvec3 dir = localCartesianToWorldCartesian(cartesianLocal, surfaceNormal);
+	//localDir = WorldCartesianToHemispherical(dir);
+		// Normalize the ray direction and surface normal
+	glm::dvec3 normalizedRayDir = glm::normalize(this->direction);
+	glm::dvec3 normalizedSurfaceNormal = glm::normalize(surfaceNormal);
 
-	return localDir.inclination;
+	double cosInclination = glm::dot(normalizedRayDir, normalizedSurfaceNormal);
+	cosInclination = glm::clamp(cosInclination, -1.0, 1.0); //This seems fucky but whatever
+
+	return acos(cosInclination);
 };
 
 void Ray::CalculateRadianceFlow(std::vector<Object*>& theObjects, LightSource& theLight) {

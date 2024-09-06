@@ -54,11 +54,11 @@ int main()
 	std::cout << "Initializing Scene Geometry...\n\n";
 
 #pragma region Scene_1
-	//------GEOMETRY------//
+	//////------GEOMETRY------//
 
 	Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::White);
 	Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
-	Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, 6, 5), ColorDBL::White);
+	Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
 	Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), ColorDBL::White);
 	Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);  //Behind camera
 	Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), ColorDBL::White); //In front of camera
@@ -84,9 +84,9 @@ int main()
 	newCube.theMaterial.isTransparent = false;
 
 	////-----SUBJECTS-----//
-	Sphere sphere1(glm::dvec3(8.0, 0.0, -2), 1.75, ColorDBL::White);
+	Sphere sphere1(glm::dvec3(9.0, -3.0, -3), 1.5, ColorDBL::White);
 	sphere1.theMaterial.MatColor = ColorDBL::White;
-	sphere1.theMaterial.isTransparent = false;
+	sphere1.theMaterial.isTransparent = true;
 	sphere1.theMaterial.isMirror = false;
 
 
@@ -102,21 +102,18 @@ int main()
 #pragma endregion
 
 #pragma region Cage
-	//// X+ = forward, Y+ = left, Z+ = up
+	////// X+ = forward, Y+ = left, Z+ = up
 	//Rectangle ceiling(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 5.0, 0.0), ColorDBL::White);
 	//Rectangle floor(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 5.0, 0.0), ColorDBL::White);
 
-	//Rectangle wall_F(glm::dvec3(10, -5, -5), glm::dvec3(10, -5, 5), glm::dvec3(10, 5, 5), glm::dvec3(10, 5, -5), ColorDBL::White);
+	//Rectangle wall_F(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), ColorDBL::Blue);
 	//wall_F.theMaterial.isMirror = false;
-	//wall_F.theMaterial.isTransparent = false;
 
 	//Rectangle wall_L(glm::dvec3(5.0, 5.0, 0.0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
 	//Rectangle wall_R(glm::dvec3(5.0, -5.0, 0.0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
 
-	//Sphere sphere1(glm::dvec3(8.0, 2.0, -3.5), 1.5, ColorDBL::White);
-	//sphere1.theMaterial.isMirror = true;
 
-	//Sphere sphere2(glm::dvec3(8.0, -2.0, -3.5), 1.5, ColorDBL::White);
+	//Sphere sphere2(glm::dvec3(6.0, 0, -1), 2.33, ColorDBL::White);
 	//sphere2.theMaterial.isTransparent = true;
 
 	//LightSource areaLight2(glm::dvec3(4.0, 1.0, 4.99), glm::dvec3(6.0, 1.0, 4.99), glm::dvec3(4.0, -1.0, 4.99), glm::dvec3(6.0, -1.0, 4.99), 100, ColorDBL::White);

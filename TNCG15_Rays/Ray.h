@@ -30,7 +30,7 @@ public:
 	// Get the point of intersection between an object and a light-source
 	glm::dvec3 getPointOfIntersection(const std::vector<Object*>& theObjects, const LightSource& theLight);
 	glm::dvec3 getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double n1, double n2);
-	glm::dvec3 getReflectedDirection(glm::dvec3& surfaceNormal);
+	glm::dvec3 getReflectedDirection(const glm::dvec3& surfaceNormal);
 
 
 
@@ -66,6 +66,7 @@ public:
 
 	Ray* prevRay = nullptr;
 	Ray* nextRay = nullptr;
+	bool isInside = false;
 
 private:
 	ColorDBL RayRadianceColor = ColorDBL(0.0, 0.0, 0.0);
@@ -81,5 +82,5 @@ private:
 	Object* hitObject = nullptr;
 	size_t hitIndex = -1;
 
-	bool isInside = false;
+	
 };
