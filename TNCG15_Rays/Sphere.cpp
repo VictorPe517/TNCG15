@@ -73,7 +73,14 @@ glm::dvec3 Sphere::normal(const Ray& theRay) {
 	glm::dvec3 intersection = getIntersection(theRay);
 
 	if (!glm::all(glm::isnan(intersection))) {
-		return (glm::normalize(intersection - position));
+
+		glm::dvec3 normal = glm::normalize(intersection - position);
+
+		//if (glm::dot(normal, -theRay.direction) > 0.0) {
+		//	normal = -normal;
+		//}
+		
+		return normal;
 	}
 	else {
 		std::cout << "NAN NORMAL DETECTED\n";

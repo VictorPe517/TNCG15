@@ -38,14 +38,13 @@ std::vector<LightSource*> LightSource::theLightSources;
 RenderSettings theRenderSettings;
 ImageHandler theImageHandler;
 HelperFunctions theHelperFunctions;
-
-double exposureMultiplier = 10;
+bool debug = false;
 //---------------------------------------------------------------//
 
 int main()
 {
+	
 	size_t pixelIndex = 0;
-
 	int maxval = (int)-INFINITY;
 	int minval = (int)INFINITY;
 
@@ -54,8 +53,7 @@ int main()
 	std::cout << "Initializing Scene Geometry...\n\n";
 
 #pragma region Scene_1
-	//////------GEOMETRY------//
-
+	////------GEOMETRY------//
 	Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::White);
 	Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
 	Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
@@ -73,31 +71,22 @@ int main()
 	std::cout << "Initializing Lights...\n\n";
 
 	//------LIGHTS------//
-	LightSource areaLight2(glm::dvec3(8.0, 1.0, 4.999), glm::dvec3(10.0, 1.0, 4.999), glm::dvec3(8.0, -1.0, 4.999), glm::dvec3(10.0, -1.0, 4.999), 100, ColorDBL::White);
-
-
-
+	LightSource areaLight2(glm::dvec3(8.0, 1.0, 4.999), glm::dvec3(10.0, 1.0, 4.999), glm::dvec3(8.0, -1.0, 4.999), glm::dvec3(10.0, -1.0, 4.999), 200.0, ColorDBL::White);
 
 	Cube newCube(glm::dvec3(7, 4, 3), 1);
 	newCube.theMaterial.MatColor = ColorDBL::White;
-	newCube.theMaterial.isMirror = false;
-	newCube.theMaterial.isTransparent = false;
 
 	////-----SUBJECTS-----//
-	Sphere sphere1(glm::dvec3(9.0, -3.0, -3), 1.5, ColorDBL::White);
+	Sphere sphere1(glm::dvec3(8, -3.0, -0), 1.33, ColorDBL::White);
 	sphere1.theMaterial.MatColor = ColorDBL::White;
 	sphere1.theMaterial.isTransparent = true;
-	sphere1.theMaterial.isMirror = false;
-
 
 	Sphere sphere2(glm::dvec3(9.0, 4.0, -2.0), 0.75, ColorDBL::White);
 	sphere2.theMaterial.MatColor = ColorDBL::White;
 	sphere2.theMaterial.isMirror = true;
-	sphere2.theMaterial.isTransparent = false;
 
-
-
-
+	Sphere sphere3(glm::dvec3(7.0, 0.0, -1.0), 1.25, ColorDBL::White);
+	sphere3.theMaterial.MatColor = ColorDBL::White;
 
 #pragma endregion
 
@@ -114,7 +103,7 @@ int main()
 
 
 	//Sphere sphere2(glm::dvec3(6.0, 0, -1), 2.33, ColorDBL::White);
-	//sphere2.theMaterial.isTransparent = true;
+	//sphere2.theMaterial.isTransparent = false;
 
 	//LightSource areaLight2(glm::dvec3(4.0, 1.0, 4.99), glm::dvec3(6.0, 1.0, 4.99), glm::dvec3(4.0, -1.0, 4.99), glm::dvec3(6.0, -1.0, 4.99), 100, ColorDBL::White);
 
@@ -204,6 +193,10 @@ int main()
 	// Logging
 	std::cout << "\n =====[ Rendering complete after " << duration << "! ]======\n\n" << "Writing to file:\n";
 	rowsDone = 0;
+
+	if (debug) {
+		
+	}
 
 #pragma region WriteToFile
 

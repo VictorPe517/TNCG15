@@ -17,7 +17,7 @@ public:
 	glm::ivec2 s_renderingResolution = glm::ivec2(2560, 1440);
 	double s_resolutionScale = 1.33; // Resolution scale multiplier
 
-	size_t s_SSAAiterations = 2; // off = 1;
+	size_t s_GlobalIterations = 2; // off = 1;
 
 	bool s_useMulticore = true;
 	bool s_useAntiAliasing = true;

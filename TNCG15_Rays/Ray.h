@@ -29,7 +29,7 @@ public:
 
 	// Get the point of intersection between an object and a light-source
 	glm::dvec3 getPointOfIntersection(const std::vector<Object*>& theObjects, const LightSource& theLight);
-	glm::dvec3 getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double n1, double n2);
+	glm::dvec3 getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double ior);
 	glm::dvec3 getReflectedDirection(const glm::dvec3& surfaceNormal);
 
 

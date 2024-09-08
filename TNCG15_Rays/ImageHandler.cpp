@@ -42,7 +42,7 @@ void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t index, st
 
 // Generates a unique filename for the file preventing overwrite
 std::string ImageHandler::GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration) {
-	return std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_SSAAiterations)) + "__time-" + std::to_string(duration) + ".ppm";
+	return std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_GlobalIterations)) + "__time-" + std::to_string(duration) + ".ppm";
 }
 
 // Displays stats after a successful render

@@ -60,16 +60,17 @@ double Ray::DrawRandomNormalized() {
 	return (double)rand() / (double)RAND_MAX;
 }
 
-glm::dvec3 Ray::getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double n1, double n2) {
+glm::dvec3 Ray::getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double ior) {
 	glm::dvec3 d0 = glm::normalize(this->direction);
 	glm::dvec3 n = glm::normalize(surfaceNormal);
 
-	double eta = n1 / n2;
+	double eta = ior;
 	double nDot = glm::dot(-d0, n);
 
 	double k = 1.0 - eta * eta * (1.0 - nDot * nDot);
 
 	if (k < 0.0) {
+		std::cout << "Total Internal Reflection occured. \n";
 		return glm::dvec3(NAN,NAN,NAN);
 	}
 
@@ -183,7 +184,9 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 	}
 
 	if (hitIndex == -1) {
-		hitIndex = 0;
+		hitIndex = 0; // Why on earth do we have to do this i don't understand how we're NOT hitting something...
+		//std::cout << "Ray with start: " << glm::to_string(startPosition) << 
+		//		   "\n     Direction: " << glm::to_string(direction) << ", hit nothing.\n\n";
 		//std::cout << "Negative one detected!\n";
 	}
 
@@ -198,77 +201,83 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 		}
 		else if (theObjects[hitIndex]->getMaterial().isTransparent) {
 			//-------------[ TRANSPARENT ]------------//
-			double n1;
-			double n2;
+			double airIndex = 1.0;
+			double matIndex = (theObjects[hitIndex]->getMaterial().refractiveIndex);
 
-			glm::dvec3 adjustedNormal = theObjectNormal;
+			glm::dvec3 geometricNormal = theObjectNormal;
+			glm::dvec3 adjustedNormal = glm::dot(direction, theObjectNormal) < 0.0 ? theObjectNormal : theObjectNormal * -1.0;
 
-			if (isInside) {
-				n1 = (theObjects[hitIndex]->getMaterial().refractiveIndex);
-				n2 = 1.0;
-				adjustedNormal = -theObjectNormal;
+			bool isEntering = glm::dot(geometricNormal, adjustedNormal) > 0.0;
+			
+			double refractRatio;
+			double cosIncidenceAngle = glm::dot(direction, adjustedNormal);
+
+			if (isEntering) {
+				refractRatio = airIndex / matIndex;
 			}
 			else {
-				n1 = 1.0;
-				n2 = (theObjects[hitIndex]->getMaterial().refractiveIndex);
+				refractRatio = matIndex / airIndex;
 
 			}
 
-			double ior = n1 / n2;
+			double refractDiff = matIndex - airIndex;
+			double refractSum = matIndex + airIndex;
+			double R0 = (refractDiff * refractDiff) / (refractSum * refractSum); // Reflectance at normal incidence
 
-			double R0 = pow((n1 - n2) / (n1 + n2), 2.0);
+			glm::dvec3 refractionDir = getRefractedDirection(intersection, adjustedNormal, (*theObjects[hitIndex]), refractRatio);
+			glm::dvec3 reflectionDir = getReflectedDirection(adjustedNormal);
 
-			double inclination = this->GetInclination(adjustedNormal);
-			double cosInclination = glm::clamp(cos(inclination), 0.0, 1.0);
-
-			glm::dvec3 normalizedDirection = glm::normalize(this->direction); // Normalize ray direction
-			glm::dvec3 normalizedNormal = glm::normalize(adjustedNormal); // Normalize fucking shit normal
-
-			double cosInclinationDirect = glm::dot(-normalizedDirection, normalizedNormal);
-			//std::cout << "Raw cosInclinationDirect: " << cosInclinationDirect << "\n";
-			cosInclinationDirect = glm::clamp(cosInclinationDirect, -1.0, 1.0);
-
+			double cosOutgoingAngle = 0.0;
+			if (isEntering) {
+				cosOutgoingAngle = glm::abs(cosIncidenceAngle);
+			}
+			else {
+				cosOutgoingAngle = glm::abs(glm::dot(refractionDir, adjustedNormal));
+			}
 
 
 			//std::cout << "n1: " << n1 << ", n2: " << n2 << ", cosInclinationDirect: " << cosInclinationDirect << "\n";
 			//std::cout << "Ray Direction: " << glm::to_string(normalizedDirection) << "\n";
 			//std::cout << "Surface Normal: " << glm::to_string(normalizedNormal) << "\n\n";
-			double Reflectance = (R0 + (1.0 - R0) * pow((1.0 - glm::abs(cosInclinationDirect)), 5.0));
+			double Reflectance = (R0 + (1.0 - R0) * pow((1.0 - cosOutgoingAngle), 5.0));
+
+			//std::cout << " Reflectance: " << Reflectance << 
+			//			"\n R0: " << R0 << 
+			//			"\n cosOutgoing: " << cosOutgoingAngle << 
+			//			"\n pow(cosOutgoingAngle,5.0): " << pow((cosOutgoingAngle), 5.0) << 
+			//			"\n\n";
+
+			//std::cout << "Refraction Direction : " << glm::to_string(refractionDir) <<
+			//	"\n Ray Direction : " << glm::to_string(direction) <<
+			//	"\n Object adjusted Normal : " << glm::to_string(adjustedNormal) << "\n\n\n";
+
+			//std::cout << "Refraction Direction : " << glm::to_string(refractionDir) <<
+			//	"\nReflection Direction : " << glm::to_string(reflectionDir) << "\n\n";
+
 			double Transmittance = 1.0 - Reflectance;
 
 			glm::dvec3 newDirection = glm::dvec3(0, 0, 0);
-			bool isReflected;
 
 			double rand = DrawRandomNormalized();
 			
 			if (rand < Reflectance) {
-				newDirection = getReflectedDirection(adjustedNormal);
-				isReflected = true;
+				newDirection = reflectionDir;
+				//std::cout << "REFLECTED!\n";
 			}
 			else {
-				newDirection = getRefractedDirection(intersection, adjustedNormal, (*theObjects[hitIndex]), n1, n2);
+				newDirection = refractionDir;
 				if (glm::any(glm::isnan(newDirection))) {
-					
-					newDirection = getReflectedDirection(adjustedNormal);
-					isReflected = true;
+					newDirection = reflectionDir;
+					std::cout << "It's NAN, setting reflection instead.\n\n";
 				}
-				else {
-					isReflected = false;
-				}
+	
 			}
 
 			newDirection = glm::normalize(newDirection);
-			glm::dvec3 newIntersection = intersection + newDirection * 1e-3;
 			if (!glm::any(glm::isnan(newDirection))) {
 				nextRay = new Ray(intersection, newDirection, RayRadianceColor);
 				nextRay->startSurface = theObjects[hitIndex];
 				nextRay->prevRay = this;
-				
-				if (!isReflected) {
-					//std::cout << "Switched isInside to: "<< !isInside <<"\n";
-					nextRay->isInside = !isInside;
-					
-				}
 
 				nextRay->CalculateRayPath(theObjects, theLight);
 			}
@@ -372,7 +381,7 @@ double Ray::GetInclination(const glm::dvec3& surfaceNormal) {
 	glm::dvec3 normalizedSurfaceNormal = glm::normalize(surfaceNormal);
 
 	double cosInclination = glm::dot(normalizedRayDir, normalizedSurfaceNormal);
-	cosInclination = glm::clamp(cosInclination, -1.0, 1.0); //This seems fucky but whatever
+	cosInclination = glm::clamp(cosInclination, -1.0, 1.0); //This seems off but whatever
 
 	return acos(cosInclination);
 };
