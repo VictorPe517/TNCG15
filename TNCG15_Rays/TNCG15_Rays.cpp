@@ -67,7 +67,7 @@ int main()
 	//-------WALLS-------//
 	Rectangle wallL(glm::dvec3(5.0, 6.0, 0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Green);
 	Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), ColorDBL::White);
-	Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::Yellow);
+	Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);
 	Rectangle wallR(glm::dvec3(5.0, -6.0, 0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
 	Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), ColorDBL::Blue);
 	Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), ColorDBL::White);
@@ -75,30 +75,27 @@ int main()
 	std::cout << "Initializing Lights...\n\n";
 
 	//------LIGHTS------//
-	LightSource areaLight(glm::dvec3(9 , 2.0, 4.999), glm::dvec3(11 , 2.0, 4.999), glm::dvec3(9 , -2.0, 4.999), glm::dvec3(11 , -2.0, 4.999), 75.0, ColorDBL::White);
-	LightSource areaLight2(glm::dvec3(-2, 2.0, 4.999), glm::dvec3(0, 2.0, 4.999), glm::dvec3(-2, -2.0, 4.999), glm::dvec3(0, -2.0, 4.999), 75.0, ColorDBL::White);
+	//LightSource areaLight(glm::dvec3(8 , 2.0, 4.999), glm::dvec3(10 , 2.0, 4.999), glm::dvec3(8 , -2.0, 4.999), glm::dvec3(10 , -2.0, 4.999), 75.0, ColorDBL::White);
+	//LightSource areaLight2(glm::dvec3(0, 2.0, 4.999), glm::dvec3(2, 2.0, 4.999), glm::dvec3(0, -2.0, 4.999), glm::dvec3(2, -2.0, 4.999), 75.0, ColorDBL::White);
 	
-	//LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999),glm::dvec3(5.0 + 2.0, -1.0, 4.999), 100.0, ColorDBL::PureBlue);
-	//LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999),glm::dvec3(8.0 + 2.0, -1.0, 4.999),glm::dvec3(6.0 + 2.0, -3.0, 4.999),glm::dvec3(8.0 + 2.0, -3.0, 4.999), 100.0, ColorDBL::PureGreen);
-	//LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999),  100.0, ColorDBL::PureRed);
+	LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999),glm::dvec3(5.0 + 2.0, -1.0, 4.999), 100.0, ColorDBL::PureBlue);
+	LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999),glm::dvec3(8.0 + 2.0, -1.0, 4.999),glm::dvec3(6.0 + 2.0, -3.0, 4.999),glm::dvec3(8.0 + 2.0, -3.0, 4.999), 100.0, ColorDBL::PureGreen);
+	LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999),  100.0, ColorDBL::PureRed);
 
 	//LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999), glm::dvec3(5.0 + 2.0, -1.0, 4.999), 50.0, ColorDBL::White);
 	//LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999), glm::dvec3(8.0 + 2.0, -1.0, 4.999), glm::dvec3(6.0 + 2.0, -3.0, 4.999), glm::dvec3(8.0 + 2.0, -3.0, 4.999), 50.0, ColorDBL::White);
 	//LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999), 50.0, ColorDBL::White);
 
-	Cube newCube(glm::dvec3(7, 4, 3), 1);
-	newCube.theMaterial.MatColor = ColorDBL::White;
-
-	////-----SUBJECTS-----//
-	Sphere sphere1(glm::dvec3(8, -3.0, -0), 1.33, ColorDBL::White);
+	//-----SUBJECTS-----//
+	Sphere sphere1(glm::dvec3(8, -3.0, -3.6666), 1.3333, ColorDBL::White);
 	sphere1.theMaterial.MatColor = ColorDBL::White;
 	sphere1.theMaterial.isTransparent = true;
 
-	Sphere sphere2(glm::dvec3(9.0, 4.0, -2.0), 0.75, ColorDBL::White);
+	Sphere sphere2(glm::dvec3(9.0, 4.0, -4.25), 0.75, ColorDBL::White);
 	sphere2.theMaterial.MatColor = ColorDBL::White;
 	sphere2.theMaterial.isMirror = true;
 
-	Sphere sphere3(glm::dvec3(7.0, 0.0, -1.0), 1.25, ColorDBL::White);
+	Sphere sphere3(glm::dvec3(9.0, 0.0, -3.75), 1.25, ColorDBL::White);
 	sphere3.theMaterial.MatColor = ColorDBL::White;
 
 #pragma endregion
@@ -120,6 +117,37 @@ int main()
 
 	//LightSource areaLight2(glm::dvec3(4.0, 1.0, 4.99), glm::dvec3(6.0, 1.0, 4.99), glm::dvec3(4.0, -1.0, 4.99), glm::dvec3(6.0, -1.0, 4.99), 100, ColorDBL::White);
 
+#pragma endregion
+
+#pragma region LegacyScene
+	//	////------GEOMETRY------//
+	//Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::Green);
+	//Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
+	//Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
+	//Triangle cielingTri2(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(13, 0, 5), ColorDBL::White);
+	//Triangle floorTri1(glm::dvec3(0, -6, -5), glm::dvec3(0, 6, -5), glm::dvec3(-3, 0, -5), ColorDBL::Blue);  //Behind camera
+	//Triangle floorTri2(glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), glm::dvec3(13, 0, -5), ColorDBL::White); //In front of camera
+	////-------WALLS-------//
+	//Rectangle wallL(glm::dvec3(5.0, 6.0, 0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
+	//Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), ColorDBL::White);
+	//Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);
+	//Rectangle wallR(glm::dvec3(5.0, -6.0, 0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
+	//Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), ColorDBL::Orange);
+	//Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), ColorDBL::White);
+	//wallL_F.theMaterial.isMirror = true;
+	//std::cout << "Initializing Lights...\n\n";
+
+	//// Legacy comparison light
+	//LightSource areaLight(glm::dvec3(4.0, 3.0, 4.5), glm::dvec3(5.0, 3.0, 4.5), glm::dvec3(4.0, -3.0, 4.5), glm::dvec3(5.0, -3.0, 4.5), 100, ColorDBL::White);
+
+	//// Legacy comparison spheres
+	//Sphere sphere1(glm::dvec3(9, 0, -2), 2, ColorDBL::Red);
+	//sphere1.theMaterial.isMirror = true;
+
+	//Sphere sphere2(glm::dvec3(8.0, 4.0, -4.0), 1.0, ColorDBL::White);
+	//sphere2.theMaterial.isMirror = true;
+
+	//Sphere sphere3(glm::dvec3(6.0, -3.0, -3.0), 2.0, ColorDBL::White);
 #pragma endregion
 
 	theRenderSettings.UserInputAndSettings();

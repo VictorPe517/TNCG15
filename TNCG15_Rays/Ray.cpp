@@ -77,7 +77,7 @@ glm::dvec3 Ray::getRefractedDirection(const glm::dvec3& intersection, const glm:
 	double k = 1.0 - eta * eta * (1.0 - nDot * nDot);
 
 	if (k < 0.0) {
-		std::cout << "Total Internal Reflection occured. \n";
+		//std::cout << "Total Internal Reflection occured. \n";
 		return glm::dvec3(NAN,NAN,NAN);
 	}
 
@@ -257,7 +257,7 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const std::ve
 				newDirection = refractionDir;
 				if (glm::any(glm::isnan(newDirection))) {
 					newDirection = reflectionDir;
-					std::cout << "It's NAN, setting reflection instead.\n\n";
+					//std::cout << "It's NAN, setting reflection instead.\n\n";
 				}
 	
 			}
@@ -391,7 +391,7 @@ void Ray::CalculateRadianceFlow(std::vector<Object*>& theObjects, const std::vec
 	else if (!hitObject->getMaterial().isMirror && !hitObject->getMaterial().isTransparent) {
 		// Else it's lambertian: Compute direct light and feed that radiance into ray
 		ColorDBL directLightRadiance = traversalPointer->CalculateIrradiance(hitObject->normal(*traversalPointer), traversalPointer->endPosition, theObjects, theLights, traversalPointer->hitIndex);
-		traversalPointer->RayRadianceColor = directLightRadiance;
+		traversalPointer->RayRadianceColor = directLightRadiance / std::numbers::pi;
 	}
 
 	while (traversalPointer->prevRay != nullptr) {
@@ -418,10 +418,9 @@ void Ray::CalculateRadianceFlow(std::vector<Object*>& theObjects, const std::vec
 		else {
 			ColorDBL directLightRadiance = traversalPointer->CalculateIrradiance(hitObject->normal(*traversalPointer), traversalPointer->endPosition, theObjects, theLights, traversalPointer->hitIndex);
 			ColorDBL prevRadianceSurfaceColor = theObjects[traversalPointer->hitIndex]->getColor() * traversalPointer->nextRay->RayRadianceColor;
-			//traversalPointer->nextRay->hitIndex
 
 			directLightRadiance += prevRadianceSurfaceColor;
-			traversalPointer->RayRadianceColor = directLightRadiance;
+			traversalPointer->RayRadianceColor = directLightRadiance; // We should probably divide by pi here but that makes the global illumination almost non-existent
 		}
 	}
 }

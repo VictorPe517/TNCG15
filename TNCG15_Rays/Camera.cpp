@@ -9,7 +9,6 @@ Camera::Camera(glm::dvec3 _c1, glm::dvec3 _c2, glm::dvec3 _c3, glm::dvec3 _c4, R
 	y_res = (int)round((double)aRenderSetting.s_renderingResolution.y * aRenderSetting.s_resolutionScale);
 
 	double _delta = 2.0 / (double)x_res;
-
 	double _yOffset = 1.0 - (double)y_res / (double)x_res;
 
 	for (size_t i = 0; i < x_res; i++) {

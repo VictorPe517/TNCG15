@@ -13,8 +13,30 @@ public:
 	void DisplayRenderSuccessfulStats(Camera theCamera, double theDuration, double pixelsPerSec, std::string fileName);
 
 	void CreateImageStream(std::ofstream& img, Camera theCamera);
+	
+	enum TonemappingType {
+		gamma,
+		sine,
+		sigmoid
+	};
+
+	double TonemappingFunc(double tone, double exponent, double exponentDivisor, TonemappingType theType);
 
 private:
-	int exposureMultiplier = 1.0;
+
+
+
+	bool useTonemapping = true;
+
+	double exposureMultiplier = 1.0;
+
+	double rMax = 0;
+	double rMin = INFINITY;
+
+	double gMax = 0;
+	double gMin = INFINITY;
+
+	double bMax = 0;
+	double bMin = INFINITY;
 };
 

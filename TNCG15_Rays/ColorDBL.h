@@ -32,6 +32,7 @@ public:
 	static const ColorDBL Cyan;
 	static const ColorDBL Magenta;
 	static const ColorDBL Yellow;
+	static const ColorDBL Orange;
 
 	static const ColorDBL PureRed;
 	static const ColorDBL PureGreen;

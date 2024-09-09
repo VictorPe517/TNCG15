@@ -72,6 +72,7 @@ const ColorDBL ColorDBL::Blue = ColorDBL(0.2, 0.2, 0.8);
 const ColorDBL ColorDBL::Cyan = ColorDBL(0.2, 0.8, 0.8);
 const ColorDBL ColorDBL::Magenta = ColorDBL(0.8, 0.2, 0.8);
 const ColorDBL ColorDBL::Yellow = ColorDBL(0.8, 0.8, 0.2);
+const ColorDBL ColorDBL::Orange = ColorDBL(0.9, 0.4, 0.0);
 
 const ColorDBL ColorDBL::PureRed = ColorDBL(1.0, 0.0, 0.0);
 const ColorDBL ColorDBL::PureGreen = ColorDBL(0.0, 1.0, 0.0);
