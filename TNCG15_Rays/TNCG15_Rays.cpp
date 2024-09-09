@@ -33,17 +33,21 @@ std::vector<Triangle> Triangle::theTriangles;
 std::vector<Sphere*> Sphere::theSpheres;
 std::vector<Cube> Cube::theCubes;
 std::vector<LightSource*> LightSource::theLightSources;
+unsigned int Ray::nonHitters;
+unsigned int Ray::rayAmount;
 
 //---------------------[ STANDARD SETTINGS ]---------------------//
 RenderSettings theRenderSettings;
 ImageHandler theImageHandler;
 HelperFunctions theHelperFunctions;
-bool debug = false;
+bool debug = true;
 //---------------------------------------------------------------//
 
 int main()
 {
-	
+	Ray::nonHitters = 0;
+	Ray::rayAmount = 0;
+
 	size_t pixelIndex = 0;
 	int maxval = (int)-INFINITY;
 	int minval = (int)INFINITY;
@@ -63,7 +67,7 @@ int main()
 	//-------WALLS-------//
 	Rectangle wallL(glm::dvec3(5.0, 6.0, 0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Green);
 	Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), ColorDBL::White);
-	Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);
+	Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::Yellow);
 	Rectangle wallR(glm::dvec3(5.0, -6.0, 0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
 	Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), ColorDBL::Blue);
 	Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), ColorDBL::White);
@@ -71,7 +75,16 @@ int main()
 	std::cout << "Initializing Lights...\n\n";
 
 	//------LIGHTS------//
-	LightSource areaLight2(glm::dvec3(8.0, 1.0, 4.999), glm::dvec3(10.0, 1.0, 4.999), glm::dvec3(8.0, -1.0, 4.999), glm::dvec3(10.0, -1.0, 4.999), 200.0, ColorDBL::White);
+	LightSource areaLight(glm::dvec3(9 , 2.0, 4.999), glm::dvec3(11 , 2.0, 4.999), glm::dvec3(9 , -2.0, 4.999), glm::dvec3(11 , -2.0, 4.999), 75.0, ColorDBL::White);
+	LightSource areaLight2(glm::dvec3(-2, 2.0, 4.999), glm::dvec3(0, 2.0, 4.999), glm::dvec3(-2, -2.0, 4.999), glm::dvec3(0, -2.0, 4.999), 75.0, ColorDBL::White);
+	
+	//LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999),glm::dvec3(5.0 + 2.0, -1.0, 4.999), 100.0, ColorDBL::PureBlue);
+	//LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999),glm::dvec3(8.0 + 2.0, -1.0, 4.999),glm::dvec3(6.0 + 2.0, -3.0, 4.999),glm::dvec3(8.0 + 2.0, -3.0, 4.999), 100.0, ColorDBL::PureGreen);
+	//LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999),  100.0, ColorDBL::PureRed);
+
+	//LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999), glm::dvec3(5.0 + 2.0, -1.0, 4.999), 50.0, ColorDBL::White);
+	//LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999), glm::dvec3(8.0 + 2.0, -1.0, 4.999), glm::dvec3(6.0 + 2.0, -3.0, 4.999), glm::dvec3(8.0 + 2.0, -3.0, 4.999), 50.0, ColorDBL::White);
+	//LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999), 50.0, ColorDBL::White);
 
 	Cube newCube(glm::dvec3(7, 4, 3), 1);
 	newCube.theMaterial.MatColor = ColorDBL::White;
@@ -122,11 +135,6 @@ int main()
 	int rowsDone = 0; // Concurrency fix
 	const auto start = std::chrono::high_resolution_clock::now();
 
-	std::vector<Ray*> pixelRays;
-	std::vector<int> pixelIndices;
-	pixelRays.reserve(theCamera.GetResX() * theCamera.GetResY() * theRenderSettings.GetAAIterations());
-	pixelIndices.reserve(theCamera.GetResX() * theCamera.GetResY() * theRenderSettings.GetAAIterations());
-
 	if (theRenderSettings.s_useMulticore) {
 		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
@@ -139,8 +147,8 @@ int main()
 					glm::dvec3 importanceDirection = theCamera.thePixels[currentPixelIndex].position + pixelOffset - theEye; // Direction of import
 
 					Ray* importanceRay = new Ray(theEye, importanceDirection, ColorDBL::White);
-					importanceRay->CalculateRayPath((Object::theObjects), *LightSource::theLightSources[0]);
-					importanceRay->CalculateRadianceFlow((Object::theObjects), *LightSource::theLightSources[0]);
+					importanceRay->CalculateRayPath((Object::theObjects), LightSource::theLightSources);
+					importanceRay->CalculateRadianceFlow((Object::theObjects), LightSource::theLightSources);
 
 					ColorDBL finalColor = importanceRay->GetRayColor() / (double)theRenderSettings.GetAAIterations();
 					theCamera.thePixels[currentPixelIndex].pixelColor += finalColor;
@@ -165,8 +173,8 @@ int main()
 					glm::dvec3 importanceDirection = theCamera.thePixels[currentPixelIndex].position + pixelOffset - theEye; // Direction of import
 
 					Ray* importanceRay = new Ray(theEye, importanceDirection, ColorDBL::White);
-					importanceRay->CalculateRayPath((Object::theObjects), *LightSource::theLightSources[0]);
-					importanceRay->CalculateRadianceFlow((Object::theObjects), *LightSource::theLightSources[0]);
+					importanceRay->CalculateRayPath((Object::theObjects), LightSource::theLightSources);
+					importanceRay->CalculateRadianceFlow((Object::theObjects), LightSource::theLightSources);
 
 					ColorDBL finalColor = importanceRay->GetRayColor() / (double)theRenderSettings.GetAAIterations();
 					theCamera.thePixels[currentPixelIndex].pixelColor += finalColor;
@@ -194,9 +202,7 @@ int main()
 	std::cout << "\n =====[ Rendering complete after " << duration << "! ]======\n\n" << "Writing to file:\n";
 	rowsDone = 0;
 
-	if (debug) {
-		
-	}
+
 
 #pragma region WriteToFile
 
@@ -214,6 +220,12 @@ int main()
 	double pixelsPerSecond = (double)theCamera.thePixels.size() / (duration.count() * 60.0);
 	theImageHandler.DisplayRenderSuccessfulStats(theCamera, duration.count(), pixelsPerSecond, fileName);
 #pragma endregion
+
+	if (debug) {
+		std::cout << "DEBUG:\n Amount of nohitters: [" << Ray::nonHitters << "]\n"
+			<< "             Out of: [" << Ray::rayAmount << "]\n"
+			<< "           Which is: " << round(((double)Ray::nonHitters / (double)Ray::rayAmount))*100.0 << "%\n";
+	}
 
 	return 0;
 }

@@ -3,6 +3,8 @@
 
 Camera::Camera(glm::dvec3 _c1, glm::dvec3 _c2, glm::dvec3 _c3, glm::dvec3 _c4, RenderSettings aRenderSetting) : c1{ _c1 }, c2{ _c2 }, c3{ _c3 }, c4{ _c4 } {
 
+	thePixels.reserve(x_res*y_res);
+
 	x_res = (int)round((double)aRenderSetting.s_renderingResolution.x * aRenderSetting.s_resolutionScale);
 	y_res = (int)round((double)aRenderSetting.s_renderingResolution.y * aRenderSetting.s_resolutionScale);
 
@@ -27,8 +29,7 @@ void Camera::DisplayPixelPosition(size_t x, size_t y)
 
 glm::dvec3 Camera::GetSuperSamplingPixelOffset(size_t currentIteration, size_t totalIterations)
 {
-	// Super quick & dirty implementation, offset each ray using a circle within the pixel 
-	// increase the frequency of the steps when totalIterations is increased.
+
 	bool useLegacyAA = false;
 
 	double x = 0.0;
@@ -37,6 +38,9 @@ glm::dvec3 Camera::GetSuperSamplingPixelOffset(size_t currentIteration, size_t t
 	if (totalIterations <= 1) return glm::dvec3(0.0, 0.0, 0.0);
 
 	if (useLegacyAA) {
+		// Super quick & dirty implementation, offset each ray using a circle within the pixel 
+		// increase the frequency of the steps when totalIterations is increased.
+
 		double _delta = 2.0 / (double)x_res; // Pixel size
 		double _radius = _delta / 2.5; // Chosen after quick testing for aesthetics
 
@@ -51,6 +55,7 @@ glm::dvec3 Camera::GetSuperSamplingPixelOffset(size_t currentIteration, size_t t
 		y = _radius * sin(radToEvaluate);
 	}
 	else {
+		//Random offset
 		double pixelDelta = 1.0 / (double)x_res;
 
 		x = (((double)rand() / (double)RAND_MAX) * 2.0 - 1.0) * pixelDelta;

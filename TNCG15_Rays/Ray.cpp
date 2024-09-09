@@ -10,35 +10,42 @@ ColorDBL Ray::GetRayColor() {
 	return RayRadianceColor;
 }
 
-ColorDBL Ray::CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects,LightSource& theLight,const int& hitIndex) {
+ColorDBL Ray::CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLights,const int& hitIndex) {
 	double E = 0.0;
 	ColorDBL irradiance = ColorDBL(0, 0, 0);
 
 	// Todo: iterate over all lamps here
-	glm::dvec3 randomPointOnLamp = theLight.getRandomPoint();
-	glm::dvec3 lampToPointVec = randomPointOnLamp - intersectionPoint;
-	glm::dvec3 lightNormal = theLight.normal(*this);
-	double area = theLight.area;
-	ColorDBL theLightColor = theLight.Color;
-	ColorDBL surfaceColor = theObjects[hitIndex]->getColor();
+	for (LightSource* theLight : theLights) {
+		glm::dvec3 randomPointOnLamp = theLight->getRandomPoint();
+		glm::dvec3 lampToPointVec = randomPointOnLamp - intersectionPoint;
+		glm::dvec3 lightNormal = theLight->normal(*this);
+		double area = theLight->area;
+		ColorDBL theLightColor = theLight->Color;
+		ColorDBL surfaceColor = theObjects[hitIndex]->getColor();
 
-	double distance = glm::length(lampToPointVec);
-	double cos_omega_x = glm::clamp(glm::dot(glm::normalize(surfaceNormal), lampToPointVec) / distance, 0.0, (double)INFINITY);
-	double cos_omega_y = -1.0 * glm::dot(lightNormal, lampToPointVec) / distance;
+		double distance = glm::length(lampToPointVec);
+		double cos_omega_x = glm::clamp(glm::dot(glm::normalize(surfaceNormal), lampToPointVec) / distance, 0.0, (double)INFINITY);
+		double cos_omega_y = -1.0 * glm::dot(lightNormal, lampToPointVec) / distance;
 
-	if (cos_omega_y < 0.0) cos_omega_y = 0.0;
+		if (cos_omega_y < 0.0) cos_omega_y = 0.0;
 
-	double G = (cos_omega_x * cos_omega_y) / (distance * distance);
-	double shadowVar = IsVisibleToPoint(intersectionPoint, randomPointOnLamp, theObjects);
+		double G = (cos_omega_x * cos_omega_y) / (distance * distance);
+		double shadowVar = IsVisibleToPoint(intersectionPoint, randomPointOnLamp, theObjects);
 
-	E = area * G * shadowVar * theLight.Watt / std::numbers::pi;
+		E = area * G * shadowVar * theLight->Watt / std::numbers::pi;
 
-	irradiance = surfaceColor * E * (theObjects[hitIndex]->getMaterial().radiosity / std::numbers::pi);
+		irradiance += surfaceColor * theLightColor * E * (theObjects[hitIndex]->getMaterial().radiosity / std::numbers::pi);
+	}
 
 	//std::cout << "E is: " << E << " ; which gives an irradiance of: " << irradiance.ToString();
 
 	return irradiance;
 };
+
+std::string Ray::GetAllNonHittersFormatted()
+{
+	return std::string();
+}
 
 Ray::~Ray() {
 	delete nextRay;
@@ -153,7 +160,7 @@ glm::dvec3 Ray::getRandomDirection(const glm::dvec3& surfaceNormal)
 	return worldDir;
 }
 
-void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSource& theLight)
+void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLights)
 {
 	glm::dvec3 intersection = glm::dvec3(0, 0, 0);
 	glm::dvec3 possibleIntersection = glm::dvec3(0.0, 0.0, 0.0);
@@ -163,7 +170,6 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 	double minLength = (double)INFINITY;
 	double lengthStartIntersection = (double)INFINITY;
 	direction = glm::normalize(direction);
-	//std::cout << "current Dir outside func: " << glm::to_string(this->direction) << "\n";
 
 	// Find the closest object in the direction of the ray
 	for (int l = 0; l < theObjects.size(); l++) {
@@ -184,6 +190,8 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 	}
 
 	if (hitIndex == -1) {
+		nonHitters++;
+
 		hitIndex = 0; // Why on earth do we have to do this i don't understand how we're NOT hitting something...
 		//std::cout << "Ray with start: " << glm::to_string(startPosition) << 
 		//		   "\n     Direction: " << glm::to_string(direction) << ", hit nothing.\n\n";
@@ -197,7 +205,7 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 			this->nextRay = new Ray(intersection, getReflectedDirection(theObjectNormal), RayRadianceColor);
 			this->nextRay->startSurface = theObjects[hitIndex];
 			this->nextRay->prevRay = this;
-			this->nextRay->CalculateRayPath(theObjects, theLight);
+			this->nextRay->CalculateRayPath(theObjects, theLights);
 		}
 		else if (theObjects[hitIndex]->getMaterial().isTransparent) {
 			//-------------[ TRANSPARENT ]------------//
@@ -235,31 +243,12 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 				cosOutgoingAngle = glm::abs(glm::dot(refractionDir, adjustedNormal));
 			}
 
-
-			//std::cout << "n1: " << n1 << ", n2: " << n2 << ", cosInclinationDirect: " << cosInclinationDirect << "\n";
-			//std::cout << "Ray Direction: " << glm::to_string(normalizedDirection) << "\n";
-			//std::cout << "Surface Normal: " << glm::to_string(normalizedNormal) << "\n\n";
 			double Reflectance = (R0 + (1.0 - R0) * pow((1.0 - cosOutgoingAngle), 5.0));
-
-			//std::cout << " Reflectance: " << Reflectance << 
-			//			"\n R0: " << R0 << 
-			//			"\n cosOutgoing: " << cosOutgoingAngle << 
-			//			"\n pow(cosOutgoingAngle,5.0): " << pow((cosOutgoingAngle), 5.0) << 
-			//			"\n\n";
-
-			//std::cout << "Refraction Direction : " << glm::to_string(refractionDir) <<
-			//	"\n Ray Direction : " << glm::to_string(direction) <<
-			//	"\n Object adjusted Normal : " << glm::to_string(adjustedNormal) << "\n\n\n";
-
-			//std::cout << "Refraction Direction : " << glm::to_string(refractionDir) <<
-			//	"\nReflection Direction : " << glm::to_string(reflectionDir) << "\n\n";
-
 			double Transmittance = 1.0 - Reflectance;
 
 			glm::dvec3 newDirection = glm::dvec3(0, 0, 0);
 
 			double rand = DrawRandomNormalized();
-			
 			if (rand < Reflectance) {
 				newDirection = reflectionDir;
 				//std::cout << "REFLECTED!\n";
@@ -279,7 +268,7 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 				nextRay->startSurface = theObjects[hitIndex];
 				nextRay->prevRay = this;
 
-				nextRay->CalculateRayPath(theObjects, theLight);
+				nextRay->CalculateRayPath(theObjects, theLights);
 			}
 			else {
 				std::cout << "Encountered NAN\n";
@@ -300,20 +289,10 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const LightSo
 
 				this->nextRay = new Ray(intersection, theDirection, RayRadianceColor);
 				this->nextRay->prevRay = this;
-				this->nextRay->CalculateRayPath(theObjects, theLight);
+				this->nextRay->CalculateRayPath(theObjects, theLights);
 			}
 		}
 	}
-
-
-
-
-
-}
-
-
-void Ray::ToString() {
-	std::cout << this->Irradiance;
 }
 
 // Calculates wether the surface is in shadow (returns 0.0) or in light (returns 1.0)
@@ -386,7 +365,8 @@ double Ray::GetInclination(const glm::dvec3& surfaceNormal) {
 	return acos(cosInclination);
 };
 
-void Ray::CalculateRadianceFlow(std::vector<Object*>& theObjects, LightSource& theLight) {
+void Ray::CalculateRadianceFlow(std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLights) {
+	bool useOldFeedRadiance = false;
 	Ray* traversalPointer = this;
 
 	// Traverse to end of ray list
@@ -395,46 +375,53 @@ void Ray::CalculateRadianceFlow(std::vector<Object*>& theObjects, LightSource& t
 	}
 
 	Object* hitObject = theObjects[traversalPointer->hitIndex];
+	LightSource* potentialLight = dynamic_cast<LightSource*>(theObjects[traversalPointer->hitIndex]);
 
 	// At the endpoint:
-	if (dynamic_cast<LightSource*>(theObjects[traversalPointer->hitIndex]) != nullptr) {
+	if (potentialLight != nullptr) {
 		// If endpoint lightsource: feed radiance into ray
-		traversalPointer->RayRadianceColor = ColorDBL(1.0, 1.0, 1.0);
+		if (useOldFeedRadiance) {
+			traversalPointer->RayRadianceColor = potentialLight->getColor(); //Old, dont know if this is right
+		}else{
+			ColorDBL tempColor = potentialLight->getColor();
+			double lightRadiance = potentialLight->Watt / (potentialLight->area * std::numbers::pi);
+			traversalPointer->RayRadianceColor = tempColor * lightRadiance;
+		}
 	}
 	else if (!hitObject->getMaterial().isMirror && !hitObject->getMaterial().isTransparent) {
 		// Else it's lambertian: Compute direct light and feed that radiance into ray
-		ColorDBL directLightRadiance = traversalPointer->CalculateIrradiance(hitObject->normal(*traversalPointer), traversalPointer->endPosition, theObjects, theLight, traversalPointer->hitIndex);
+		ColorDBL directLightRadiance = traversalPointer->CalculateIrradiance(hitObject->normal(*traversalPointer), traversalPointer->endPosition, theObjects, theLights, traversalPointer->hitIndex);
 		traversalPointer->RayRadianceColor = directLightRadiance;
 	}
-	else {
-		if (hitObject->getMaterial().isTransparent) {
-			std::cout << "ITS FUCKING FUUUCKED FUUUUUCK\n";
-		}
-	}
-
-	int index = 0;
 
 	while (traversalPointer->prevRay != nullptr) {
 		traversalPointer = traversalPointer->prevRay;
 		hitObject = theObjects[traversalPointer->hitIndex];
+		LightSource* potentialLight = dynamic_cast<LightSource*>(theObjects[traversalPointer->hitIndex]);
 
-		if (dynamic_cast<LightSource*>(theObjects[traversalPointer->hitIndex]) != nullptr) {
+		if (potentialLight != nullptr) {
 			// If lightsource
-			traversalPointer->RayRadianceColor = ColorDBL(1.0, 1.0, 1.0);
+
+			if (useOldFeedRadiance) {
+				traversalPointer->RayRadianceColor = potentialLight->getColor(); //Old, dont know if this is right
+			}
+			else {
+				ColorDBL tempColor = potentialLight->getColor();
+				double lightRadiance = potentialLight->Watt / (potentialLight->area * std::numbers::pi);
+				traversalPointer->RayRadianceColor = tempColor * lightRadiance;
+			}
 		}
 		else if (hitObject->getMaterial().isMirror || hitObject->getMaterial().isTransparent) { //IF mirror // transparent : copy radiance from previous (traversalPointer->nextRay) into this ray
 			traversalPointer->RayRadianceColor = traversalPointer->nextRay->RayRadianceColor;
 
 		}
 		else {
-			ColorDBL directLightRadiance = traversalPointer->CalculateIrradiance(hitObject->normal(*traversalPointer), traversalPointer->endPosition, theObjects, theLight, traversalPointer->hitIndex);
+			ColorDBL directLightRadiance = traversalPointer->CalculateIrradiance(hitObject->normal(*traversalPointer), traversalPointer->endPosition, theObjects, theLights, traversalPointer->hitIndex);
 			ColorDBL prevRadianceSurfaceColor = theObjects[traversalPointer->hitIndex]->getColor() * traversalPointer->nextRay->RayRadianceColor;
 			//traversalPointer->nextRay->hitIndex
 
 			directLightRadiance += prevRadianceSurfaceColor;
 			traversalPointer->RayRadianceColor = directLightRadiance;
 		}
-
-		index++;
 	}
 }

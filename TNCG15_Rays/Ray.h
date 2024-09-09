@@ -22,7 +22,9 @@ class Ray {
 public:
 	Ray() = default;
 
-	Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor) : startPosition{ start }, direction{ glm::normalize(dir) }, RayRadianceColor{ _RayColor = ColorDBL(1,1,1) } {    }
+	Ray(glm::dvec3 start, glm::dvec3 dir, ColorDBL _RayColor) : startPosition{ start }, direction{ glm::normalize(dir) }, RayRadianceColor{ _RayColor = ColorDBL(1,1,1) } {
+		rayAmount++;
+	}
 
 	void SetRayColor(ColorDBL theColor);
 	ColorDBL GetRayColor();
@@ -31,8 +33,6 @@ public:
 	glm::dvec3 getPointOfIntersection(const std::vector<Object*>& theObjects, const LightSource& theLight);
 	glm::dvec3 getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double ior);
 	glm::dvec3 getReflectedDirection(const glm::dvec3& surfaceNormal);
-
-
 
 	glm::dvec3 localCartesianToWorldCartesian(const glm::dvec3& localDir, const glm::dvec3& surfaceNormal);
 	glm::dvec3 hemisphericalToCartesian(const LocalDirection& dir);
@@ -43,8 +43,8 @@ public:
 	LocalDirection WorldCartesianToHemispherical(glm::dvec3& direction);
 	LocalDirection getRandomLocalDirection();
 
-	ColorDBL CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects,LightSource& theLight,const int& hitIndex);
-	void CalculateRayPath(const std::vector<Object*>& theObjects, const LightSource& theLight);
+	ColorDBL CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLight,const int& hitIndex);
+	void CalculateRayPath(const std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLights);
 	double IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects);
 
 	double CalculateBRDF(glm::dvec3 thePoint, double direction, double inclination);
@@ -52,11 +52,13 @@ public:
 	bool DrawRandom();
 	double DrawRandomNormalized();
 
-	void CalculateRadianceFlow(std::vector<Object*>& theObjects, LightSource& theLight);
+	void CalculateRadianceFlow(std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLights);
 
 	void ToString();
 
 	void DeallocateRaypath();
+
+	std::string GetAllNonHittersFormatted();
 
 	~Ray();
 
@@ -68,19 +70,12 @@ public:
 	Ray* nextRay = nullptr;
 	bool isInside = false;
 
+	static unsigned int nonHitters;
+	static unsigned int rayAmount;
+
 private:
 	ColorDBL RayRadianceColor = ColorDBL(0.0, 0.0, 0.0);
-
-	// W: Importance
-	double W = 1.0;
-	// L: Radiance
-	double L = 0.0;
-	// E: Irradiance, the light arriving from the scene to the point
-	double Irradiance = 0.0;
-
 	Object* startSurface = nullptr;
 	Object* hitObject = nullptr;
 	size_t hitIndex = -1;
-
-	
 };

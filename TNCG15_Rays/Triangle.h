@@ -27,6 +27,6 @@ public:
 	Material theMaterial = Material(1.0, 1.0, 1.0, false, ColorDBL(1.0, 1.0, 1.0));
 
 private:
-	double doubThreshold = 1e-6;
+	double doubThreshold = 1e-8;
 };
 

@@ -28,8 +28,6 @@ public:
 	glm::dvec3 v1, v2, v3, v4;
 	double Watt = 100.0;
 	double area = 1.0;
-	double radiosity = 10000;
-	double radiance = radiosity;
 
 	double calculateArea();
 
