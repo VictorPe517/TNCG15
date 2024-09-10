@@ -45,6 +45,7 @@ bool debug = true;
 
 int main()
 {
+	std::string sceneName;
 	Ray::nonHitters = 0;
 	Ray::rayAmount = 0;
 
@@ -58,6 +59,7 @@ int main()
 
 #pragma region Scene_1
 	////------GEOMETRY------//
+	sceneName = "Scene1";
 	Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::White);
 	Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
 	Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
@@ -77,17 +79,17 @@ int main()
 	//------LIGHTS------//
 	//LightSource areaLight(glm::dvec3(8 , 2.0, 4.999), glm::dvec3(10 , 2.0, 4.999), glm::dvec3(8 , -2.0, 4.999), glm::dvec3(10 , -2.0, 4.999), 75.0, ColorDBL::White);
 	//LightSource areaLight2(glm::dvec3(0, 2.0, 4.999), glm::dvec3(2, 2.0, 4.999), glm::dvec3(0, -2.0, 4.999), glm::dvec3(2, -2.0, 4.999), 75.0, ColorDBL::White);
-	
-	LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999),glm::dvec3(5.0 + 2.0, -1.0, 4.999), 100.0, ColorDBL::PureBlue);
-	LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999),glm::dvec3(8.0 + 2.0, -1.0, 4.999),glm::dvec3(6.0 + 2.0, -3.0, 4.999),glm::dvec3(8.0 + 2.0, -3.0, 4.999), 100.0, ColorDBL::PureGreen);
-	LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999),  100.0, ColorDBL::PureRed);
+	//
+	//LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999),glm::dvec3(5.0 + 2.0, -1.0, 4.999), 100.0, ColorDBL::PureBlue);
+	//LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999),glm::dvec3(8.0 + 2.0, -1.0, 4.999),glm::dvec3(6.0 + 2.0, -3.0, 4.999),glm::dvec3(8.0 + 2.0, -3.0, 4.999), 100.0, ColorDBL::PureGreen);
+	//LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999),  100.0, ColorDBL::PureRed);
 
-	//LightSource areaLight1(glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(5.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999), glm::dvec3(5.0 + 2.0, -1.0, 4.999), 50.0, ColorDBL::White);
-	//LightSource areaLight2(glm::dvec3(6.0 + 2.0, -1.0, 4.999), glm::dvec3(8.0 + 2.0, -1.0, 4.999), glm::dvec3(6.0 + 2.0, -3.0, 4.999), glm::dvec3(8.0 + 2.0, -3.0, 4.999), 50.0, ColorDBL::White);
-	//LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999), 50.0, ColorDBL::White);
+	LightSource areaLight1(glm::dvec3(1.0 + 2.0, 1.0, 4.999), glm::dvec3(3.0 + 2.0, 1.0, 4.999), glm::dvec3(1.0 + 2.0, -1.0, 4.999), glm::dvec3(3.0 + 2.0, -1.0, 4.999), 50.0, ColorDBL::White);
+	LightSource areaLight2(glm::dvec3(6.0 + 2.0, -3.0, 4.999), glm::dvec3(8.0 + 2.0, -3.0, 4.999), glm::dvec3(6.0 + 2.0, -4.0, 4.999), glm::dvec3(8.0 + 2.0, -4.0, 4.999), 50.0, ColorDBL::White);
+	LightSource areaLight3(glm::dvec3(6.0 + 2.0, 3.0, 4.999), glm::dvec3(8.0 + 2.0, 3.0, 4.999), glm::dvec3(6.0 + 2.0, 1.0, 4.999), glm::dvec3(8.0 + 2.0, 1.0, 4.999), 50.0, ColorDBL::White);
 
 	//-----SUBJECTS-----//
-	Sphere sphere1(glm::dvec3(8, -3.0, -3.6666), 1.3333, ColorDBL::White);
+	Sphere sphere1(glm::dvec3(8, -3.0, -1), 1.0, ColorDBL::White);
 	sphere1.theMaterial.MatColor = ColorDBL::White;
 	sphere1.theMaterial.isTransparent = true;
 
@@ -95,25 +97,30 @@ int main()
 	sphere2.theMaterial.MatColor = ColorDBL::White;
 	sphere2.theMaterial.isMirror = true;
 
-	Sphere sphere3(glm::dvec3(9.0, 0.0, -3.75), 1.25, ColorDBL::White);
+	double size = 2.0;
+	Sphere sphere3(glm::dvec3(9.0, -0.5, -5.0+size), size, ColorDBL::White);
 	sphere3.theMaterial.MatColor = ColorDBL::White;
 
 #pragma endregion
 
 #pragma region Cage
 	////// X+ = forward, Y+ = left, Z+ = up
+	//sceneName = "Cage";
 	//Rectangle ceiling(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 5.0, 0.0), ColorDBL::White);
 	//Rectangle floor(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 5.0, 0.0), ColorDBL::White);
 
 	//Rectangle wall_F(glm::dvec3(10, -6, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(10, -6, -5), ColorDBL::Blue);
-	//wall_F.theMaterial.isMirror = false;
+	//wall_F.theMaterial.isMirror = true;
 
 	//Rectangle wall_L(glm::dvec3(5.0, 5.0, 0.0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
 	//Rectangle wall_R(glm::dvec3(5.0, -5.0, 0.0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
 
+	//double size = 1.75;
+	//Sphere sphere2(glm::dvec3(8.0, -(size+1), -5+size), size, ColorDBL::White);
+	//sphere2.theMaterial.isTransparent = true;
 
-	//Sphere sphere2(glm::dvec3(6.0, 0, -1), 2.33, ColorDBL::White);
-	//sphere2.theMaterial.isTransparent = false;
+	//Sphere sphere1(glm::dvec3(8.0, (size+1), -5 + size), size, ColorDBL::White);
+	//sphere1.theMaterial.isMirror = true;
 
 	//LightSource areaLight2(glm::dvec3(4.0, 1.0, 4.99), glm::dvec3(6.0, 1.0, 4.99), glm::dvec3(4.0, -1.0, 4.99), glm::dvec3(6.0, -1.0, 4.99), 100, ColorDBL::White);
 
@@ -121,6 +128,7 @@ int main()
 
 #pragma region LegacyScene
 	//	////------GEOMETRY------//
+	//sceneName = "LegacyScene";
 	//Rectangle floorRect(glm::dvec3(5.0, 0.0, -5.0), glm::dvec3(-5.0, 6.0, 0.0), ColorDBL::Green);
 	//Rectangle cielingRect(glm::dvec3(5.0, 0.0, 5.0), glm::dvec3(5.0, 6.0, 0.0), ColorDBL::White);
 	//Triangle cielingTri1(glm::dvec3(-3, 0, 5), glm::dvec3(0, 6, 5), glm::dvec3(0, -6, 5), ColorDBL::White);
@@ -130,11 +138,11 @@ int main()
 	////-------WALLS-------//
 	//Rectangle wallL(glm::dvec3(5.0, 6.0, 0), glm::dvec3(-5.0, 0.0, 5.0), ColorDBL::Yellow);
 	//Rectangle wallNW(glm::dvec3(0, 6, 5), glm::dvec3(-3, 0, 5), glm::dvec3(-3, 0, -5), glm::dvec3(0, 6, -5), ColorDBL::White);
+
 	//Rectangle wallNE(glm::dvec3(-3, 0, 5), glm::dvec3(0, -6, 5), glm::dvec3(0, -6, -5), glm::dvec3(-3, 0, -5), ColorDBL::White);
 	//Rectangle wallR(glm::dvec3(5.0, -6.0, 0), glm::dvec3(5.0, 0.0, 5.0), ColorDBL::Red);
 	//Rectangle wallR_F(glm::dvec3(10, -6, 5), glm::dvec3(13, 0, 5), glm::dvec3(13, 0, -5), glm::dvec3(10, -6, -5), ColorDBL::Orange);
 	//Rectangle wallL_F(glm::dvec3(13, 0, 5), glm::dvec3(10, 6, 5), glm::dvec3(10, 6, -5), glm::dvec3(13, 0, -5), ColorDBL::White);
-	//wallL_F.theMaterial.isMirror = true;
 	//std::cout << "Initializing Lights...\n\n";
 
 	//// Legacy comparison light
@@ -142,12 +150,12 @@ int main()
 
 	//// Legacy comparison spheres
 	//Sphere sphere1(glm::dvec3(9, 0, -2), 2, ColorDBL::Red);
-	//sphere1.theMaterial.isMirror = true;
+	//sphere1.theMaterial.isMirror = false;
 
 	//Sphere sphere2(glm::dvec3(8.0, 4.0, -4.0), 1.0, ColorDBL::White);
-	//sphere2.theMaterial.isMirror = true;
 
 	//Sphere sphere3(glm::dvec3(6.0, -3.0, -3.0), 2.0, ColorDBL::White);
+	//sphere3.theMaterial.isTransparent = false;
 #pragma endregion
 
 	theRenderSettings.UserInputAndSettings();
@@ -156,7 +164,7 @@ int main()
 	Camera theCamera(glm::dvec3(0, -1, 1), glm::dvec3(0, -1, -1), glm::dvec3(0, 1, -1), glm::dvec3(0, 1, 1), theRenderSettings);
 
 	theRenderSettings.WriteSettingsToScreen(theCamera);
-	std::cout << "\n Constructing Ray Path: \n";
+	std::cout << "\n Constructing Ray Path & Calculating Lighting: \n";
 
 
 	//--------------------RENDERING LOOP--------------------//
@@ -215,13 +223,11 @@ int main()
 		}
 	}
 
-	// Rendering function
-	std::cout << "\n Calculating Lighting: \n";
 
 	const auto stop = std::chrono::high_resolution_clock::now();
 	const std::chrono::duration<double, std::ratio<60>> duration = stop - start; //Log time in minutes
 
-	std::string fileName = theImageHandler.GenerateFilename(theRenderSettings, theCamera, duration.count());
+	std::string fileName = theImageHandler.GenerateFilename(theRenderSettings, theCamera, duration.count(), sceneName);
 	std::ofstream img(fileName);
 
 	theImageHandler.CreateImageStream(img, theCamera);
@@ -250,7 +256,7 @@ int main()
 #pragma endregion
 
 	if (debug) {
-		std::cout << "DEBUG:\n Amount of nohitters: [" << Ray::nonHitters << "]\n"
+		std::cout << "DEBUG:\n Rays that didn't hit nothing: [" << Ray::nonHitters << "]\n"
 			<< "             Out of: [" << Ray::rayAmount << "]\n"
 			<< "           Which is: " << round(((double)Ray::nonHitters / (double)Ray::rayAmount))*100.0 << "%\n";
 	}

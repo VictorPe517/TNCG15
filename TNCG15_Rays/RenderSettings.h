@@ -20,7 +20,6 @@ public:
 	size_t s_GlobalIterations = 2; // off = 1;
 
 	bool s_useMulticore = true;
-	bool s_useAntiAliasing = true;
 	bool s_verboseDebugging = false;
 };
 

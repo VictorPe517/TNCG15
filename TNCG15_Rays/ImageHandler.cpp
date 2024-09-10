@@ -1,53 +1,41 @@
 #include "ImageHandler.h"
 
-double ImageHandler::TonemappingFunc(double tone, double exponent,double exponentDivisor, TonemappingType theType) {
-	//Tone should be between 0 and 2
-	if (theType == gamma) {
-		return 0.5 * pow(tone, exponent / exponentDivisor);
+double ImageHandler::TonemappingFunc(double tone, TonemappingType toneType, double exponent,double exponentDivisor) {
+	//Tone should be between 0 and 1
+	switch (toneType) {
+		case gamma:
+			return 0.5 * pow(tone, exponent / exponentDivisor);
+			break;
+		case sigmoid:
+			return 1.5 / (1.0 + exp(-1.5 * (tone - 0.5))) - 0.48; // Arbitrarily chosen for aesthetics
+			break;
+		case linear:
+			return tone;
+			break;
+		case reinhard:
+			return tone / (tone + 1.0);
+			break;
 	}
-	else if (theType == sine) {
-		if (tone > 0.99562) {
-			return 0.97 + 0.08*glm::log(tone);
-		}
-		else {
-			return 8.0 * pow((-0.5 * cos(0.4 * tone * 3.1415 + 0.1)), 3) + 0.98;
-		}
-	}
-	else if (theType == sigmoid) {
-		return 1.5 / (1.0 + exp(-1.5 * (tone - 0.5))) - 0.48;
-	}
-	
 }
 
 // Converts the pixel values into integers between 0-255 and saves them to the imagestream "img"
 void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t index, std::ofstream& img, RenderSettings theRenderSettings) {
 	//-------Write image to file-------//
-	double r_d = (theCamera.thePixels[index].pixelColor.r);
-	double g_d = (theCamera.thePixels[index].pixelColor.g);
-	double b_d = (theCamera.thePixels[index].pixelColor.b);
-
-	//rMax = glm::max(r_d, rMax);
-	//gMax = glm::max(g_d, gMax);
-	//bMax = glm::max(b_d, bMax);
-
-	//rMin = glm::min(r_d, rMin);
-	//gMin = glm::min(g_d, gMin);
-	//bMin = glm::min(b_d, bMin);
+	double rRaw = (theCamera.thePixels[index].pixelColor.r);
+	double gRaw = (theCamera.thePixels[index].pixelColor.g);
+	double bRaw = (theCamera.thePixels[index].pixelColor.b);
 
 	double r;
 	double g;
 	double b;
 
-	if (useTonemapping) {
-		r = TonemappingFunc(r_d, 2, 3.0, sine) * exposureMultiplier;
-		g = TonemappingFunc(g_d, 2, 3, sine) * exposureMultiplier;
-		b = TonemappingFunc(b_d, 2, 3, sine) * exposureMultiplier;
-	}
-	else {
-		r = r_d * exposureMultiplier * 6.0;
-		g = g_d * exposureMultiplier * 6.0;
-		b = b_d * exposureMultiplier * 6.0;
-	}
+	double tone;
+
+	TonemappingType method = TonemappingType::sigmoid;
+
+	r = TonemappingFunc(rRaw, method) * exposureMultiplier;
+	g = TonemappingFunc(gRaw, method) * exposureMultiplier;
+	b = TonemappingFunc(bRaw, method) * exposureMultiplier;
 
 
 	//Give the other two channels some of the intensity of the highest colors
@@ -100,8 +88,8 @@ void ImageHandler::writeCurrentPixelToStream(Camera& theCamera, size_t index, st
 
 
 // Generates a unique filename for the file preventing overwrite
-std::string ImageHandler::GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration) {
-	return std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_GlobalIterations)) + "__time-" + std::to_string(duration) + ".ppm";
+std::string ImageHandler::GenerateFilename(RenderSettings renderSettings, Camera theCamera, double duration, std::string sceneName) {
+	return sceneName + "_"+std::to_string(theCamera.GetResX()) + "x" + std::to_string(theCamera.GetResY()) + "px__iterations-" + std::to_string((int)floor(renderSettings.s_GlobalIterations)) + "__time-" + std::to_string(duration) + ".ppm";
 }
 
 // Displays stats after a successful render
