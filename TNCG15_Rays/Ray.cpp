@@ -167,6 +167,7 @@ void Ray::CalculateRayPath(const std::vector<Object*>& theObjects, const std::ve
 	// Find the closest object in the direction of the ray
 	for (int l = 0; l < theObjects.size(); l++) {
 		//lengthStartIntersection = 0.0;
+
 		possibleIntersection = (theObjects[l])->GetIntersection(*this);
 		lengthStartIntersection = glm::length(possibleIntersection - startPosition);
 
