@@ -23,6 +23,21 @@ public:
 		area = calculateArea();
 		theObjects.push_back(this);
 		theLightSources.push_back(this);
+
+		double xMax, xMin, yMax, yMin, zMax, zMin;
+
+		xMax = std::max({ v1.x, v2.x, v3.x, v4.x });
+		xMin = std::min({ v1.x, v2.x, v3.x, v4.x });
+		yMax = std::max({ v1.y, v2.y, v3.y, v4.y });
+		yMin = std::min({ v1.y, v2.y, v3.y, v4.y });
+		zMax = std::max({ v1.z, v2.z, v3.z, v4.z });
+		zMin = std::min({ v1.z, v2.z, v3.z, v4.z });
+
+		length.x = std::abs(xMax - xMin);
+		length.y = std::abs(yMax - yMin);
+		length.z = std::abs(zMax - zMin);
+
+		centerPoint = glm::dvec3((xMin + xMax) / 2.0, (yMin + yMax) / 2.0, (zMin + zMax) / 2.0);
 	}
 
 	glm::dvec3 v1, v2, v3, v4;
@@ -31,17 +46,21 @@ public:
 
 	double calculateArea();
 
-	virtual glm::dvec3 normal(const Ray& theRay) override;
+	virtual glm::dvec3 CalculateNormal(const Ray& theRay) override;
 
 	glm::dvec3 const getRandomPoint();
 
-	virtual glm::dvec3 getIntersection(const Ray& theRay) override;
+	virtual glm::dvec3 GetIntersection(const Ray& theRay) override;
 
-	virtual ColorDBL getColor() override {
+	virtual const glm::dvec3 GetLength() override;
+
+	virtual const glm::dvec3 GetCenterPoint() override;
+
+	virtual ColorDBL GetColor() override {
 		return Color;
 	}
 
-	virtual Material getMaterial() override {
+	virtual Material GetMaterial() override {
 		return Material(1, 1, 1, 0, ColorDBL(0, 1, 1));
 	}
 
@@ -50,5 +69,8 @@ public:
 	ColorDBL Color = ColorDBL(1.0, 1.0, 1.0);
 
 	static std::vector<LightSource*> theLightSources;
+
+	glm::dvec3 length;
+	glm::dvec3 centerPoint;
 };
 

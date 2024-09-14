@@ -5,9 +5,12 @@ Sphere::Sphere(glm::dvec3 _position, double rad, ColorDBL _Color) : position{ _p
 	theMaterial.MatColor = _Color;
 	theSpheres.push_back(this);
 	theObjects.push_back(this);
+
+	centerPoint = _position;
+	length = glm::dvec3(rad * 2.0, rad * 2.0,rad * 2.0);
 }
 
-glm::dvec3 Sphere::getIntersection(const Ray& theRay) {
+glm::dvec3 Sphere::GetIntersection(const Ray& theRay) {
 	double arg;
 
 	double c1 = glm::dot(theRay.direction, theRay.direction);
@@ -68,9 +71,9 @@ glm::dvec3 Sphere::getIntersection(const Ray& theRay) {
 }
 
 
-glm::dvec3 Sphere::normal(const Ray& theRay) {
+glm::dvec3 Sphere::CalculateNormal(const Ray& theRay) {
 
-	glm::dvec3 intersection = getIntersection(theRay);
+	glm::dvec3 intersection = GetIntersection(theRay);
 
 	if (!glm::all(glm::isnan(intersection))) {
 
@@ -91,10 +94,18 @@ glm::dvec3 Sphere::normal(const Ray& theRay) {
 
 }
 
-ColorDBL Sphere::getColor() {
+glm::dvec3 const Sphere::GetCenterPoint() {
+	return centerPoint;
+}
+
+glm::dvec3 const Sphere::GetLength() {
+	return length;
+}
+
+ColorDBL Sphere::GetColor() {
 	return theMaterial.MatColor;
 }
 
-Material Sphere::getMaterial() {
+Material Sphere::GetMaterial() {
 	return theMaterial;
 }

@@ -175,7 +175,6 @@ int main()
 		concurrency::parallel_for(size_t(0), (size_t)theCamera.GetResX(), [&](size_t _currentXpixel) {
 			for (size_t _currentYpixel = 0; _currentYpixel < theCamera.GetResY(); _currentYpixel++) {
 				int currentPixelIndex = _currentXpixel * theCamera.GetResY() + _currentYpixel; // The pixel we are processing
-				//std::cout << " Index : [" << currentPixelIndex << "]\n";
 
 				for (size_t ssaa_sample = 0; ssaa_sample < theRenderSettings.GetAAIterations(); ssaa_sample++) {
 

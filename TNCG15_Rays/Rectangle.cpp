@@ -1,6 +1,6 @@
 #include "Rectangle.h"
 
-glm::dvec3 Rectangle::normal(const Ray& theRay) {
+glm::dvec3 Rectangle::CalculateNormal(const Ray& theRay) {
 	glm::dvec3 direction = glm::cross(this->v2 - this->v1, this->v3 - this->v1);
 
 	if (direction == glm::dvec3(NAN, NAN, NAN))
@@ -12,13 +12,13 @@ glm::dvec3 Rectangle::normal(const Ray& theRay) {
 	return direction / glm::length(direction);
 }
 
-glm::dvec3 Rectangle::getIntersection(const Ray& theRay) {
+glm::dvec3 Rectangle::GetIntersection(const Ray& theRay) {
 	glm::dvec3 vertex = v2;
 
 	glm::dvec3 c1 = v3 - vertex;
 	glm::dvec3 c2 = v1 - vertex;
 
-	glm::dvec3 theNormal = this->normal(theRay);
+	glm::dvec3 theNormal = this->CalculateNormal(theRay);
 
 	double t = glm::dot((vertex - theRay.startPosition), theNormal) / (glm::dot(theRay.direction, theNormal));
 
@@ -39,11 +39,19 @@ glm::dvec3 Rectangle::getIntersection(const Ray& theRay) {
 	}
 }
 
-ColorDBL Rectangle::getColor() {
+ColorDBL Rectangle::GetColor() {
 	return theMaterial.MatColor;
 }
 
-Material Rectangle::getMaterial() {
+Material Rectangle::GetMaterial() {
 	return theMaterial;
+}
+
+glm::dvec3 const Rectangle::GetCenterPoint() {
+	return centerPoint;
+}
+
+glm::dvec3 const Rectangle::GetLength() {
+	return length;
 }
 

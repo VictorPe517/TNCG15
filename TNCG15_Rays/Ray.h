@@ -31,21 +31,25 @@ public:
 
 	// Get the point of intersection between an object and a light-source
 	glm::dvec3 getPointOfIntersection(const std::vector<Object*>& theObjects, const LightSource& theLight);
-	glm::dvec3 getRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double ior);
-	glm::dvec3 getReflectedDirection(const glm::dvec3& surfaceNormal);
+	glm::dvec3 GetRefractedDirection(const glm::dvec3& intersection, const glm::dvec3& surfaceNormal, const Object& theObject, double ior);
+	glm::dvec3 GetReflectedDirection(const glm::dvec3& surfaceNormal);
 
-	glm::dvec3 localCartesianToWorldCartesian(const glm::dvec3& localDir, const glm::dvec3& surfaceNormal);
-	glm::dvec3 hemisphericalToCartesian(const LocalDirection& dir);
+	glm::dvec3 LocalCartesianToWorldCartesian(const glm::dvec3& localDir, const glm::dvec3& surfaceNormal);
+	glm::dvec3 HemisphericalToCartesian(const LocalDirection& dir);
 	glm::dvec3 getRandomDirection(const glm::dvec3& surfaceNormal);
 	double GetInclination(const glm::dvec3& surfaceNormal);
 
 	LocalDirection WorldCartesianToHemispherical();
 	LocalDirection WorldCartesianToHemispherical(glm::dvec3& direction);
-	LocalDirection getRandomLocalDirection();
+	LocalDirection GetRandomLocalDirection();
 
 	ColorDBL CalculateIrradiance(const glm::dvec3& surfaceNormal, const glm::dvec3& intersectionPoint, const std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLight,const int& hitIndex);
 	void CalculateRayPath(const std::vector<Object*>& theObjects, const std::vector<LightSource*>& theLights);
-	double IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects);
+	double IsVisibleToPoint(const glm::dvec3& surfaceHitPoint, const glm::dvec3& randomLightPoint, const std::vector<Object*>& theObjects, const LightSource* theLight);
+	
+	bool BoundingBoxesIntersect(const glm::dvec3& rayCenter, const glm::dvec3& rayLength, const glm::dvec3& objectCenter, const glm::dvec3& objectLength);
+	glm::dvec3 CreateLength(const glm::dvec3& minPoint, const glm::dvec3& maxPoint);
+	glm::dvec3 CreateCenterPoint(const glm::dvec3& minPoint, const glm::dvec3& maxPoint);
 
 	double CalculateBRDF(glm::dvec3 thePoint, double direction, double inclination);
 

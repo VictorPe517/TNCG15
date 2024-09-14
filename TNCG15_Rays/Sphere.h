@@ -12,18 +12,22 @@ class Sphere : public Object
 public:
 	Sphere(glm::dvec3 _position, double rad, ColorDBL _Color = ColorDBL(1.0, 1.0, 1.0));
 
-	virtual glm::dvec3 getIntersection(const Ray& theRay) override;
+	virtual glm::dvec3 GetIntersection(const Ray& theRay) override;
 
 	//virtual glm::dvec3 normal(Ray theRay) override{
 	//	std::cout << "   normal() called for sphere - Invalid operation!";
 	//	return glm::dvec3(0.0, 0.0, 0.0);
 	//}
 
-	virtual glm::dvec3 normal(const Ray& theRay);
+	virtual glm::dvec3 CalculateNormal(const Ray& theRay);
 
-	virtual ColorDBL getColor() override;
+	virtual ColorDBL GetColor() override;
 
-	virtual Material getMaterial() override;
+	virtual Material GetMaterial() override;
+
+	virtual const glm::dvec3 GetLength() override;
+
+	virtual const glm::dvec3 GetCenterPoint() override;
 
 	glm::dvec3 position = glm::dvec3(0, 0, 0);
 	double radius = 0;
@@ -32,5 +36,8 @@ public:
 	Material theMaterial = Material(1, 1, 1, false, ColorDBL(1.0, 1.0, 1.0));
 
 	static std::vector<Sphere*> theSpheres;
+
+	glm::dvec3 length;
+	glm::dvec3 centerPoint;
 };
 

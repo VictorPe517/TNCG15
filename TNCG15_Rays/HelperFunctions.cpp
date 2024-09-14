@@ -20,5 +20,7 @@ void HelperFunctions::DisplayLoadingBar(int& rowsDone, const int& x_res) {
 		std::cout << "] : ";
 
 		std::cout << (int)floor(((double)rowsDone / (double)x_res) * 50.0) << "% \r";
+
+		std::cout.flush();
 	}
 }

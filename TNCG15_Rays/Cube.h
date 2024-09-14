@@ -18,14 +18,18 @@ public:
 	Cube(Rectangle _r1, Rectangle _r2, Rectangle _r3, Rectangle _r4, Rectangle _r5, Rectangle _r6, ColorDBL _Color);
 
 
-	virtual glm::dvec3 normal(const Ray& theRay) override;
+	virtual glm::dvec3 CalculateNormal(const Ray& theRay) override;
 
-	virtual glm::dvec3 getIntersection(const Ray& theRay) override;
+	virtual glm::dvec3 GetIntersection(const Ray& theRay) override;
 
 
-	virtual ColorDBL getColor() override;
+	virtual ColorDBL GetColor() override;
 
-	virtual Material getMaterial() override;
+	virtual Material GetMaterial() override;
+
+	virtual const glm::dvec3 GetLength() override;
+
+	virtual const glm::dvec3 GetCenterPoint() override;
 
 	void setMirror(bool boolean);
 

@@ -41,12 +41,12 @@ Cube::Cube(Rectangle _r1, Rectangle _r2, Rectangle _r3, Rectangle _r4, Rectangle
 	theCubes.push_back(*this);
 }
 
-glm::dvec3 Cube::getIntersection(const Ray& theRay) {
+glm::dvec3 Cube::GetIntersection(const Ray& theRay) {
 	double minLength = (double)INFINITY;
 	glm::dvec3 closest = glm::dvec3(NAN, NAN, NAN);
 
 	for (Rectangle* theRectangle : theRects) {
-		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
+		glm::dvec3 intersection = theRectangle->GetIntersection(theRay);
 
 		if (!glm::all(glm::isnan(intersection)) && glm::length(intersection - theRay.startPosition) < minLength) {
 			minLength = glm::length(intersection - theRay.startPosition);
@@ -59,14 +59,14 @@ glm::dvec3 Cube::getIntersection(const Ray& theRay) {
 }
 
 
-glm::dvec3 Cube::normal(const Ray& theRay) {
+glm::dvec3 Cube::CalculateNormal(const Ray& theRay) {
 	Rectangle* latestHitRectangle = nullptr;
 
 	double minLength = (double)INFINITY;
 	glm::dvec3 closest = glm::dvec3(NAN, NAN, NAN);
 
 	for (Rectangle* theRectangle : theRects) {
-		glm::dvec3 intersection = theRectangle->getIntersection(theRay);
+		glm::dvec3 intersection = theRectangle->GetIntersection(theRay);
 
 		if (intersection != glm::dvec3(NAN, NAN, NAN) && glm::length(intersection - theRay.startPosition) < minLength) {
 			minLength = glm::length(intersection - theRay.startPosition);
@@ -75,17 +75,17 @@ glm::dvec3 Cube::normal(const Ray& theRay) {
 		}
 	}
 	//std::cout << "Normal: " << glm::to_string(latestHitRectangle->normal(theRay)) << "\n";
-	if (latestHitRectangle != nullptr) return latestHitRectangle->normal(theRay);
+	if (latestHitRectangle != nullptr) return latestHitRectangle->CalculateNormal(theRay);
 
 	return glm::dvec3(NAN, NAN, NAN);
 }
 
 
-ColorDBL Cube::getColor() {
+ColorDBL Cube::GetColor() {
 	return theMaterial.MatColor;
 }
 
-Material Cube::getMaterial() {
+Material Cube::GetMaterial() {
 	return theMaterial;
 }
 
@@ -96,4 +96,12 @@ void Cube::setMirror(bool boolean)
 	//for (Rectangle* theRectangle : theRects) {
 	//	theRectangle->theMaterial.isMirror = boolean; //Redundancy measure
 	//}
+}
+
+glm::dvec3 const Cube::GetLength() {
+	return glm::dvec3(0, 0, 0);
+}
+
+glm::dvec3 const Cube::GetCenterPoint() {
+	return glm::dvec3(0, 0, 0);
 }
